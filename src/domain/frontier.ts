@@ -45,7 +45,7 @@ function betterLower(current: ExactValue | null, next: ExactValue): ExactValue {
 function betterUpper(current: ExactValue | null, next: ExactValue): ExactValue { if (!current) return next; return compareExact(next, current) === -1 ? next : current; }
 
 export function deriveFrontier(direction: Direction, specification: SpecificationVersion, claims: Claim[]): Frontier {
-  const active = claims.filter((claim) => claim.specificationVersionId === specification.id && claim.status === "ACCEPTED");
+  const active = claims.filter((claim) => claim.specificationVersionId === specification.id && claim.status === "ACCEPTED" && claim.scientificStatus !== "UNCERTAIN");
   let lowerBound: ExactValue | null = null;
   let upperBound: ExactValue | null = null;
   let achievable: ExactValue | null = null;
