@@ -85,9 +85,23 @@ function signOff(note?: string): string {
   </table>`;
 }
 
+// A javascript: (or any non-http(s)) URL in an href is live in an email client — this is the
+// last line of defense for any caller that didn't already validate its URLs at the source
+// (see app/submit/actions.ts's safeEvidenceUrl for the write-side check on submission links).
+function safeHref(url: string): string | null {
+  try {
+    const parsed = new URL(url);
+    return parsed.protocol === "http:" || parsed.protocol === "https:" ? parsed.toString() : null;
+  } catch {
+    return null;
+  }
+}
+
 function button(label: string, url: string): string {
+  const href = safeHref(url);
+  if (!href) return "";
   return `<table role="presentation" cellpadding="0" cellspacing="0" style="margin:28px 0 0;"><tr><td style="border-radius:2px; background:${BLUE};">
-    <a class="lr-button" href="${url}" style="display:inline-block; padding:14px 28px; font:600 13px -apple-system,sans-serif; color:#ffffff; text-decoration:none;">${label}</a>
+    <a class="lr-button" href="${href}" style="display:inline-block; padding:14px 28px; font:600 13px -apple-system,sans-serif; color:#ffffff; text-decoration:none;">${escapeHtml(label)}</a>
   </td></tr></table>`;
 }
 
@@ -109,31 +123,41 @@ export type DigestItem = { label: string; title: string; meta: string; url: stri
 
 export type DigestContent = { preheader: string; heading: string; intro: string; sections: { title: string; items: DigestItem[] }[]; ctaLabel: string; ctaUrl: string; note?: string };
 
-/** List-based shape for the weekly digest — same shell/proportions as the single-CTA emails. */
+/**
+ * List-based shape for the weekly digest — same shell/proportions as the single-CTA emails.
+ * Every field here can originate from public, unauthenticated input (a submission title comes
+ * straight from /submit), so — unlike renderEmail, whose callers pre-escape at the call site —
+ * this escapes every interpolated field itself. Safe to call with raw data; callers never have
+ * to remember to escape.
+ */
 export function renderDigestEmail({ preheader, heading, intro, sections, ctaLabel, ctaUrl, note }: DigestContent): { html: string; text: string } {
   const sectionsHtml = sections.map((section) => `
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:32px;">
       <tr><td>
-        <p class="lr-muted" style="margin:0 0 14px; font:600 11px 'DM Mono',ui-monospace,monospace; text-transform:uppercase; letter-spacing:.08em; color:${FAINT};">${section.title} (${section.items.length})</p>
+        <p class="lr-muted" style="margin:0 0 14px; font:600 11px 'DM Mono',ui-monospace,monospace; text-transform:uppercase; letter-spacing:.08em; color:${FAINT};">${escapeHtml(section.title)} (${section.items.length})</p>
         ${section.items.length === 0
       ? `<p class="lr-muted" style="margin:0; font-size:13px; color:${FAINT};">Nothing this week.</p>`
-      : section.items.map((item, i) => `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="${i > 0 ? `border-top:1px solid ${LINE};` : ""}">
+      : section.items.map((item, i) => {
+        const href = safeHref(item.url);
+        const label = `${escapeHtml(item.label)} — ${escapeHtml(item.title)}`;
+        return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="${i > 0 ? `border-top:1px solid ${LINE};` : ""}">
               <tr><td style="padding:14px 0;">
-                <a href="${item.url}" class="lr-ink" style="font:600 14px 'Space Grotesk',-apple-system,sans-serif; color:${INK}; text-decoration:none;">${item.label} — ${item.title}</a><br/>
-                <span class="lr-muted" style="font-size:12px; color:${MUTED};">${item.meta}</span>
+                ${href ? `<a href="${href}" class="lr-ink" style="font:600 14px 'Space Grotesk',-apple-system,sans-serif; color:${INK}; text-decoration:none;">${label}</a>` : `<span class="lr-ink" style="font:600 14px 'Space Grotesk',-apple-system,sans-serif; color:${INK};">${label}</span>`}<br/>
+                <span class="lr-muted" style="font-size:12px; color:${MUTED};">${escapeHtml(item.meta)}</span>
               </td></tr>
-            </table>`).join("")}
+            </table>`;
+      }).join("")}
       </td></tr>
     </table>`).join("");
 
-  const body = `<h1 class="lr-ink" style="margin:0 0 18px; font:600 26px/1.3 'Space Grotesk',-apple-system,sans-serif; letter-spacing:-.03em; color:${INK};">${heading}</h1>
-    <p class="lr-muted" style="margin:0; font-size:15px; line-height:1.7; color:${MUTED};">${intro}</p>
+  const body = `<h1 class="lr-ink" style="margin:0 0 18px; font:600 26px/1.3 'Space Grotesk',-apple-system,sans-serif; letter-spacing:-.03em; color:${INK};">${escapeHtml(heading)}</h1>
+    <p class="lr-muted" style="margin:0; font-size:15px; line-height:1.7; color:${MUTED};">${escapeHtml(intro)}</p>
     ${sectionsHtml}
     ${button(ctaLabel, ctaUrl)}
-    ${signOff(note)}`;
+    ${signOff(note ? escapeHtml(note) : undefined)}`;
 
-  const html = shell(preheader, heading, body);
+  const html = shell(escapeHtml(preheader), escapeHtml(heading), body);
   const textSections = sections.map((s) => `${s.title} (${s.items.length})\n${s.items.length === 0 ? "Nothing this week." : s.items.map((i) => `- ${i.label} — ${i.title} (${i.meta}): ${i.url}`).join("\n")}`).join("\n\n");
-  const text = `${heading}\n\n${stripHtml(intro)}\n\n${textSections}\n\n${ctaLabel}: ${ctaUrl}\n\n${note ? stripHtml(note) + "\n\n" : ""}— The Limits Registry editorial team\n\nLimits Registry · support@limitsregistry.com`;
+  const text = `${heading}\n\n${intro}\n\n${textSections}\n\n${ctaLabel}: ${ctaUrl}\n\n${note ? note + "\n\n" : ""}— The Limits Registry editorial team\n\nLimits Registry · support@limitsregistry.com`;
   return { html, text };
 }
