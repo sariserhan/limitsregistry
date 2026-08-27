@@ -26,7 +26,7 @@ Implementation status is tracked honestly below: completed infrastructure is che
 
 ### 1. Data model hardening
 
-- [ ] Add explicit `evidence` and `review` fixtures to every ontology test.
+- [x] Add explicit `evidence` and `review` fixtures to every ontology test.
 - [x] Add rational and scientific-notation comparison tests.
 - [x] Define strict semantics for `<` and `>` bounds.
 - [x] Define integer-gap display rules separately from continuous values.
@@ -38,10 +38,10 @@ Implementation status is tracked honestly below: completed infrastructure is che
 
 - [x] Add repository functions for specification versions, evidence, reviews, timeline events, papers, and people.
 - [x] Add database serializers between Drizzle rows and domain types.
-- [ ] Replace static public page data with server-side database reads.
+- [x] Replace static public page data with server-side database reads.
 - [x] Add a safe empty-registry state for a new production database.
 - [x] Add pagination and filtering to repository queries.
-- [ ] Add database integration tests against Docker PostgreSQL.
+- [x] Add database integration tests against Docker PostgreSQL.
 
 ### 3. Editorial console
 
