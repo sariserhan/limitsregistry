@@ -96,7 +96,7 @@ export default async function ConsolePage() {
           <div>{limit.registryNumber} — {limit.title}</div>
           <div>{submission.description}</div>
           {submission.proposedRelation && submission.proposedValueExact && <div>Proposed: {submission.proposedRelation} {submission.proposedValueExact}</div>}
-          {submission.evidenceUrl && <div><a href={submission.evidenceUrl} target="_blank" rel="noreferrer">Evidence ↗</a></div>}
+          {submission.evidenceUrl && (submission.evidenceUrl.startsWith("http://") || submission.evidenceUrl.startsWith("https://")) && <div><a href={submission.evidenceUrl} target="_blank" rel="noreferrer">Evidence ↗</a></div>}
         </div>
         {canDecide && <form className="candidate-actions" action={decideSubmission} style={{ flexDirection: "column", alignItems: "stretch", gap: 8 }}>
           <input type="hidden" name="id" value={submission.id} />

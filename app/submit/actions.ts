@@ -8,6 +8,19 @@ import { insertSubmission, type NewSubmission } from "../../src/db/repository.su
 const SUBMISSION_TYPES = ["BETTER_ACHIEVABLE_RESULT", "STRONGER_BOUND", "PROOF", "REPRODUCTION", "CORRECTION"] as const;
 const RELATIONS = ["<", "<=", "=", ">=", ">"] as const;
 
+// `type="url"` is a client-side hint only — a direct POST can send anything, including a
+// javascript: URL that would execute in the reviewing editor's session when clicked.
+function safeEvidenceUrl(raw: string): string | undefined {
+  if (!raw) return undefined;
+  try {
+    const url = new URL(raw);
+    if (url.protocol !== "http:" && url.protocol !== "https:") throw new Error("unsupported protocol");
+    return url.toString();
+  } catch {
+    throw new Error("Evidence URL must be a valid http(s) link.");
+  }
+}
+
 export async function createSubmission(formData: FormData) {
   const session = await requireRole("USER");
 
@@ -33,7 +46,7 @@ export async function createSubmission(formData: FormData) {
     submissionType: submissionType as NewSubmission["submissionType"],
     title,
     description,
-    evidenceUrl: evidenceUrl || undefined,
+    evidenceUrl: safeEvidenceUrl(evidenceUrl),
   };
   if (proposedRelation && RELATIONS.includes(proposedRelation as (typeof RELATIONS)[number]) && proposedValueExact) {
     input.proposedRelation = proposedRelation as NewSubmission["proposedRelation"];
