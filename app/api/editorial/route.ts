@@ -3,7 +3,7 @@ import { reportError } from "../../../src/ops/monitoring";
 import { z } from "zod";
 import { getSession } from "../../../src/auth/session";
 import { hasRole } from "../../../src/auth/permissions";
-import { createEditorialLimit, createEditorialSpec, createEditorialClaim, createEditorialEvidence, recordEditorialReview, listAuditLog, listEditorialQueue, updateClaimEditorialStatus } from "../../../src/db/repository";
+import { createEditorialLimit, createEditorialSpec, createEditorialClaim, createEditorialEvidence, recordEditorialReview, issueClaimCertificate, listAuditLog, listEditorialQueue, updateClaimEditorialStatus } from "../../../src/db/repository";
 
 const limitSchema = z.object({ action: z.literal("create-limit"), registryNumber: z.string().regex(/^LR-[0-9]{6}$/), slug: z.string().min(2), title: z.string().min(2), summary: z.string().min(10), category: z.string().min(2), direction: z.enum(["MINIMIZE", "MAXIMIZE"]) });
 // The "Constraints" field in editorial-workspace.tsx is a single text input (placeholder
@@ -52,6 +52,7 @@ export async function POST(request: Request) {
     // route requires a real session, the reviewer is always whoever is actually authenticated.
     if (action === "record-review") { const parsed = reviewSchema.parse(body); return NextResponse.json(await recordEditorialReview({ ...parsed, reviewerUserId: session.user.id })); }
     if (action === "audit-log") return NextResponse.json(await listAuditLog());
+    if (action === "issue-certificate") { const bodyData = body as { claimId?: string; certificateType?: "CLAIM_ACCEPTED" | "RECORD_ESTABLISHED" }; if (!bodyData.claimId || !bodyData.certificateType) return NextResponse.json({ error: "claimId and certificateType are required." }, { status: 400 }); return NextResponse.json(await issueClaimCertificate({ claimId: bodyData.claimId, certificateType: bodyData.certificateType, issuedByUserId: session.user.id })); }
     if (action === "update-claim") { const parsed = statusSchema.parse(body); return NextResponse.json(await updateClaimEditorialStatus(parsed.claimId, parsed.status)); }
     return NextResponse.json({ error: "Unknown editorial action." }, { status: 400 });
   } catch (error) { return NextResponse.json({ error: error instanceof z.ZodError ? error.issues[0]?.message ?? "Invalid input." : "Editorial action failed." }, { status: 400 }); }

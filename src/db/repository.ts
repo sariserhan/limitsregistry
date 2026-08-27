@@ -1,7 +1,7 @@
 import { unstable_cache } from "next/cache";
 import { and, asc, eq, inArray, sql } from "drizzle-orm";
 import { db } from "./client";
-import { claimEvidence, claims, evidence, limits, specificationVersions, reviews, auditLogs } from "./schema";
+import { claimEvidence, claims, evidence, limits, specificationVersions, reviews, auditLogs, certificates } from "./schema";
 import { serializeClaim, serializeEvidence, serializeLimit, serializeSpecification } from "./serializers";
 
 export const listPublishedLimits = unstable_cache(async () => db.select().from(limits).where(inArray(limits.status, ["OPEN", "PROVEN"])).orderBy(asc(limits.registryNumber)), ["published-limits"], { revalidate: 60, tags: ["published-limits"] });
@@ -49,3 +49,17 @@ export async function createEditorialClaim(input: { claimNumber: string; specifi
 export async function createEditorialEvidence(input: { type: "PAPER" | "FORMAL_PROOF" | "SOURCE_CODE" | "DATASET" | "EXHAUSTIVE_COMPUTATION" | "EXPERIMENT" | "REPRODUCTION" | "OTHER"; label: string; url?: string; location?: string }) { const [row] = await db.insert(evidence).values({ ...input, metadata: {} }).returning(); return row; }
 export async function recordEditorialReview(input: { claimId: string; reviewerUserId: string; decision: string; rationale: string; conflictDisclosed: boolean }) { const [row] = await db.insert(reviews).values(input).returning(); return row; }
 export async function listAuditLog() { return db.select().from(auditLogs).orderBy(sql`${auditLogs.createdAt} desc`).limit(50); }
+
+
+export async function issueClaimCertificate(input: { claimId: string; certificateType: "CLAIM_ACCEPTED" | "RECORD_ESTABLISHED"; issuedByUserId?: string }) {
+  const rows = await db.select({ claim: claims, spec: specificationVersions, limit: limits }).from(claims).innerJoin(specificationVersions, eq(specificationVersions.id, claims.specificationVersionId)).innerJoin(limits, eq(limits.id, specificationVersions.limitId)).where(eq(claims.id, input.claimId)).limit(1);
+  const record = rows[0]; if (!record || record.claim.status !== "ACCEPTED") throw new Error("Only accepted Claims can receive certificates.");
+  const evidenceRows = await db.select({ id: claimEvidence.evidenceId }).from(claimEvidence).where(eq(claimEvidence.claimId, input.claimId));
+  const reviewRows = await db.select({ id: reviews.id }).from(reviews).where(and(eq(reviews.claimId, input.claimId), eq(reviews.decision, "ACCEPTED")));
+  if (evidenceRows.length === 0 || reviewRows.length < 2) throw new Error("A certificate requires evidence and two accepted independent reviews.");
+  const snapshot = { certificateType: input.certificateType, claimNumber: record.claim.claimNumber, claimType: record.claim.claimType, relation: record.claim.relation, valueExact: record.claim.valueExact, specificationVersionId: record.spec.id, specificationVersion: record.spec.versionNumber, registryNumber: record.limit.registryNumber, evidenceIds: evidenceRows.map((item) => item.id).sort(), acceptedReviewCount: reviewRows.length };
+  const { hashCertificateSnapshot, signCertificateHash } = await import("../certificates/hash"); const recordHash = hashCertificateSnapshot(snapshot); const signed = signCertificateHash(recordHash); const [certificate] = await db.insert(certificates).values({ certificateNumber: `CERT-${record.claim.claimNumber}`, certificateType: input.certificateType, claimId: input.claimId, recordHash, signature: signed.signature, signatureAlgorithm: signed.algorithm, snapshot, issuedByUserId: input.issuedByUserId }).returning(); return certificate;
+}
+
+
+export async function getCertificate(certificateNumber: string) { const rows = await db.select().from(certificates).where(eq(certificates.certificateNumber, certificateNumber)).limit(1); return rows[0] ?? null; }
