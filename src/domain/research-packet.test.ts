@@ -181,3 +181,10 @@ describe("researched draft ingestion batch", () => {
     expect(researchQueueCandidates.every((candidate) => candidate.registryReviewStatus === "UNREVIEWED")).toBe(true);
   });
 });
+
+import { toBibtex } from "./research-infrastructure";
+describe("research infrastructure contracts", () => {
+  it("generates stable BibTeX from canonical metadata", () => {
+    expect(toBibtex({ citeKey: "shannon1948", title: "A Mathematical Theory of Communication", authors: ["Claude Shannon"], year: 1948, venue: "Bell System Technical Journal", doi: "10.1002/j.1538-7305.1948.tb01338.x" })).toContain("@article{shannon1948");
+  });
+});
