@@ -1,5 +1,3 @@
-import Link from "next/link";
-import { BrandIcon } from "../../src/components/brand-icon";
 import { requireRole } from "../../src/auth/session";
 import { hasRole, type Role } from "../../src/auth/permissions";
 import { listAllLimits, listCandidateClaims, listPapers, getAcceptedBoundsForLimit } from "../../src/db/repository.console";
@@ -11,7 +9,6 @@ import type { CandidateClaimExtraction } from "../../src/lib/ai/extract-claims";
 import { addSource, decideCandidateClaim, decideSubmission, runExtraction, extractPdfCandidateClaims, importBibtex, reindexSemanticSearch } from "./actions";
 import { EditorialWorkspace } from "./editorial-workspace";
 import { ConsoleTabs } from "./ConsoleTabs";
-import "./console.css";
 
 const SUBMISSION_TYPE_LABELS: Record<string, string> = {
   BETTER_ACHIEVABLE_RESULT: "Better achievable result",
@@ -35,11 +32,10 @@ export default async function ConsolePage({ searchParams }: Props) {
     if (c.limitId && !boundsByLimit.has(c.limitId)) boundsByLimit.set(c.limitId, await getAcceptedBoundsForLimit(c.limitId));
   }
 
-  return <main className="console-page">
-    <header><Link className="brand" href="/"><BrandIcon className="brand-mark" /><span>Limits Registry</span></Link><nav><Link href="/search">Search</Link> · <Link href="/console/research">Infrastructure</Link> · <Link href="/console/codata-review">CODATA review</Link> · <Link href="/console/research/graph">Graph</Link> · <Link href="/console/research/artifacts">Artifacts</Link> · <Link href="/breakthroughs">Breakthroughs</Link> · <Link href="/">Public Registry ↗</Link></nav></header>
+  return <>
     <p className="section-kicker">Internal editorial workspace</p>
     <h1>Research Console</h1>
-    <p className="lede">Signed in as {session.user.email} · {session.user.role}. Sources, AI extraction, and record drafting are draft-only — nothing here publishes without editorial review.</p>
+    <p className="lede">Sources, AI extraction, and record drafting are draft-only — nothing here publishes without editorial review.</p>
     {(params.success || params.error) && <p className={params.error ? "graph-message graph-error" : "graph-message"} role="status">{params.error ?? params.success}</p>}
 
     <ConsoleTabs tabs={[
@@ -149,5 +145,5 @@ export default async function ConsolePage({ searchParams }: Props) {
         </>,
       }] : []),
     ]} />
-  </main>;
+  </>;
 }
