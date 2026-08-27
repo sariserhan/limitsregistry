@@ -61,3 +61,20 @@ export const candidateClaims = pgTable("candidate_claims", { id: uuid("id").defa
 
 // V3: immutable certificates for accepted Claims and record changes
 export const certificates = pgTable("certificates", { id: uuid("id").defaultRandom().primaryKey(), certificateNumber: text("certificate_number").notNull().unique(), certificateType: text("certificate_type").notNull(), claimId: uuid("claim_id").references(() => claims.id).notNull(), recordHash: text("record_hash").notNull(), signature: text("signature"), signatureAlgorithm: text("signature_algorithm").default("SHA-256").notNull(), snapshot: jsonb("snapshot").$type<Record<string, unknown>>().notNull(), status: text("status").default("ACTIVE").notNull(), issuedByUserId: text("issued_by_user_id").references(() => user.id), issuedAt: timestamp("issued_at", { withTimezone: true }).defaultNow().notNull(), supersededAt: timestamp("superseded_at", { withTimezone: true }) }, (t) => [index("certificates_claim_idx").on(t.claimId), index("certificates_hash_idx").on(t.recordHash)]);
+
+// --- V3: admin dashboard — site controls, inbound messages, outbound admin email log ---
+export const announcementLevelEnum = pgEnum("announcement_level", ["INFO", "WARNING", "CRITICAL"]);
+// Singleton row (id fixed to "global") holding maintenance-mode and site-announcement state,
+// read on every page via a short-lived cache (see src/db/repository.settings.ts) rather than
+// once per request from proxy.ts — see AGENTS.md-linked Next docs on avoiding DB reads there.
+export const siteSettings = pgTable("site_settings", { id: text("id").primaryKey(), maintenanceEnabled: boolean("maintenance_enabled").default(false).notNull(), maintenanceMessage: text("maintenance_message"), announcementEnabled: boolean("announcement_enabled").default(false).notNull(), announcementMessage: text("announcement_message"), announcementLevel: announcementLevelEnum("announcement_level").default("INFO").notNull(), updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(), updatedByUserId: text("updated_by_user_id").references(() => user.id) });
+
+export const inboxChannelEnum = pgEnum("inbox_channel", ["CONTACT", "SUPPORT"]);
+export const inboxStatusEnum = pgEnum("inbox_status", ["OPEN", "RESOLVED"]);
+// Inbound messages from the public /contact and /support forms. No submitter account required —
+// this is the public's only way to reach the team without going through email directly.
+export const inboxMessages = pgTable("inbox_messages", { id: uuid("id").defaultRandom().primaryKey(), channel: inboxChannelEnum("channel").notNull(), name: text("name").notNull(), email: text("email").notNull(), subject: text("subject"), message: text("message").notNull(), status: inboxStatusEnum("status").default("OPEN").notNull(), replyBody: text("reply_body"), repliedAt: timestamp("replied_at", { withTimezone: true }), repliedByUserId: text("replied_by_user_id").references(() => user.id), createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull() }, (t) => [index("inbox_messages_channel_idx").on(t.channel)]);
+
+// Audit trail for the admin "compose and send" tool — not a general outbound-email log (auth
+// emails and the weekly digest aren't recorded here, only admin-initiated arbitrary sends).
+export const adminSentEmails = pgTable("admin_sent_emails", { id: uuid("id").defaultRandom().primaryKey(), toEmail: text("to_email").notNull(), subject: text("subject").notNull(), heading: text("heading").notNull(), body: text("body").notNull(), footerNote: text("footer_note"), sentByUserId: text("sent_by_user_id").references(() => user.id).notNull(), createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull() });

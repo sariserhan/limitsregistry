@@ -1,19 +1,12 @@
-import Link from "next/link";
-import { requireRole } from "../../src/auth/session";
 import { ROLES } from "../../src/auth/permissions";
 import { listUsers } from "../../src/db/repository.users";
 import { listReviewerNetwork } from "../../src/db/repository.reviewers";
 import { updateUserRole } from "./actions";
-import "./admin.css";
 
-export default async function AdminPage() {
-  const session = await requireRole("ADMIN");
+export default async function AdminUsersPage() {
   const [users, reviewers] = await Promise.all([listUsers(), listReviewerNetwork()]);
 
-  return <main className="admin-shell">
-    <Link href="/">&larr; Back to Registry</Link>
-    <h1>Admin</h1>
-    <p>Signed in as {session.user.email} · {session.user.role}. Grant Research Console and review access here.</p>
+  return <>
     <div className="admin-table-scroll">
       <table className="admin-table">
         <thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Joined</th></tr></thead>
@@ -51,5 +44,5 @@ export default async function AdminPage() {
         </tbody>
       </table>
     </div>
-  </main>;
+  </>;
 }
