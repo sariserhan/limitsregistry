@@ -59,11 +59,11 @@ This roadmap tracks the remaining work after the current research infrastructure
 - [x] Add bounty database table.
 - [x] Add authenticated bounty submission API.
 - [x] Add basic bounty listing in Research Infrastructure.
-- [ ] Add bounty creation form.
-- [ ] Add editor verification and moderation actions.
-- [ ] Add public verified-bounty listing.
-- [ ] Add expiration, status, currency, and source validation.
-- [ ] Link verified bounties to canonical Limits.
+- [x] Add bounty creation form.
+- [x] Add editor verification and moderation actions.
+- [x] Add public verified-bounty listing.
+- [x] Add expiration, status, currency, and source validation.
+- [x] Link verified bounties to canonical Limits.
 
 ## 7. PDF and source ingestion
 

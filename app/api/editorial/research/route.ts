@@ -1,13 +1,11 @@
 import { NextResponse } from "next/server";
 import { requireRole } from "../../../../src/auth/session";
-import { db } from "../../../../src/db/client";
-import { researchBounties } from "../../../../src/db/schema";
-import { createDependency, createVerificationArtifact } from "../../../../src/db/repository.research";
+import { createBounty, createDependency, createVerificationArtifact } from "../../../../src/db/repository.research";
 import { DEPENDENCY_RELATIONS, type DependencyRelation } from "../../../../src/domain/dependencies";
 import { ARTIFACT_VERIFIERS, type ArtifactVerifier } from "../../../../src/verification/artifact-adapters";
 export const runtime = "nodejs";
 export async function POST(request: Request) {
-  await requireRole("RESEARCHER");
+  const session = await requireRole("RESEARCHER");
   const body = await request.json() as Record<string, string>;
   const kind = body.kind;
   if (kind === "artifact") {
@@ -24,9 +22,8 @@ export async function POST(request: Request) {
     } catch (error) { return NextResponse.json({ error: error instanceof Error ? error.message : "Dependency could not be created." }, { status: 400 }); }
   }
   if (kind === "bounty") {
-    if (!body.title || !body.sponsor || !body.description || !body.sourceUrl || !/^https:\/\//i.test(body.sourceUrl)) return NextResponse.json({ error: "title, sponsor, description, and HTTPS sourceUrl are required." }, { status: 400 });
-    const [row] = await db.insert(researchBounties).values({ limitId: body.limitId || null, title: body.title, sponsor: body.sponsor, description: body.description, sourceUrl: body.sourceUrl, amount: body.amount || null, currency: body.currency || null }).returning();
-    return NextResponse.json({ data: row }, { status: 201 });
+    if (!body.limitId || !body.title || !body.sponsor || !body.description || !body.sourceUrl) return NextResponse.json({ error: "limitId, title, sponsor, description, and sourceUrl are required." }, { status: 400 });
+    try { const expiresAt = body.expiresAt ? new Date(body.expiresAt) : null; const row = await createBounty({ limitId: body.limitId, title: body.title, sponsor: body.sponsor, description: body.description, sourceUrl: body.sourceUrl, amount: body.amount || null, currency: body.currency || null, expiresAt, submittedByUserId: session.user.id }); return NextResponse.json({ data: row }, { status: 201 }); } catch (error) { return NextResponse.json({ error: error instanceof Error ? error.message : "Bounty could not be created." }, { status: 400 }); }
   }
   return NextResponse.json({ error: "kind must be artifact, dependency, or bounty." }, { status: 400 });
 }
