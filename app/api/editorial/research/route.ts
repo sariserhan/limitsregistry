@@ -1,7 +1,9 @@
 import { NextResponse } from "next/server";
 import { requireRole } from "../../../../src/auth/session";
 import { db } from "../../../../src/db/client";
-import { dependencyRelations, researchBounties, verificationArtifacts } from "../../../../src/db/schema";
+import { researchBounties, verificationArtifacts } from "../../../../src/db/schema";
+import { createDependency } from "../../../../src/db/repository.research";
+import { DEPENDENCY_RELATIONS, type DependencyRelation } from "../../../../src/domain/dependencies";
 export const runtime = "nodejs";
 export async function POST(request: Request) {
   await requireRole("RESEARCHER");
@@ -14,8 +16,11 @@ export async function POST(request: Request) {
   }
   if (kind === "dependency") {
     if (!body.sourceLimitId || !body.targetLimitId || !body.relation) return NextResponse.json({ error: "sourceLimitId, targetLimitId, and relation are required." }, { status: 400 });
-    const [row] = await db.insert(dependencyRelations).values({ sourceLimitId: body.sourceLimitId, targetLimitId: body.targetLimitId, relation: body.relation, evidenceClaimId: body.evidenceClaimId || null }).returning();
-    return NextResponse.json({ data: row }, { status: 201 });
+    if (!DEPENDENCY_RELATIONS.includes(body.relation as DependencyRelation)) return NextResponse.json({ error: "Unsupported dependency relation." }, { status: 400 });
+    try {
+      const row = await createDependency({ sourceLimitId: body.sourceLimitId, targetLimitId: body.targetLimitId, relation: body.relation as DependencyRelation, evidenceClaimId: body.evidenceClaimId || null });
+      return NextResponse.json({ data: row }, { status: 201 });
+    } catch (error) { return NextResponse.json({ error: error instanceof Error ? error.message : "Dependency could not be created." }, { status: 400 }); }
   }
   if (kind === "bounty") {
     if (!body.title || !body.sponsor || !body.description || !body.sourceUrl || !/^https:\/\//i.test(body.sourceUrl)) return NextResponse.json({ error: "title, sponsor, description, and HTTPS sourceUrl are required." }, { status: 400 });

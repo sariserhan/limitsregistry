@@ -18,10 +18,10 @@ This roadmap tracks the remaining work after the current research infrastructure
 - [x] Add dependency repository functions.
 - [x] Add authenticated dependency submission API.
 - [x] Add authenticated graph review page.
-- [ ] Add visual node-and-edge graph.
-- [ ] Add dependency creation form and editor decisions.
-- [ ] Display only accepted dependencies publicly.
-- [ ] Add reduction-direction and cycle validation.
+- [x] Add visual node-and-edge graph.
+- [x] Add dependency creation form and editor decisions.
+- [x] Display only accepted dependencies publicly.
+- [x] Add reduction-direction and cycle validation.
 
 ## 3. Verification and reproducibility
 

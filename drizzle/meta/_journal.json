@@ -50,6 +50,13 @@
       "when": 1787855449186,
       "tag": "0006_semantic-search-index",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1787856587501,
+      "tag": "0007_dependency-graph-hardening",
+      "breakpoints": true
     }
   ]
 }
