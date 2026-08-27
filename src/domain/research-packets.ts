@@ -37,3 +37,20 @@ const bchEvidence: Evidence = { id: "EVD-LR086-1", type: "MATHEMATICAL_PROOF", m
 export const bchResearchPacket: ResearchPacket = { limit: { id: "LR-000086", title: "Minimum distance of primitive binary BCH codes", category: "Coding theory", status: "OPEN", direction: "MAXIMIZE", summary: "The true minimum Hamming distance of a primitive narrow-sense binary BCH family of length 2ᵐ − 1." }, specification: bchSpec, claims: [ textClaim("CLM-LR086-DESIGNED", bchSpec.id, ">=", "δ", "LOWER_BOUND", "BCH bound", 1959, "The designed distance is a lower bound on true minimum distance", bchEvidence.id) ], evidence: [bchEvidence], registryReviewStatus: "UNREVIEWED" };
 
 export const additionalResearchPackets: ResearchPacket[] = [cernyResearchPacket, capSetResearchPacket, bchResearchPacket];
+
+const sortingSpec = (id: string, limitId: string, inputs: number): SpecificationVersion => ({ id, limitId, version: 1, formalStatement: `S(${inputs}) is the minimum number of comparators in a fixed network that sorts every ${inputs}-input sequence.`, constraints: { inputs: String(inputs), inputDomain: "totally ordered values", verificationDomain: `${2 ** inputs} binary inputs`, network: "fixed/data-oblivious" }, asymptotic: false, probabilistic: false });
+const sortingEvidence = (id: string, label: string): Evidence => ({ id, type: "COMPUTATIONAL_PROOF", method: "SAT_SYMMETRY_REDUCTION", verificationLevel: "SOURCE_CONFIRMED", label, sourceUrl: "https://arxiv.org/abs/1405.5754" });
+const sortingPacket = (limitId: string, inputs: number, lower: number, upper: number, status: "OPEN" | "PROVEN", lowerSource: string, upperSource: string): ResearchPacket => {
+  const specification = sortingSpec(`SP-${limitId}-V1`, limitId, inputs);
+  const lowerEvidence = sortingEvidence(`EVD-${limitId}-LOWER`, `Computer-assisted lower-bound verification for S(${inputs})`);
+  const upperEvidence: Evidence = { id: `EVD-${limitId}-UPPER`, type: "CONSTRUCTION", method: "COMPARATOR_NETWORK", verificationLevel: "SOURCE_CONFIRMED", label: `Known ${upper}-comparator sorting network for ${inputs} inputs`, sourceUrl: "https://imada.sdu.dk/~petersk/sn/" };
+  const makeClaim = (id: string, relation: Claim["relation"], value: number, type: Claim["claimType"], source: string, evidenceId: string): Claim => ({ id, specificationVersionId: specification.id, relation, value: { kind: "integer", value: BigInt(value) }, claimType: type, status: "ACCEPTED", epistemicStatus: "SOURCE_CONFIRMED", scientificStatus: "ACCEPTED", registryReviewStatus: "UNREVIEWED", evidenceIds: [evidenceId], author: "Codish, Cruz-Filipe, Frank, Schneider-Kamp", year: 2014, source });
+  return { limit: { id: limitId, title: `Minimum number of comparators for a ${inputs}-input sorting network`, category: "Algorithms / Sorting Networks", status, direction: "MINIMIZE", summary: `The minimum number of fixed compare-exchange operations needed to sort ${inputs} inputs.` }, specification, claims: [makeClaim(`CLM-${limitId}-LOWER`, ">=", lower, "LOWER_BOUND", lowerSource, lowerEvidence.id), makeClaim(`CLM-${limitId}-UPPER`, "<=", upper, "UPPER_BOUND", upperSource, upperEvidence.id)], evidence: [lowerEvidence, upperEvidence], registryReviewStatus: "UNREVIEWED" };
+};
+
+export const sortingNetworkResearchPackets: ResearchPacket[] = [
+  sortingPacket("LR-SN-009", 9, 25, 25, "PROVEN", "Twenty-Five Comparators is Optimal when Sorting Nine Inputs", "Floyd's 25-comparator construction"),
+  sortingPacket("LR-SN-010", 10, 29, 29, "PROVEN", "Twenty-Five Comparators is Optimal when Sorting Nine Inputs (and Twenty-Nine for Ten)", "Waksman's 29-comparator construction"),
+  sortingPacket("LR-SN-011", 11, 33, 35, "OPEN", "Maintained sorting-network lower-bound table", "Maintained sorting-network upper-bound table"),
+  sortingPacket("LR-SN-012", 12, 37, 39, "OPEN", "Maintained sorting-network lower-bound table", "Maintained sorting-network upper-bound table"),
+];

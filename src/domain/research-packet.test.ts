@@ -32,3 +32,22 @@ describe("additional normalized research packets", () => {
     expect(bchResearchPacket.specification.constraints.parameter).toBe("m and δ");
   });
 });
+
+import { sortingNetworkResearchPackets } from "./research-packets";
+
+describe("sorting network research packets", () => {
+  it("derives exact frontiers for 9 and 10 inputs", () => {
+    for (const packet of sortingNetworkResearchPackets.slice(0, 2)) {
+      const frontier = deriveFrontier(packet.limit.direction, packet.specification, packet.claims);
+      expect(frontier.status).toBe("PROVEN");
+      expect(frontier.gap).toBe("Closed");
+    }
+  });
+  it("preserves open gaps for 11 and 12 inputs", () => {
+    for (const packet of sortingNetworkResearchPackets.slice(2)) {
+      const frontier = deriveFrontier(packet.limit.direction, packet.specification, packet.claims);
+      expect(frontier.status).toBe("OPEN");
+      expect(frontier.gap).toMatch(/to/);
+    }
+  });
+});
