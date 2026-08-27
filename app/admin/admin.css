@@ -20,9 +20,10 @@
 
 .admin-form { display:grid; gap:15px; max-width:520px; }
 .admin-form label { display:grid; gap:7px; color:var(--muted); font:10px 'DM Mono',monospace; text-transform:uppercase; }
-.admin-form input, .admin-form textarea, .admin-form select { border:1px solid var(--line); background:#fff; padding:11px; font:13px/1.4 'DM Mono',monospace; color:var(--ink); }
+.admin-form input:not([type="checkbox"]):not([type="radio"]), .admin-form textarea, .admin-form select { border:1px solid var(--line); background:#fff; padding:11px; font:13px/1.4 'DM Mono',monospace; color:var(--ink); }
 .admin-form textarea { min-height:110px; resize:vertical; }
-.admin-form-row { display:flex; align-items:center; gap:10px; font-size:13px; color:var(--ink); }
+.admin-form .admin-form-row { display:flex; align-items:center; gap:10px; font-size:13px; color:var(--ink); text-transform:none; font-family:'DM Sans',sans-serif; }
+.admin-form-row input[type="checkbox"] { width:16px; height:16px; flex-shrink:0; accent-color:var(--blue); }
 .admin-submit { border:0; background:var(--blue); color:#fff; padding:11px 18px; font:12px 'DM Mono',monospace; cursor:pointer; justify-self:start; }
 
 .status-badge { display:inline-flex; align-items:center; gap:6px; font:11px 'DM Mono',monospace; text-transform:uppercase; letter-spacing:.05em; padding:5px 10px; border:1px solid var(--line); white-space:nowrap; }

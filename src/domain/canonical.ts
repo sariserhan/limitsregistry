@@ -8,4 +8,4 @@ export const canonicalRecords: Record<string, CanonicalRecord> = {
   "LR-000098": { id: "LR-000098", category: "MATHEMATICS / COMBINATORICS", title: "Largest cap set in [3]ⁿ", summary: "The largest subset of a grid containing no three points in a line.", achievable: "Θ(3ⁿ / n)", bound: "O(3ⁿ / n¹·⁶)", gap: "Asymptotic", mode: "asymptotic" },
 };
 
-export function getCanonicalRecord(id: string): CanonicalRecord { return canonicalRecords[id] ?? canonicalRecords["LR-000072"]; }
+export function getCanonicalRecord(id: string): CanonicalRecord | undefined { return canonicalRecords[id]; }
