@@ -69,8 +69,8 @@ Implementation status is tracked honestly below: completed infrastructure is che
 
 ### 5. Launch catalog
 
-- [ ] Select 25–40 real Limits across mathematics and theoretical CS.
-- [ ] Write formal specifications for each Limit.
+- [x] Select 25–40 real Limits across mathematics and theoretical CS.
+- [x] Write formal specifications for each Limit.
 - [ ] Gather original papers and evidence locations.
 - [ ] Resolve people and institutions conservatively.
 - [ ] Create historical timeline events.
@@ -86,9 +86,9 @@ Implementation status is tracked honestly below: completed infrastructure is che
 - [ ] Confirm Neon Preview/Production environment separation.
 - [ ] Configure Neon backup and retention expectations.
 - [ ] Add error monitoring and request IDs.
-- [ ] Add production database migration runbook.
-- [ ] Add rollback/forward-fix procedure.
-- [ ] Add security review for admin and database routes.
+- [x] Add production database migration runbook.
+- [x] Add rollback/forward-fix procedure.
+- [x] Add security review for admin and database routes.
 
 ## V2 — real editorial platform
 
