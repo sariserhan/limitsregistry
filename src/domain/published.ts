@@ -19,4 +19,4 @@ function makePublished(limit: BrowseLimit): PublishedLimit {
 
 export const publishedLimits = browseLimits.map(makePublished);
 export function getPublishedLimit(id: string): PublishedLimit | undefined { return publishedLimits.find((limit) => limit.id === id); }
-export function formatExact(value: ExactValue | null): string { if (!value) return "?"; if (value.kind === "integer") return value.value?.toString() ?? "?"; if (value.kind === "rational") return `${value.numerator}/${value.denominator}`; return "?"; }
+export function formatExact(value: ExactValue | null): string { if (!value) return "?"; if (value.kind === "integer") return value.value?.toString() ?? "?"; if (value.kind === "rational") return `${value.numerator}/${value.denominator}`; return value.value; }
