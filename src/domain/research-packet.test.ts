@@ -90,3 +90,16 @@ describe("foundational scientific limits", () => {
     expect(noCloningResearchPacket.claims[0]?.value).toEqual({ kind: "text", value: "impossible" });
   });
 });
+
+import { margolusLevitinResearchPacket, carnotCopResearchPacket, holevoResearchPacket, nyquistResearchPacket, bekensteinResearchPacket } from "./research-packets";
+
+describe("additional foundational research packets", () => {
+  it("covers quantum, thermodynamic, information, and signal limits", () => {
+    for (const packet of [margolusLevitinResearchPacket, carnotCopResearchPacket, holevoResearchPacket, nyquistResearchPacket, bekensteinResearchPacket]) {
+      expect(packet.limit.limitKind).toBe("THEORETICAL_BOUND");
+      expect(packet.limit.canonicalStatus).toBe("EXACT");
+      expect(packet.registryReviewStatus).toBe("UNREVIEWED");
+      expect(packet.claims[0]?.evidenceBasis).toContain("THEORETICAL_DERIVATION");
+    }
+  });
+});
