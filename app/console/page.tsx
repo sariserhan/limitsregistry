@@ -33,7 +33,7 @@ export default async function ConsolePage() {
   }
 
   return <main className="console-page">
-    <header><Link className="brand" href="/"><BrandIcon className="brand-mark" /><span>Limits Registry</span></Link><nav><Link href="/search">Search</Link> · <Link href="/console/research">Infrastructure</Link> · <Link href="/console/research/graph">Graph</Link> · <Link href="/console/research/artifacts">Artifacts</Link> · <Link href="/breakthroughs">Breakthroughs</Link> · <Link href="/">Public Registry ↗</Link></nav></header>
+    <header><Link className="brand" href="/"><BrandIcon className="brand-mark" /><span>Limits Registry</span></Link><nav><Link href="/search">Search</Link> · <Link href="/console/research">Infrastructure</Link> · <Link href="/console/codata-review">CODATA review</Link> · <Link href="/console/research/graph">Graph</Link> · <Link href="/console/research/artifacts">Artifacts</Link> · <Link href="/breakthroughs">Breakthroughs</Link> · <Link href="/">Public Registry ↗</Link></nav></header>
     <p className="section-kicker">Internal editorial workspace</p>
     <h1>Research Console</h1>
     <p className="lede">Signed in as {session.user.email} · {session.user.role}. Sources, AI extraction, and record drafting are draft-only — nothing here publishes without editorial review.</p>
