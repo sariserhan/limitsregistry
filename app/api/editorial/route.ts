@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { timingSafeEqual } from "node:crypto";
 import { reportError } from "../../../src/ops/monitoring";
 import { z } from "zod";
 import { createEditorialLimit, createEditorialSpec, createEditorialClaim, createEditorialEvidence, recordEditorialReview, listAuditLog, listEditorialQueue, updateClaimEditorialStatus } from "../../../src/db/repository";
@@ -6,7 +7,15 @@ import { createEditorialLimit, createEditorialSpec, createEditorialClaim, create
 const limitSchema = z.object({ action: z.literal("create-limit"), registryNumber: z.string().regex(/^LR-[0-9]{6}$/), slug: z.string().min(2), title: z.string().min(2), summary: z.string().min(10), category: z.string().min(2), direction: z.enum(["MINIMIZE", "MAXIMIZE"]), token: z.string().min(1) });
 const specSchema = z.object({ action: z.literal("create-spec"), limitId: z.string().uuid(), formalStatement: z.string().min(10), constraints: z.record(z.string(), z.unknown()), token: z.string().min(1) });
 const statusSchema = z.object({ action: z.literal("update-claim"), claimId: z.string().uuid(), status: z.enum(["ACCEPTED", "REJECTED", "UNDER_REVIEW", "DISPUTED", "INVALIDATED"]), token: z.string().min(1) });
-function authorized(token: string | null) { return Boolean(process.env.EDITORIAL_ADMIN_TOKEN && token && token === process.env.EDITORIAL_ADMIN_TOKEN); }
+// Plain `===` on secrets leaks timing information (it returns as soon as a byte
+// differs), letting an attacker recover the token byte-by-byte. timingSafeEqual
+// requires equal-length buffers, so bail out on a length mismatch first — that
+// alone leaks far less than a per-byte timing oracle would.
+function authorized(token: string | null) {
+  const expected = process.env.EDITORIAL_ADMIN_TOKEN;
+  if (!expected || !token || token.length !== expected.length) return false;
+  return timingSafeEqual(Buffer.from(token), Buffer.from(expected));
+}
 export async function GET(request: Request) {
   if (!authorized(request.headers.get("x-editorial-token"))) return NextResponse.json({ items: [], error: "Editorial access requires an admin token." }, { status: 401 });
   try { if (new URL(request.url).searchParams.get("audit") === "1") return NextResponse.json({ items: await listAuditLog() }); return NextResponse.json({ items: await listEditorialQueue(new URL(request.url).searchParams.get("q") ?? "") }); } catch (error) { reportError(error, { requestId: "request-id-middleware", route: "app/api/editorial/route.ts" }); return NextResponse.json({ items: [], error: "Editorial database is unavailable." }, { status: 503 }); }

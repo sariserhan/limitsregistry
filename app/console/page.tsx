@@ -1,13 +1,82 @@
-"use client";
 import Link from "next/link";
-import { FormEvent, useState } from "react";
-type QueueItem = { id: string; claimNumber: string; valueExact: string; status: string; claimType: string };
-export default function ConsolePage() {
-  const [items, setItems] = useState<QueueItem[]>([]); const [audit, setAudit] = useState<unknown[]>([]); const [query, setQuery] = useState(""); const [token, setToken] = useState(""); const [message, setMessage] = useState("Enter the editorial admin token to connect.");
-  async function loadAudit() { const response = await fetch("/api/editorial?audit=1", { headers: { "x-editorial-token": token } }); const data = await response.json(); setAudit(data.items ?? []); }
-  async function refresh(value = query) { const response = await fetch(`/api/editorial?q=${encodeURIComponent(value)}`, { headers: { "x-editorial-token": token } }); const data = await response.json(); setItems(data.items ?? []); setMessage(data.error ?? `${(data.items ?? []).length} queue items loaded.`); }
-  async function submit(event: FormEvent<HTMLFormElement>) { event.preventDefault(); setMessage("Saving…"); const body = Object.fromEntries(new FormData(event.currentTarget)); const response = await fetch("/api/editorial", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ ...body, token, action: "create-limit", direction: "MAXIMIZE" }) }); const data = await response.json(); setMessage(response.ok ? `Created ${data.registryNumber}.` : data.error ?? "Could not save."); if (response.ok) event.currentTarget.reset(); }
-  async function submitAction(event: FormEvent<HTMLFormElement>, action: string) { event.preventDefault(); setMessage("Saving…"); const values = Object.fromEntries(new FormData(event.currentTarget)); const response = await fetch("/api/editorial", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ ...values, action, token, conflictDisclosed: true }) }); const data = await response.json(); setMessage(response.ok ? "Saved to the editorial database." : data.error ?? "Could not save."); if (response.ok) event.currentTarget.reset(); }
-  async function update(id: string, status: string) { const response = await fetch("/api/editorial", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ action: "update-claim", claimId: id, status, token }) }); setMessage(response.ok ? "Claim updated." : "Could not update claim."); void refresh(); }
-  return <main className="console-page"><header><Link className="brand" href="/"><span className="brand-mark"><i /><i /><i /></span><span>Limits Registry</span></Link><Link href="/">Public Registry ↗</Link></header><section className="console-intro"><p className="section-kicker">Internal editorial workspace</p><h1>Research Console</h1><p>Intake sources, create scoped records, and move Claims through review. Every operation is server-authorized.</p><label className="token-field">Admin token<input type="password" value={token} onChange={e => setToken(e.target.value)} placeholder="EDITORIAL_ADMIN_TOKEN" autoComplete="current-password" /><button type="button" className="primary-button" onClick={() => void refresh("")} disabled={!token}>Connect to queue</button></label></section><div className="console-panels"><section className="editor-panel"><h2>Create a Limit</h2><form onSubmit={submit}><label>Registry number<input name="registryNumber" placeholder="LR-000200" required /></label><label>Slug<input name="slug" placeholder="new-limit" required /></label><label>Title<input name="title" required /></label><label>Category<input name="category" placeholder="Graph theory" required /></label><label>Summary<textarea name="summary" minLength={10} required /></label><button className="primary-button" type="submit" disabled={!token}>Create draft limit</button></form><hr /><h2>Source intake</h2><form onSubmit={e => void submitAction(e, "create-evidence")}><label>Source label<input name="label" required /></label><label>Source URL<input name="url" type="url" /></label><label>Location<input name="location" placeholder="Theorem 1, page 4" /></label><label>Type<select name="type" defaultValue="PAPER"><option>PAPER</option><option>FORMAL_PROOF</option><option>SOURCE_CODE</option><option>DATASET</option><option>EXHAUSTIVE_COMPUTATION</option><option>REPRODUCTION</option><option>OTHER</option></select></label><button className="secondary-button" type="submit" disabled={!token}>Attach evidence</button></form><hr /><h2>Claim draft</h2><form onSubmit={e => void submitAction(e, "create-claim")}><label>Specification UUID<input name="specificationVersionId" required /></label><label>Claim number<input name="claimNumber" placeholder="CLM-000500" required /></label><label>Value<input name="valueExact" placeholder="3/2 or O(n)" required /></label><label>Relation<select name="relation" defaultValue="<="><option>&lt;</option><option>&lt;=</option><option>=</option><option>&gt;=</option><option>&gt;</option></select></label><label>Type<select name="claimType" defaultValue="UPPER_BOUND"><option>UPPER_BOUND</option><option>LOWER_BOUND</option><option>EXACT_VALUE</option><option>CONSTRUCTION</option><option>ASYMPTOTIC_BOUND</option><option>COMPUTATIONAL_BOUND</option></select></label><label>Method summary<textarea name="methodSummary" /></label><input type="hidden" name="epistemicStatus" value="LITERATURE_ASSERTED" /><button className="secondary-button" type="submit" disabled={!token}>Save claim draft</button></form><hr /><h2>Specification version</h2><form onSubmit={e => void submitAction(e, "create-spec")}><label>Limit UUID<input name="limitId" required /></label><label>Formal statement<textarea name="formalStatement" minLength={10} required /></label><label>Constraints<input name="constraints" placeholder="domain=finite" required /></label><button className="secondary-button" type="submit" disabled={!token}>Create specification</button></form><hr /><h2>Review decision</h2><form onSubmit={e => void submitAction(e, "record-review")}><label>Claim UUID<input name="claimId" required /></label><label>Reviewer UUID<input name="reviewerUserId" required /></label><label>Decision<select name="decision"><option>ACCEPTED</option><option>REJECTED</option><option>NEEDS_REVISION</option></select></label><label>Rationale<textarea name="rationale" minLength={10} required /></label><button className="secondary-button" type="submit" disabled={!token}>Record review</button></form></section><section className="editor-panel"><div className="queue-head"><div><h2>Review queue</h2><p>Draft and under-review Claims.</p></div><input aria-label="Filter review queue" value={query} onChange={e => { setQuery(e.target.value); void refresh(e.target.value); }} placeholder="Filter claims" /></div>{items.length ? items.map(item => <article className="editor-claim" key={item.id}><div><strong>{item.claimNumber}</strong><span>{item.claimType} · {item.valueExact}</span></div><select aria-label={`Status for ${item.claimNumber}`} defaultValue={item.status} onChange={e => void update(item.id, e.target.value)}><option>DRAFT</option><option>UNDER_REVIEW</option><option>ACCEPTED</option><option>REJECTED</option><option>DISPUTED</option><option>INVALIDATED</option></select></article>) : <div className="empty-state"><strong>No claims in queue</strong><span>Authenticate to load editorial work.</span></div>}</section><section className="editor-panel audit-panel"><div className="queue-head"><div><h2>Audit log</h2><p>Recent editorial actions.</p></div><button className="secondary-button" type="button" onClick={() => void loadAudit()} disabled={!token}>Load log</button></div>{audit.length ? audit.map((entry, index) => <pre key={index}>{JSON.stringify(entry, null, 2)}</pre>) : <div className="empty-state"><strong>No audit entries loaded</strong><span>Load the protected audit log when needed.</span></div>}</section></div><p role="status" className="console-message">{message}</p></main>;
+import { requireRole } from "../../src/auth/session";
+import { hasRole, type Role } from "../../src/auth/permissions";
+import { listAllLimits, listCandidateClaims, listPapers, getAcceptedBoundsForLimit } from "../../src/db/repository.console";
+import { detectContradiction, type BoundClaim } from "../../src/domain/contradiction";
+import type { CandidateClaimExtraction } from "../../src/lib/ai/extract-claims";
+import { addSource, decideCandidateClaim, runExtraction } from "./actions";
+import { EditorialWorkspace } from "./editorial-workspace";
+import "./console.css";
+
+export default async function ConsolePage() {
+  const session = await requireRole("RESEARCHER");
+  const [papers, limits, candidates] = await Promise.all([listPapers(), listAllLimits(), listCandidateClaims()]);
+  const canDecide = hasRole(session.user.role as Role, "EDITOR");
+
+  const pending = candidates.filter((c) => c.status === "PENDING_REVIEW");
+  const boundsByLimit = new Map<string, BoundClaim[]>();
+  for (const c of pending) {
+    if (c.limitId && !boundsByLimit.has(c.limitId)) boundsByLimit.set(c.limitId, await getAcceptedBoundsForLimit(c.limitId));
+  }
+
+  return <main className="console-page">
+    <header><Link className="brand" href="/"><span className="brand-mark"><i /><i /><i /></span><span>Limits Registry</span></Link><Link href="/">Public Registry ↗</Link></header>
+    <p className="section-kicker">Internal editorial workspace</p>
+    <h1>Research Console</h1>
+    <p className="lede">Signed in as {session.user.email} · {session.user.role}. Sources, AI extraction, and record drafting are draft-only — nothing here publishes without editorial review.</p>
+
+    <section>
+      <h2>Add a source</h2>
+      <form className="intake-form" action={addSource}>
+        <input name="source" placeholder="DOI (10.xxxx/…) or arXiv ID/URL" required />
+        <button type="submit">Fetch metadata</button>
+      </form>
+    </section>
+
+    <section>
+      <h2>Sources ({papers.length})</h2>
+      {papers.map((p) => <div className="source-card" key={p.id}>
+        <div><strong>{p.title}</strong><small>{p.venue ?? "—"} · {p.doi ?? p.arxivId ?? "no identifier"}</small></div>
+        {p.abstract && <form action={runExtraction}>
+          <input type="hidden" name="paperId" value={p.id} />
+          <input type="hidden" name="title" value={p.title} />
+          <input type="hidden" name="abstract" value={p.abstract} />
+          <select name="limitId" defaultValue="">
+            <option value="">No Limit linked</option>
+            {limits.map((l) => <option key={l.id} value={l.id}>{l.registryNumber} — {l.title}</option>)}
+          </select>
+          <button type="submit">Extract candidate claims</button>
+        </form>}
+      </div>)}
+      {papers.length === 0 && <p>No sources yet.</p>}
+    </section>
+
+    <section>
+      <h2>Candidate claims awaiting review ({pending.length})</h2>
+      {pending.map((c) => {
+        const extraction = c.extraction as unknown as CandidateClaimExtraction;
+        const bounds = c.limitId ? boundsByLimit.get(c.limitId) ?? [] : [];
+        return <article className="candidate-card" key={c.id}>
+          <header><span>{c.model} · {c.promptVersion}</span><span>{new Date(c.createdAt).toLocaleString()}</span></header>
+          {extraction.claims.map((claim, i) => {
+            const numeric = Number.parseFloat(claim.valueText);
+            const warning = c.limitId && Number.isFinite(numeric) ? detectContradiction(bounds, { relation: claim.relation, valueNumeric: numeric }) : null;
+            return <div className="candidate-item" key={i}>
+              <strong>{claim.relation} {claim.valueText}{claim.unit ? ` ${claim.unit}` : ""}</strong> — {claim.claimType.replaceAll("_", " ")} ({Math.round(claim.confidence * 100)}% confidence)
+              <div>{claim.quantityDescription}</div>
+              {warning && <div className="warn">⚠ {warning}</div>}
+            </div>;
+          })}
+          {canDecide && <form className="candidate-actions" action={decideCandidateClaim}>
+            <input type="hidden" name="id" value={c.id} />
+            <button name="decision" value="PROMOTED">Promote for claim drafting</button>
+            <button name="decision" value="DISMISSED">Dismiss</button>
+          </form>}
+        </article>;
+      })}
+      {pending.length === 0 && <p>Nothing awaiting review.</p>}
+    </section>
+
+    <EditorialWorkspace />
+  </main>;
 }

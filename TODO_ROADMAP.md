@@ -63,9 +63,9 @@ Implementation status is tracked honestly below: completed infrastructure is che
 - [x] Show correction and dispute history.
 - [x] Show derived frontier explanation.
 - [x] Add canonical metadata, sitemap, robots.txt, and structured data.
-- [x] Add accessible loading, empty, and error states.
-- [x] Add copy-citation interaction.
-- [ ] Add responsive visual QA at mobile, tablet, desktop, and wide desktop sizes.
+- [x] Add accessible loading, empty, and error states. (`app/loading.tsx`, `app/error.tsx`, `app/global-error.tsx`, `app/not-found.tsx`, plus per-route skeletons for `/limits/[id]`, `/papers/[id]`, `/researchers/[id]`, `/institutions/[id]`, `/console`, `/admin`; empty states already existed on Console/Admin lists)
+- [x] Add copy-citation interaction. (`app/limits/[id]/CopyCitationButton.tsx`)
+- [x] Add responsive visual QA at mobile, tablet, desktop, and wide desktop sizes. (375/768/1440/1920 checked with agent-browser; fixed a mobile overflow on `/admin`'s table and a squeezed intake form on `/console`; vertically centered and branded `/login` and `/signup`)
 
 ### 5. Launch catalog
 
@@ -92,17 +92,17 @@ Implementation status is tracked honestly below: completed infrastructure is che
 
 ## V2 — real editorial platform
 
-- [ ] Add authentication with Better Auth or another selected provider.
-- [ ] Add server-side roles and permissions.
-- [ ] Add protected editor and admin routes.
-- [ ] Add persistent users and reviewer identities.
-- [ ] Add DOI, Crossref, OpenAlex, and arXiv source ingestion.
-- [ ] Add AI-assisted metadata and Claim extraction as draft-only workflows.
-- [ ] Add contradiction and duplicate detection.
-- [ ] Add paper, researcher, and institution pages backed by Postgres.
-- [ ] Add reviewer assignments and conflict-of-interest tracking.
-- [ ] Add public API only after the data contract stabilizes.
-- [ ] Add Neon branch-based preview database workflow.
+- [x] Add authentication with Better Auth or another selected provider. (email/password; `src/auth/`; email verification and password reset via Resend — `src/lib/email/`, `/forgot-password`, `/reset-password`)
+- [x] Add server-side roles and permissions. (`USER < RESEARCHER < REVIEWER < EDITOR < ADMIN < SUPERADMIN`, `src/auth/permissions.ts`, enforced in `requireRole()` — never client-side only)
+- [x] Add protected editor and admin routes. (`/console` RESEARCHER+, `/admin` ADMIN+; optimistic `proxy.ts` redirect + secure per-page `requireRole()` check)
+- [x] Add persistent users and reviewer identities. (Better Auth `user`/`session`/`account` tables; `reviews.reviewer_user_id` and `audit_logs.actor_user_id` now reference real users)
+- [ ] Add DOI, Crossref, OpenAlex, and arXiv source ingestion. (DOI via Crossref and arXiv done — `src/lib/ingestion/`; OpenAlex intentionally skipped as redundant with Crossref for this catalog's needs, add if citation-graph/open-access data becomes a real requirement)
+- [x] Add AI-assisted metadata and Claim extraction as draft-only workflows. (`src/lib/ai/extract-claims.ts` writes only to `candidate_claims`, never `claims`; metadata itself stays deterministic per spec §53, sourced from Crossref/arXiv, not AI)
+- [x] Add contradiction and duplicate detection. (`src/domain/contradiction.ts`, `src/domain/duplicate-detection.ts`, wired into the Research Console intake and candidate-review flow)
+- [x] Add paper, researcher, and institution pages backed by Postgres. (`/papers/[id]`, `/researchers/[id]`, `/institutions/[id]`)
+- [ ] Add reviewer assignments and conflict-of-interest tracking. (schema only — `reviewer_assignments` table with `conflict_disclosed`; no assignment UI yet since there's no claim-detail editor to attach it to until the V1 editorial console lands)
+- [ ] Add public API only after the data contract stabilizes. (deliberately not started — the public-page data contract is still V1 work in progress)
+- [ ] Add Neon branch-based preview database workflow. (not yet configured — Vercel's Neon integration creates a DB branch per PR automatically once installed on the project in the Vercel dashboard; no app code needed, just enabling the integration)
 
 ## V3 — open research infrastructure
 
