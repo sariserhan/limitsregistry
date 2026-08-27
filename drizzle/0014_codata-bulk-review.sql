@@ -1,0 +1,1 @@
+CREATE UNIQUE INDEX IF NOT EXISTS "reviews_claim_reviewer_unique" ON "reviews" USING btree ("claim_id","reviewer_user_id");
