@@ -120,3 +120,14 @@ describe("AI research packets", () => {
     expect(aiTransformerExpressivityResearchPacket.specification.constraints.task).toBe("UNSPECIFIED");
   });
 });
+
+import { aiRnnWidthResearchPacket, aiTrainingHardnessResearchPacket } from "./research-packets";
+
+describe("additional AI research packets", () => {
+  it("captures recurrent width and training complexity limits", () => {
+    expect(aiRnnWidthResearchPacket.limit.limitKind).toBe("THEORETICAL_BOUND");
+    expect(aiRnnWidthResearchPacket.claims[0]?.value).toEqual({ kind: "text", value: "max(dₓ + 1, dᵧ)" });
+    expect(aiTrainingHardnessResearchPacket.limit.limitKind).toBe("IMPOSSIBILITY_RESULT");
+    expect(aiTrainingHardnessResearchPacket.claims[0]?.value).toEqual({ kind: "text", value: "NP-complete" });
+  });
+});
