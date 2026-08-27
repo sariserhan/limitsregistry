@@ -10,6 +10,7 @@ import { detectContradiction, type BoundClaim } from "../../src/domain/contradic
 import type { CandidateClaimExtraction } from "../../src/lib/ai/extract-claims";
 import { addSource, decideCandidateClaim, decideSubmission, runExtraction, extractPdfCandidateClaims, importBibtex, reindexSemanticSearch } from "./actions";
 import { EditorialWorkspace } from "./editorial-workspace";
+import { ConsoleTabs } from "./ConsoleTabs";
 import "./console.css";
 
 const SUBMISSION_TYPE_LABELS: Record<string, string> = {
@@ -38,102 +39,112 @@ export default async function ConsolePage() {
     <h1>Research Console</h1>
     <p className="lede">Signed in as {session.user.email} · {session.user.role}. Sources, AI extraction, and record drafting are draft-only — nothing here publishes without editorial review.</p>
 
-    {canDecide ? <section><h2>Semantic search index</h2><p>Refreshes the public index from published Limits, accepted Claims, specifications, and linked papers.</p><p className="index-status" role="status">{indexStatus.length ? indexStatus.map((row) => `${row.status}: ${row.count}`).join(" · ") : "Index is empty — nothing has been embedded yet."}</p><form action={reindexSemanticSearch}><button type="submit">Refresh semantic index</button></form></section> : null}
+    <ConsoleTabs tabs={[
+      {
+        id: "intake", label: `Intake (${papers.length})`, content: <>
+          <section>
+            <h2>Add a source</h2>
+            <form className="intake-form" action={addSource}>
+              <input name="source" placeholder="DOI (10.xxxx/…) or arXiv ID/URL" required />
+              <button type="submit">Fetch metadata</button>
+            </form>
+          </section>
 
-    <section>
-      <h2>Add a source</h2>
-      <form className="intake-form" action={addSource}>
-        <input name="source" placeholder="DOI (10.xxxx/…) or arXiv ID/URL" required />
-        <button type="submit">Fetch metadata</button>
-      </form>
-    </section>
+          <section>
+            <h2>Import bibliography</h2>
+            <form className="intake-form" action={importBibtex}>
+              <textarea name="bibtex" rows={6} placeholder="Paste BibTeX entries here" required />
+              <button type="submit">Import draft sources</button>
+            </form>
+          </section>
 
-    <section>
-      <h2>Import bibliography</h2>
-      <form className="intake-form" action={importBibtex}>
-        <textarea name="bibtex" rows={6} placeholder="Paste BibTeX entries here" required />
-        <button type="submit">Import draft sources</button>
-      </form>
-    </section>
+          <section>
+            <h2>Sources ({papers.length})</h2>
+            {papers.map((p) => <div className="source-card" key={p.id}>
+              <div><strong>{p.title}</strong><small>{p.venue ?? "—"} · {p.doi ?? p.arxivId ?? "no identifier"}</small></div>
+              {p.abstract && <form action={runExtraction}>
+                <input type="hidden" name="paperId" value={p.id} />
+                <input type="hidden" name="title" value={p.title} />
+                <input type="hidden" name="abstract" value={p.abstract} />
+                <select name="limitId" defaultValue="">
+                  <option value="">No Limit linked</option>
+                  {limits.map((l) => <option key={l.id} value={l.id}>{l.registryNumber} — {l.title}</option>)}
+                </select>
+                <button type="submit">Extract candidate claims</button>
+              </form>}
+              <form className="pdf-job-form" action={extractPdfCandidateClaims}><input type="hidden" name="paperId" value={p.id} /><select name="limitId" defaultValue=""><option value="">No Limit linked</option>{limits.map((l) => <option key={l.id} value={l.id}>{l.registryNumber} — {l.title}</option>)}</select>{p.arxivId ? <small>Secure arXiv PDF: {p.arxivId}</small> : <input name="pdfUrl" type="url" pattern="https://.*" placeholder="Allowlisted official publisher PDF URL" required />}<button type="submit">Queue PDF extraction</button></form>
+            </div>)}
+            {papers.length === 0 && <p>No sources yet.</p>}
+          </section>
 
-    <section>
-      <h2>Sources ({papers.length})</h2>
-      {papers.map((p) => <div className="source-card" key={p.id}>
-        <div><strong>{p.title}</strong><small>{p.venue ?? "—"} · {p.doi ?? p.arxivId ?? "no identifier"}</small></div>
-        {p.abstract && <form action={runExtraction}>
-          <input type="hidden" name="paperId" value={p.id} />
-          <input type="hidden" name="title" value={p.title} />
-          <input type="hidden" name="abstract" value={p.abstract} />
-          <select name="limitId" defaultValue="">
-            <option value="">No Limit linked</option>
-            {limits.map((l) => <option key={l.id} value={l.id}>{l.registryNumber} — {l.title}</option>)}
-          </select>
-          <button type="submit">Extract candidate claims</button>
-        </form>}
-        <form className="pdf-job-form" action={extractPdfCandidateClaims}><input type="hidden" name="paperId" value={p.id} /><select name="limitId" defaultValue=""><option value="">No Limit linked</option>{limits.map((l) => <option key={l.id} value={l.id}>{l.registryNumber} — {l.title}</option>)}</select>{p.arxivId ? <small>Secure arXiv PDF: {p.arxivId}</small> : <input name="pdfUrl" type="url" pattern="https://.*" placeholder="Allowlisted official publisher PDF URL" required />}<button type="submit">Queue PDF extraction</button></form>
-      </div>)}
-      {papers.length === 0 && <p>No sources yet.</p>}
-    </section>
-
-    <section>
-      <h2>PDF extraction jobs ({sourceJobs.length})</h2>
-      {sourceJobs.length ? sourceJobs.map(({ job, paper }) => <article className="source-job" key={job.id}>
-        <header><strong>{paper.title}</strong><span className="job-status">{job.status.replaceAll("_", " ")}</span></header>
-        <small>{job.sourceType} · Attempt {job.attempts}/{job.maxAttempts}{job.pageCount ? ` · ${job.pageCount} pages` : ""}{job.byteSize ? ` · ${(job.byteSize / 1048576).toFixed(2)} MB` : ""}</small>
-        {job.errorMessage ? <p role="alert">{job.errorMessage}</p> : null}
-      </article>) : <p>No PDF jobs queued.</p>}
-    </section>
-
-    <section>
-      <h2>Candidate claims awaiting review ({pending.length})</h2>
-      {pending.map((c) => {
-        const extraction = c.extraction as unknown as CandidateClaimExtraction;
-        const bounds = c.limitId ? boundsByLimit.get(c.limitId) ?? [] : [];
-        return <article className="candidate-card" key={c.id}>
-          <header><span>{c.model} · {c.promptVersion}</span><span>{new Date(c.createdAt).toLocaleString()}</span></header>
-          {extraction.claims.map((claim, i) => {
-            const numeric = Number.parseFloat(claim.valueText);
-            const warning = c.limitId && Number.isFinite(numeric) ? detectContradiction(bounds, { relation: claim.relation, valueNumeric: numeric }) : null;
-            return <div className="candidate-item" key={i}>
-              <strong>{claim.relation} {claim.valueText}{claim.unit ? ` ${claim.unit}` : ""}</strong> — {claim.claimType.replaceAll("_", " ")} ({Math.round(claim.confidence * 100)}% confidence)
-              <div>{claim.quantityDescription}</div>
-              {warning && <div className="warn">⚠ {warning}</div>}
-            </div>;
+          <section>
+            <h2>PDF extraction jobs ({sourceJobs.length})</h2>
+            {sourceJobs.length ? sourceJobs.map(({ job, paper }) => <article className="source-job" key={job.id}>
+              <header><strong>{paper.title}</strong><span className="job-status">{job.status.replaceAll("_", " ")}</span></header>
+              <small>{job.sourceType} · Attempt {job.attempts}/{job.maxAttempts}{job.pageCount ? ` · ${job.pageCount} pages` : ""}{job.byteSize ? ` · ${(job.byteSize / 1048576).toFixed(2)} MB` : ""}</small>
+              {job.errorMessage ? <p role="alert">{job.errorMessage}</p> : null}
+            </article>) : <p>No PDF jobs queued.</p>}
+          </section>
+        </>,
+      },
+      {
+        id: "queue", label: `Review queue (${pending.length})`, content: <section>
+          <h2>Candidate claims awaiting review ({pending.length})</h2>
+          {pending.map((c) => {
+            const extraction = c.extraction as unknown as CandidateClaimExtraction;
+            const bounds = c.limitId ? boundsByLimit.get(c.limitId) ?? [] : [];
+            return <article className="candidate-card" key={c.id}>
+              <header><span>{c.model} · {c.promptVersion}</span><span>{new Date(c.createdAt).toLocaleString()}</span></header>
+              {extraction.claims.map((claim, i) => {
+                const numeric = Number.parseFloat(claim.valueText);
+                const warning = c.limitId && Number.isFinite(numeric) ? detectContradiction(bounds, { relation: claim.relation, valueNumeric: numeric }) : null;
+                return <div className="candidate-item" key={i}>
+                  <strong>{claim.relation} {claim.valueText}{claim.unit ? ` ${claim.unit}` : ""}</strong> — {claim.claimType.replaceAll("_", " ")} ({Math.round(claim.confidence * 100)}% confidence)
+                  <div>{claim.quantityDescription}</div>
+                  {warning && <div className="warn">⚠ {warning}</div>}
+                </div>;
+              })}
+              {canDecide && <form className="candidate-actions" action={decideCandidateClaim}>
+                <input type="hidden" name="id" value={c.id} />
+                <button name="decision" value="PROMOTED">Promote for claim drafting</button>
+                <button name="decision" value="DISMISSED">Dismiss</button>
+              </form>}
+            </article>;
           })}
-          {canDecide && <form className="candidate-actions" action={decideCandidateClaim}>
-            <input type="hidden" name="id" value={c.id} />
-            <button name="decision" value="PROMOTED">Promote for claim drafting</button>
-            <button name="decision" value="DISMISSED">Dismiss</button>
-          </form>}
-        </article>;
-      })}
-      {pending.length === 0 && <p>Nothing awaiting review.</p>}
-    </section>
-
-    <section>
-      <h2>Public submissions awaiting review ({pendingSubmissions.length})</h2>
-      {pendingSubmissions.map(({ submission, submitter, limit }) => <article className="candidate-card" key={submission.id}>
-        <header><span>{submitter.name} ({submitter.email})</span><span>{new Date(submission.createdAt).toLocaleString()}</span></header>
-        <div className="candidate-item">
-          <strong>{SUBMISSION_TYPE_LABELS[submission.submissionType]} — {submission.title}</strong>
-          <div>{limit.registryNumber} — {limit.title}</div>
-          <div>{submission.description}</div>
-          {submission.proposedRelation && submission.proposedValueExact && <div>Proposed: {submission.proposedRelation} {submission.proposedValueExact}</div>}
-          {submission.evidenceUrl && (submission.evidenceUrl.startsWith("http://") || submission.evidenceUrl.startsWith("https://")) && <div><a href={submission.evidenceUrl} target="_blank" rel="noreferrer">Evidence ↗</a></div>}
-        </div>
-        {canDecide && <form className="candidate-actions" action={decideSubmission} style={{ flexDirection: "column", alignItems: "stretch", gap: 8 }}>
-          <input type="hidden" name="id" value={submission.id} />
-          <textarea name="notes" placeholder="Reviewer note (required)" rows={2} style={{ font: "inherit", padding: 8, border: "1px solid var(--line)" }} />
-          <div style={{ display: "flex", gap: 8 }}>
-            <button name="decision" value="ACCEPTED">Accept</button>
-            <button name="decision" value="NEEDS_REVISION">Needs revision</button>
-            <button name="decision" value="REJECTED">Reject</button>
-          </div>
-        </form>}
-      </article>)}
-      {pendingSubmissions.length === 0 && <p>Nothing awaiting review.</p>}
-    </section>
-
-    <EditorialWorkspace canDecide={canDecide} />
+          {pending.length === 0 && <p>Nothing awaiting review.</p>}
+        </section>,
+      },
+      {
+        id: "submissions", label: `Submissions (${pendingSubmissions.length})`, content: <section>
+          <h2>Public submissions awaiting review ({pendingSubmissions.length})</h2>
+          {pendingSubmissions.map(({ submission, submitter, limit }) => <article className="candidate-card" key={submission.id}>
+            <header><span>{submitter.name} ({submitter.email})</span><span>{new Date(submission.createdAt).toLocaleString()}</span></header>
+            <div className="candidate-item">
+              <strong>{SUBMISSION_TYPE_LABELS[submission.submissionType]} — {submission.title}</strong>
+              <div>{limit.registryNumber} — {limit.title}</div>
+              <div>{submission.description}</div>
+              {submission.proposedRelation && submission.proposedValueExact && <div>Proposed: {submission.proposedRelation} {submission.proposedValueExact}</div>}
+              {submission.evidenceUrl && (submission.evidenceUrl.startsWith("http://") || submission.evidenceUrl.startsWith("https://")) && <div><a href={submission.evidenceUrl} target="_blank" rel="noreferrer">Evidence ↗</a></div>}
+            </div>
+            {canDecide && <form className="candidate-actions" action={decideSubmission} style={{ flexDirection: "column", alignItems: "stretch", gap: 8 }}>
+              <input type="hidden" name="id" value={submission.id} />
+              <textarea name="notes" placeholder="Reviewer note (required)" rows={2} style={{ font: "inherit", padding: 8, border: "1px solid var(--line)" }} />
+              <div style={{ display: "flex", gap: 8 }}>
+                <button name="decision" value="ACCEPTED">Accept</button>
+                <button name="decision" value="NEEDS_REVISION">Needs revision</button>
+                <button name="decision" value="REJECTED">Reject</button>
+              </div>
+            </form>}
+          </article>)}
+          {pendingSubmissions.length === 0 && <p>Nothing awaiting review.</p>}
+        </section>,
+      },
+      ...(canDecide ? [{
+        id: "editorial", label: "Editorial", content: <>
+          <section><h2>Semantic search index</h2><p>Refreshes the public index from published Limits, accepted Claims, specifications, and linked papers.</p><p className="index-status" role="status">{indexStatus.length ? indexStatus.map((row) => `${row.status}: ${row.count}`).join(" · ") : "Index is empty — nothing has been embedded yet."}</p><form action={reindexSemanticSearch}><button type="submit">Refresh semantic index</button></form></section>
+          <EditorialWorkspace canDecide={canDecide} />
+        </>,
+      }] : []),
+    ]} />
   </main>;
 }

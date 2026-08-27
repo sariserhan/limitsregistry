@@ -2,6 +2,10 @@
 .console-page h1 { font:600 40px 'Space Grotesk',sans-serif; letter-spacing:-.05em; margin:0 0 8px; }
 .console-page > p.lede { color:var(--muted); margin:0 0 40px; }
 .index-status { font:10px 'DM Mono',monospace; text-transform:uppercase; color:var(--faint); margin:8px 0 14px; }
+.console-tabs { display:flex; flex-wrap:wrap; gap:2px; border-bottom:1px solid var(--line); margin-bottom:36px; }
+.console-tabs button { border:0; background:transparent; cursor:pointer; padding:10px 14px; font:11px 'DM Mono',monospace; text-transform:uppercase; letter-spacing:.06em; color:var(--muted); border-bottom:2px solid transparent; margin-bottom:-1px; }
+.console-tabs button:hover { color:var(--ink); }
+.console-tabs button.active { color:var(--ink); border-bottom-color:var(--blue); }
 .console-page section { margin-bottom:52px; }
 .console-page h2 { font:600 18px 'Space Grotesk',sans-serif; border-bottom:1px solid var(--ink); padding-bottom:10px; margin:0 0 18px; }
 .intake-form { display:flex; gap:10px; }
