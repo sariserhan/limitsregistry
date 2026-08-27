@@ -10,6 +10,28 @@ import { extractCandidateClaims, EXTRACTION_MODEL, EXTRACTION_PROMPT_VERSION } f
 import { insertCandidateClaim, insertPaper, listPapers, setCandidateClaimStatus } from "../../src/db/repository.console";
 import { setSubmissionStatus } from "../../src/db/repository.submissions";
 
+export async function importBibtex(formData: FormData) {
+  await requireRole("RESEARCHER");
+  const input = String(formData.get("bibtex") ?? "").trim();
+  if (!input || input.length > 200000) throw new Error("Provide a BibTeX file up to 200 KB.");
+  const entries = [...input.matchAll(/@(?:article|inproceedings|misc)\s*\{([\s\S]*?)\n\s*\}/gi)];
+  let imported = 0;
+  for (const match of entries) {
+    const block = match[1];
+    const field = (name: string) => block.match(new RegExp(`${name}\\s*=\\s*[\\{\\"]([\\s\\S]*?)[\\}\\"]\\s*,?`, "i"))?.[1]?.trim();
+    const title = field("title");
+    if (!title) continue;
+    const doi = field("doi") ?? null;
+    const arxivId = field("eprint") ?? null;
+    if ((await listPapers()).some((paper) => (doi && paper.doi === doi) || (arxivId && paper.arxivId === arxivId) || paper.title.toLowerCase() === title.toLowerCase())) continue;
+    await insertPaper({ title, abstract: null, publicationDate: field("year") ? new Date(Date.UTC(Number(field("year")), 0, 1)) : null, venue: field("journal") ?? field("booktitle") ?? null, doi, arxivId, publisherUrl: field("url") ?? null });
+    imported++;
+  }
+  if (!entries.length) throw new Error("No supported BibTeX entries found.");
+  revalidatePath("/console");
+  return imported;
+}
+
 export async function addSource(formData: FormData) {
   await requireRole("RESEARCHER");
   const rawSource = String(formData.get("source") ?? "").trim();

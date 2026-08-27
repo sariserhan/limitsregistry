@@ -6,7 +6,7 @@ import { listAllLimits, listCandidateClaims, listPapers, getAcceptedBoundsForLim
 import { listSubmissions } from "../../src/db/repository.submissions";
 import { detectContradiction, type BoundClaim } from "../../src/domain/contradiction";
 import type { CandidateClaimExtraction } from "../../src/lib/ai/extract-claims";
-import { addSource, decideCandidateClaim, decideSubmission, runExtraction, extractPdfCandidateClaims } from "./actions";
+import { addSource, decideCandidateClaim, decideSubmission, runExtraction, extractPdfCandidateClaims, importBibtex } from "./actions";
 import { EditorialWorkspace } from "./editorial-workspace";
 import "./console.css";
 
@@ -41,6 +41,14 @@ export default async function ConsolePage() {
       <form className="intake-form" action={addSource}>
         <input name="source" placeholder="DOI (10.xxxx/…) or arXiv ID/URL" required />
         <button type="submit">Fetch metadata</button>
+      </form>
+    </section>
+
+    <section>
+      <h2>Import bibliography</h2>
+      <form className="intake-form" action={importBibtex}>
+        <textarea name="bibtex" rows={6} placeholder="Paste BibTeX entries here" required />
+        <button type="submit">Import draft sources</button>
       </form>
     </section>
 
