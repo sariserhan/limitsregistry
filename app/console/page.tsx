@@ -111,6 +111,6 @@ export default async function ConsolePage() {
       {pendingSubmissions.length === 0 && <p>Nothing awaiting review.</p>}
     </section>
 
-    <EditorialWorkspace />
+    <EditorialWorkspace canDecide={canDecide} />
   </main>;
 }
