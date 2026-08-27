@@ -71,12 +71,12 @@ Implementation status is tracked honestly below: completed infrastructure is che
 
 - [x] Select 25–40 real Limits across mathematics and theoretical CS.
 - [x] Write formal specifications for each Limit.
-- [ ] Gather original papers and evidence locations.
-- [ ] Resolve people and institutions conservatively.
-- [ ] Create historical timeline events.
-- [ ] Complete independent editorial review.
-- [ ] Publish only records with evidence-backed Claims.
-- [ ] Verify every public quantitative statement against a source.
+- [x] Gather original papers and evidence locations. (`scripts/seed-launch-catalog.ts` — 32 real papers with real DOI/arXiv IDs, gathered via cited research across 5 independent research passes, one per 5-limit batch; deduped against each other, e.g. Hamming 1950 is shared by two limits and stored once)
+- [x] Resolve people and institutions conservatively. (39 real paper authors resolved by name; institutions deliberately *not* resolved — nearly every affiliation research turned up came back "not confirmed," so per the conservative-resolution rule they were left out rather than guessed)
+- [x] Create historical timeline events. (49 events, e.g. Turán 1941, Håstad 1986, the Coppersmith–Winograd → Duan–Wu–Zhou → Williams–Xu–Xu–Zhou matrix-multiplication-exponent chain)
+- [ ] Complete independent editorial review. (cannot be done by the agent that drafted the content — self-review isn't independent — per master spec §8/§74/"No AI-only publication." All 26 seeded Claims sit in DRAFT with a real citation attached, ready for a human reviewer.)
+- [ ] Publish only records with evidence-backed Claims. (same constraint: publishing — i.e. accepting a Claim, or flipping a Limit's status off DRAFT — is a human/admin action per the spec's Publication Rule, not something to do unreviewed on the spec's own authority)
+- [ ] Verify every public quantitative statement against a source. (not yet applicable — nothing from this pass is public yet; every seeded Claim already carries its source citation in `method_summary`/`claim_papers`, ready for a reviewer to check against the primary source before publishing)
 
 ### 6. Operations and deployment
 

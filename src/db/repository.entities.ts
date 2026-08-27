@@ -1,7 +1,12 @@
 import "server-only";
-import { desc, eq } from "drizzle-orm";
+import { and, desc, eq, inArray } from "drizzle-orm";
 import { db } from "./client";
 import { claimPapers, claimPeople, claims, institutions, limits, papers, people, personInstitutions, specificationVersions } from "./schema";
+
+// These pages are public, unauthenticated reads — never expose a claim that hasn't
+// cleared review, or one whose Limit hasn't been published, no matter how it's reached.
+const PUBLIC_CLAIM_STATUS = eq(claims.status, "ACCEPTED");
+const PUBLIC_LIMIT_STATUS = inArray(limits.status, ["OPEN", "PROVEN"]);
 
 export async function getPaper(id: string) {
   const rows = await db.select().from(papers).where(eq(papers.id, id)).limit(1);
@@ -14,7 +19,7 @@ export async function getClaimsForPaper(paperId: string) {
     .innerJoin(claims, eq(claims.id, claimPapers.claimId))
     .innerJoin(specificationVersions, eq(specificationVersions.id, claims.specificationVersionId))
     .innerJoin(limits, eq(limits.id, specificationVersions.limitId))
-    .where(eq(claimPapers.paperId, paperId))
+    .where(and(eq(claimPapers.paperId, paperId), PUBLIC_CLAIM_STATUS, PUBLIC_LIMIT_STATUS))
     .orderBy(desc(claims.createdAt));
 }
 
@@ -36,7 +41,7 @@ export async function getClaimsForPerson(personId: string) {
     .innerJoin(claims, eq(claims.id, claimPeople.claimId))
     .innerJoin(specificationVersions, eq(specificationVersions.id, claims.specificationVersionId))
     .innerJoin(limits, eq(limits.id, specificationVersions.limitId))
-    .where(eq(claimPeople.personId, personId))
+    .where(and(eq(claimPeople.personId, personId), PUBLIC_CLAIM_STATUS, PUBLIC_LIMIT_STATUS))
     .orderBy(desc(claims.createdAt));
 }
 
