@@ -25,3 +25,16 @@ export async function sendResetPasswordEmail(to: string, name: string, url: stri
   });
   await sendEmail({ to, subject: "Reset your password — Limits Registry", html, text });
 }
+
+export async function sendWelcomeEmail(to: string, name: string) {
+  const siteUrl = process.env.BETTER_AUTH_URL ?? "http://localhost:3000";
+  const { html, text } = renderEmail({
+    preheader: "Your Limits Registry account is verified.",
+    heading: `Welcome, ${name}`,
+    intro: "Your email is verified. New accounts start with read-only access — an admin grants Research Console and review permissions from there.",
+    ctaLabel: "Explore the Registry",
+    ctaUrl: siteUrl,
+    note: "Questions about access? Reply to this email.",
+  });
+  await sendEmail({ to, subject: "Welcome to Limits Registry", html, text });
+}
