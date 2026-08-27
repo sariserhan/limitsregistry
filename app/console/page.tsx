@@ -2,16 +2,26 @@ import Link from "next/link";
 import { requireRole } from "../../src/auth/session";
 import { hasRole, type Role } from "../../src/auth/permissions";
 import { listAllLimits, listCandidateClaims, listPapers, getAcceptedBoundsForLimit } from "../../src/db/repository.console";
+import { listSubmissions } from "../../src/db/repository.submissions";
 import { detectContradiction, type BoundClaim } from "../../src/domain/contradiction";
 import type { CandidateClaimExtraction } from "../../src/lib/ai/extract-claims";
-import { addSource, decideCandidateClaim, runExtraction } from "./actions";
+import { addSource, decideCandidateClaim, decideSubmission, runExtraction } from "./actions";
 import { EditorialWorkspace } from "./editorial-workspace";
 import "./console.css";
 
+const SUBMISSION_TYPE_LABELS: Record<string, string> = {
+  BETTER_ACHIEVABLE_RESULT: "Better achievable result",
+  STRONGER_BOUND: "Stronger proven bound",
+  PROOF: "Proof",
+  REPRODUCTION: "Independent reproduction",
+  CORRECTION: "Correction",
+};
+
 export default async function ConsolePage() {
   const session = await requireRole("RESEARCHER");
-  const [papers, limits, candidates] = await Promise.all([listPapers(), listAllLimits(), listCandidateClaims()]);
+  const [papers, limits, candidates, submissions] = await Promise.all([listPapers(), listAllLimits(), listCandidateClaims(), listSubmissions()]);
   const canDecide = hasRole(session.user.role as Role, "EDITOR");
+  const pendingSubmissions = submissions.filter((s) => s.submission.status === "SUBMITTED" || s.submission.status === "UNDER_REVIEW");
 
   const pending = candidates.filter((c) => c.status === "PENDING_REVIEW");
   const boundsByLimit = new Map<string, BoundClaim[]>();
@@ -75,6 +85,30 @@ export default async function ConsolePage() {
         </article>;
       })}
       {pending.length === 0 && <p>Nothing awaiting review.</p>}
+    </section>
+
+    <section>
+      <h2>Public submissions awaiting review ({pendingSubmissions.length})</h2>
+      {pendingSubmissions.map(({ submission, submitter, limit }) => <article className="candidate-card" key={submission.id}>
+        <header><span>{submitter.name} ({submitter.email})</span><span>{new Date(submission.createdAt).toLocaleString()}</span></header>
+        <div className="candidate-item">
+          <strong>{SUBMISSION_TYPE_LABELS[submission.submissionType]} — {submission.title}</strong>
+          <div>{limit.registryNumber} — {limit.title}</div>
+          <div>{submission.description}</div>
+          {submission.proposedRelation && submission.proposedValueExact && <div>Proposed: {submission.proposedRelation} {submission.proposedValueExact}</div>}
+          {submission.evidenceUrl && <div><a href={submission.evidenceUrl} target="_blank" rel="noreferrer">Evidence ↗</a></div>}
+        </div>
+        {canDecide && <form className="candidate-actions" action={decideSubmission} style={{ flexDirection: "column", alignItems: "stretch", gap: 8 }}>
+          <input type="hidden" name="id" value={submission.id} />
+          <textarea name="notes" placeholder="Reviewer note (required)" rows={2} style={{ font: "inherit", padding: 8, border: "1px solid var(--line)" }} />
+          <div style={{ display: "flex", gap: 8 }}>
+            <button name="decision" value="ACCEPTED">Accept</button>
+            <button name="decision" value="NEEDS_REVISION">Needs revision</button>
+            <button name="decision" value="REJECTED">Reject</button>
+          </div>
+        </form>}
+      </article>)}
+      {pendingSubmissions.length === 0 && <p>Nothing awaiting review.</p>}
     </section>
 
     <EditorialWorkspace />

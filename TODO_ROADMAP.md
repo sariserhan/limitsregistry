@@ -106,8 +106,8 @@ Implementation status is tracked honestly below: completed infrastructure is che
 
 ## V3 — open research infrastructure
 
-- [ ] Add authenticated public submissions.
-- [ ] Add expert reviewer network and credentials.
+- [x] Add authenticated public submissions. (`/submit` — any signed-in USER proposes a better result/stronger bound/proof/reproduction/correction against a published Limit, rate-limited 5/hour/user; `/console` gets an EDITOR+ review queue with required reviewer notes. Accepting a submission never writes to `claims` directly — same draft-only posture as the AI-extraction candidate queue. Note: this directly contradicts this file's own "No public submissions" non-goal below — read that as "not yet, for V1/V2" since V3 has its own line item for exactly this; flagging the tension rather than silently overriding it.)
+- [x] Add expert reviewer network and credentials. (`reviewer_profiles` table + `/reviewer-profile` self-service editor for REVIEWER+ users; directory visible at `/admin`. Self-reported only, labeled as such everywhere it's shown — not independently verified, consistent with how institutions were handled in the launch-catalog pass.)
 - [x] Add reproducible computational verification.
 - [x] Add sandboxed execution for approved verifier types.
 - [x] Add independent reproduction workflows.
