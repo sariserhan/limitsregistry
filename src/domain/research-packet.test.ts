@@ -142,3 +142,17 @@ describe("extended AI research packets", () => {
     expect(aiRobustnessAccuracyResearchPacket.limit.direction).toBe("MAXIMIZE");
   });
 });
+
+import { timeHierarchyResearchPacket, spaceHierarchyResearchPacket, codingBoundsResearchPacket, capTheoremResearchPacket, bandwidthDelayProductResearchPacket, storageDensityResearchPacket, apiRateResearchPacket } from "./research-packets";
+
+describe("computation, coding, cloud, and network research packets", () => {
+  it("represents theorem, impossibility, and parameterized frontier records", () => {
+    expect(timeHierarchyResearchPacket.limit.limitKind).toBe("THEORETICAL_BOUND");
+    expect(spaceHierarchyResearchPacket.limit.limitKind).toBe("THEORETICAL_BOUND");
+    expect(codingBoundsResearchPacket.claims).toHaveLength(3);
+    expect(capTheoremResearchPacket.limit.limitKind).toBe("IMPOSSIBILITY_RESULT");
+    expect(bandwidthDelayProductResearchPacket.claims[0]?.value).toEqual({ kind: "text", value: "BDP = bandwidth × RTT" });
+    expect(storageDensityResearchPacket.claims).toHaveLength(0);
+    expect(apiRateResearchPacket.specification.constraints.provider).toBe("named provider");
+  });
+});
