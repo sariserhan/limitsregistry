@@ -11,9 +11,10 @@ function makePublished(limit: BrowseLimit): PublishedLimit {
   const claimsData: Claim[] = [];
   const achievable = numeric(limit.achievable);
   const bound = numeric(limit.bound);
-  if (achievable !== null) claimsData.push({ id: `CLM-${limit.id}-A`, specificationVersionId: specification.id, claimType: "CONSTRUCTION", relation: limit.direction === "MAXIMIZE" ? ">=" : "<=", value: { kind: "integer", value: achievable }, status: "ACCEPTED", epistemicStatus: "SOURCE_CONFIRMED", evidenceIds: [], author: "Registry source", year: 2025, source: "Curated launch record" });
-  if (bound !== null) claimsData.push({ id: `CLM-${limit.id}-B`, specificationVersionId: specification.id, claimType: "UPPER_BOUND", relation: limit.direction === "MAXIMIZE" ? "<=" : ">=", value: { kind: "integer", value: bound }, status: "ACCEPTED", epistemicStatus: limit.status === "PROVEN" ? "PROVEN" : "SOURCE_CONFIRMED", evidenceIds: [], author: "Registry source", year: 2025, source: "Curated launch record" });
-  return { ...limit, specification, claimsData, frontier: deriveFrontier(limit.direction, specification, claimsData) };
+  if (achievable !== null) claimsData.push({ id: `CLM-${limit.id}-A`, specificationVersionId: specification.id, claimType: "CONSTRUCTION", relation: ">=", value: { kind: "integer", value: achievable }, status: "ACCEPTED", epistemicStatus: "SOURCE_CONFIRMED", evidenceIds: [], author: "Registry source", year: 2025, source: "Curated launch record" });
+  if (bound !== null) claimsData.push({ id: `CLM-${limit.id}-B`, specificationVersionId: specification.id, claimType: "UPPER_BOUND", relation: "<=", value: { kind: "integer", value: bound }, status: "ACCEPTED", epistemicStatus: limit.status === "PROVEN" ? "PROVEN" : "SOURCE_CONFIRMED", evidenceIds: [], author: "Registry source", year: 2025, source: "Curated launch record" });
+  const frontier = deriveFrontier(limit.direction, specification, claimsData);
+  return { ...limit, status: frontier.status === "PROVEN" ? "PROVEN" : "OPEN", specification, claimsData, frontier };
 }
 
 export const publishedLimits = browseLimits.map(makePublished);
