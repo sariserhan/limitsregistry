@@ -1,7 +1,7 @@
 import { unstable_cache } from "next/cache";
 import { and, asc, eq, inArray, sql } from "drizzle-orm";
 import { db } from "./client";
-import { claimEvidence, claims, evidence, follows, limits, notifications, specificationVersions, reviews, auditLogs, certificates, watchlistEvents } from "./schema";
+import { claimEvidence, claims, evidence, follows, limits, notifications, specificationVersions, reviews, auditLogs, certificates, watchlistEvents, timelineEvents } from "./schema";
 import { shouldPublishAcceptedClaimEvent } from "../watchlists/events";
 import { serializeClaim, serializeEvidence, serializeLimit, serializeSpecification } from "./serializers";
 import { deriveFrontier } from "../domain/frontier";
@@ -111,7 +111,13 @@ export async function getCertificate(certificateNumber: string) { const rows = a
 
 /** One cached read for the public Browse surface; prevents database records from inheriting launch-fixture frontiers. */
 export async function listPublishedLimitsWithFrontiers() {
-  const rows = await db.select({ limit: limits, specification: specificationVersions, claim: claims }).from(limits).innerJoin(specificationVersions, eq(specificationVersions.limitId, limits.id)).leftJoin(claims, eq(claims.specificationVersionId, specificationVersions.id)).where(inArray(limits.status, ["OPEN", "PROVEN", "DISPUTED", "RETIRED"])).orderBy(asc(limits.registryNumber), sql`${specificationVersions.versionNumber} desc`);
+  const publicStatuses: Array<"OPEN" | "PROVEN" | "DISPUTED" | "RETIRED"> = ["OPEN", "PROVEN", "DISPUTED", "RETIRED"];
+  const [rows, events] = await Promise.all([
+    db.select({ limit: limits, specification: specificationVersions, claim: claims }).from(limits).innerJoin(specificationVersions, eq(specificationVersions.limitId, limits.id)).leftJoin(claims, eq(claims.specificationVersionId, specificationVersions.id)).where(inArray(limits.status, publicStatuses)).orderBy(asc(limits.registryNumber), sql`${specificationVersions.versionNumber} desc`),
+    db.select({ limitId: timelineEvents.limitId, id: timelineEvents.id, eventType: timelineEvents.eventType, title: timelineEvents.title, description: timelineEvents.description, occurredAt: timelineEvents.occurredAt }).from(timelineEvents).innerJoin(limits, eq(limits.id, timelineEvents.limitId)).where(inArray(limits.status, publicStatuses)).orderBy(sql`${timelineEvents.occurredAt} desc`),
+  ]);
+  const eventsByLimit = new Map<string, typeof events>();
+  for (const event of events) eventsByLimit.set(event.limitId, [...(eventsByLimit.get(event.limitId) ?? []), event]);
   const grouped = new Map<string, { limit: typeof limits.$inferSelect; specification: typeof specificationVersions.$inferSelect; claimRows: Array<typeof claims.$inferSelect> }>();
   for (const row of rows) {
     const current = grouped.get(row.limit.id);
@@ -120,7 +126,7 @@ export async function listPublishedLimitsWithFrontiers() {
   }
   return [...grouped.values()].map(({ limit, specification, claimRows }) => {
     const serializedSpecification = serializeSpecification(specification);
-    const serializedClaims = claimRows.map((claim) => serializeClaim(claim));
-    return { limit, specification: serializedSpecification, claims: serializedClaims, frontier: deriveFrontier(limit.direction, serializedSpecification, serializedClaims) };
+    const serializedClaims = claimRows.filter((claim) => claim.status === "ACCEPTED").map((claim) => serializeClaim(claim));
+    return { limit, specification: serializedSpecification, claims: serializedClaims, timeline: eventsByLimit.get(limit.id) ?? [], frontier: deriveFrontier(limit.direction, serializedSpecification, serializedClaims) };
   });
 }
