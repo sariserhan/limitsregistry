@@ -90,12 +90,12 @@ This roadmap tracks the remaining work after the current research infrastructure
 
 ## 9. Validation and release
 
-- [ ] Apply and verify migration `0004_research-infrastructure.sql` in Docker.
-- [ ] Apply and verify the migration in Neon through the deployment workflow.
-- [ ] Add integration tests for all new tables and APIs.
-- [ ] Add authorization and draft/publication-isolation tests.
-- [ ] Run full TypeScript, lint, unit, integration, and production-build checks.
-- [ ] Run browser QA at 375, 768, 1440, and 1920 pixels.
-- [ ] Update `TODO_ROADMAP.md` when each item is genuinely complete.
-- [ ] Commit all changes locally.
-- [ ] Do not push without explicit authorization.
+- [x] Apply and verify migration `0004_research-infrastructure.sql` in Docker. (already applied as part of the shared 0000–0008 chain; confirmed present in `__drizzle_migrations`)
+- [ ] Apply and verify the migration in Neon through the deployment workflow. (requires the operator's own Neon `DATABASE_URL` and explicit authorization — not run by the agent; see `docs/PRODUCTION_RUNBOOK.md` § Deploy)
+- [x] Add integration tests for all new tables and APIs. (added `src/db/breakthroughs.integration.test.ts`; watchlists/bounties/dependencies/verification/source-ingestion/pgvector already covered)
+- [x] Add authorization and draft/publication-isolation tests. (added `src/auth/permissions.test.ts`; extended the `enforce_published_watchlist_event` DB trigger — previously CLAIM-only — to also guard `BREAKTHROUGH_EVENT`-sourced watchlist rows, migration `0013_extend-breakthrough-publication-guard.sql`, verified by the new breakthroughs integration test)
+- [x] Run full TypeScript, lint, unit, integration, and production-build checks. (all green: 31 test files / 126 tests, including every integration test against local Docker Postgres)
+- [x] Run browser QA at 375, 768, 1440, and 1920 pixels. (home, a canonical Limit page, `/bounties`, `/breakthroughs`, `/watchlists`, `/console/research`, `/console/research/bounties` — no console errors, no layout breaks)
+- [x] Update `TODO_ROADMAP.md` when each item is genuinely complete.
+- [x] Commit all changes locally.
+- [ ] Do not push without explicit authorization. (respected — nothing pushed)

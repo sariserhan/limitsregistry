@@ -92,6 +92,13 @@
       "when": 1787860569628,
       "tag": "0012_admin_dashboard_tables",
       "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1787860976700,
+      "tag": "0013_extend-breakthrough-publication-guard",
+      "breakpoints": true
     }
   ]
 }

@@ -29,18 +29,23 @@ export async function listRecentBreakthroughEvents(resultLimit = 50) {
 }
 
 async function persistBreakthroughEvents(events: BreakthroughDetection[], limitId: string, claimId: string, actorUserId: string) {
+  // One transaction per event: the watchlist_events row is guarded by a DB trigger
+  // (enforce_published_watchlist_event) that rejects publishing until the Claim is ACCEPTED and
+  // its Limit is public — a second, DB-level line of defense behind this function's own caller
+  // guard. Without the transaction, a trigger rejection here would still leave the immutable
+  // breakthroughEvents row committed, an orphan visible on the public Timeline with no
+  // corresponding published watchlist projection.
   for (const event of events) {
-    const occurredAt = new Date();
-    // Immutable historical record (breakthroughEvents) and the feed-visible projection of the
-    // same fact (watchlistEvents, publishedAt set immediately — this only ever runs for an
-    // already-ACCEPTED claim, so there's no draft state left to wait out before publishing).
-    const [row] = await db.insert(breakthroughEvents).values({ limitId, claimId, eventType: event.eventType, occurredAt }).returning();
-    // sourceEntityId is the breakthroughEvents row's own id, not claimId — a single ACCEPTED
-    // claim can produce more than one STRONGER_BOUND detection (e.g. both bounds tightened at
-    // once), and watchlistEvents has a unique index on (sourceEntityType, sourceEntityId,
-    // eventType) that would collide if they all pointed at the same claimId.
-    await db.insert(watchlistEvents).values({ limitId, eventType: event.eventType, sourceEntityType: "BREAKTHROUGH_EVENT", sourceEntityId: row.id, payload: { claimId, detail: event.detail }, publishedAt: occurredAt }).onConflictDoNothing();
-    await db.insert(auditLogs).values({ actorUserId, action: `BREAKTHROUGH_${event.eventType}`, entityType: "LIMIT", entityId: limitId, after: { breakthroughEventId: row.id, claimId, eventType: event.eventType, detail: event.detail } });
+    await db.transaction(async (tx) => {
+      const occurredAt = new Date();
+      const [row] = await tx.insert(breakthroughEvents).values({ limitId, claimId, eventType: event.eventType, occurredAt }).returning();
+      // sourceEntityId is the breakthroughEvents row's own id, not claimId — a single ACCEPTED
+      // claim can produce more than one STRONGER_BOUND detection (e.g. both bounds tightened at
+      // once), and watchlistEvents has a unique index on (sourceEntityType, sourceEntityId,
+      // eventType) that would collide if they all pointed at the same claimId.
+      await tx.insert(watchlistEvents).values({ limitId, eventType: event.eventType, sourceEntityType: "BREAKTHROUGH_EVENT", sourceEntityId: row.id, payload: { claimId, detail: event.detail }, publishedAt: occurredAt }).onConflictDoNothing();
+      await tx.insert(auditLogs).values({ actorUserId, action: `BREAKTHROUGH_${event.eventType}`, entityType: "LIMIT", entityId: limitId, after: { breakthroughEventId: row.id, claimId, eventType: event.eventType, detail: event.detail } });
+    });
   }
 }
 
