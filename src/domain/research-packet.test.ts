@@ -188,3 +188,17 @@ describe("research infrastructure contracts", () => {
     expect(toBibtex({ citeKey: "shannon1948", title: "A Mathematical Theory of Communication", authors: ["Claude Shannon"], year: 1948, venue: "Bell System Technical Journal", doi: "10.1002/j.1538-7305.1948.tb01338.x" })).toContain("@article{shannon1948");
   });
 });
+
+import { aiScalingResearchPackets } from "./research-packets";
+describe("AI scaling limit packets", () => {
+  it("keeps scaling claims scoped and draft-only", () => {
+    expect(aiScalingResearchPackets).toHaveLength(3);
+    for (const packet of aiScalingResearchPackets) {
+      expect(packet.limit.status).toBe("DRAFT");
+      expect(packet.registryReviewStatus).toBe("UNREVIEWED");
+      expect(packet.claims[0]?.status).toBe("DRAFT");
+      expect(packet.claims[0]?.evidenceIds.length).toBeGreaterThan(0);
+    }
+    expect(aiScalingResearchPackets[1]?.specification.constraints.implementation).toContain("IO-aware");
+  });
+});
