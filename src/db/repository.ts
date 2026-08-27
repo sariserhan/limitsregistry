@@ -60,3 +60,6 @@ export async function issueClaimCertificate(input: { claimId: string; certificat
   const snapshot = { certificateType: input.certificateType, claimNumber: record.claim.claimNumber, claimType: record.claim.claimType, relation: record.claim.relation, valueExact: record.claim.valueExact, specificationVersionId: record.spec.id, specificationVersion: record.spec.versionNumber, registryNumber: record.limit.registryNumber, evidenceIds: evidenceRows.map((item) => item.id).sort(), acceptedReviewCount: reviewRows.length };
   const { hashCertificateSnapshot, signCertificateHash } = await import("../certificates/hash"); const recordHash = hashCertificateSnapshot(snapshot); const signed = signCertificateHash(recordHash); const [certificate] = await db.insert(certificates).values({ certificateNumber: `CERT-${record.claim.claimNumber}`, certificateType: input.certificateType, claimId: input.claimId, recordHash, signature: signed.signature, signatureAlgorithm: signed.algorithm, snapshot, issuedByUserId: input.issuedByUserId }).returning(); return certificate;
 }
+
+
+export async function getCertificate(certificateNumber: string) { const rows = await db.select().from(certificates).where(eq(certificates.certificateNumber, certificateNumber)).limit(1); return rows[0] ?? null; }
