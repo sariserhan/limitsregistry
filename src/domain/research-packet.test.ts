@@ -33,7 +33,7 @@ describe("additional normalized research packets", () => {
   });
 });
 
-import { sortingNetworkResearchPackets, landauerResearchPacket, speedOfLightResearchPacket, minimalGenomeResearchPacket, minimalGenomeSizeResearchPacket } from "./research-packets";
+import { sortingNetworkResearchPackets, landauerResearchPacket, speedOfLightResearchPacket, minimalGenomeResearchPacket, minimalGenomeSizeResearchPacket, carnotResearchPacket, betzResearchPacket, shannonAwgnResearchPacket, noCloningResearchPacket } from "./research-packets";
 
 describe("sorting network research packets", () => {
   it("derives exact frontiers for 9 and 10 inputs", () => {
@@ -73,5 +73,20 @@ describe("canonical limit states", () => {
     expect(speedOfLightResearchPacket.claims[0]?.relation).toBe("=");
     expect(minimalGenomeSizeResearchPacket.limit.id).not.toBe(minimalGenomeResearchPacket.limit.id);
     expect(minimalGenomeSizeResearchPacket.claims[0]?.value).toEqual({ kind: "integer", value: 531560n });
+  });
+});
+
+
+describe("foundational scientific limits", () => {
+  it("represents parameterized theoretical bounds", () => {
+    for (const packet of [carnotResearchPacket, betzResearchPacket, shannonAwgnResearchPacket]) {
+      expect(packet.limit.limitKind).toBe("THEORETICAL_BOUND");
+      expect(packet.limit.canonicalStatus).toBe("EXACT");
+      expect(packet.claims[0]?.evidenceBasis).toContain("THEORETICAL_DERIVATION");
+    }
+  });
+  it("represents no-cloning as an impossibility result", () => {
+    expect(noCloningResearchPacket.limit.limitKind).toBe("IMPOSSIBILITY_RESULT");
+    expect(noCloningResearchPacket.claims[0]?.value).toEqual({ kind: "text", value: "impossible" });
   });
 });
