@@ -15,6 +15,7 @@ npm run dev
 ```
 
 The local database is PostgreSQL 16 in Docker. Production uses Neon PostgreSQL through the same `DATABASE_URL` and Drizzle schema.
+The database health check is available at `/api/health/db`. Production records should only be inserted after evidence and editorial review; the current UI fixtures remain intentionally separate from the empty production schema.
 
 ## Database workflow
 
