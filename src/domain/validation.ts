@@ -1,3 +1,4 @@
+import { compareExact } from "./frontier";
 import type { Claim, SpecificationVersion } from "./types";
 
 export type ValidationIssue = { code: string; message: string; severity: "ERROR" | "WARNING" };
@@ -12,3 +13,15 @@ export function validateClaim(claim: Claim, specification: SpecificationVersion)
 }
 
 export function validateClaimSet(claims: Claim[], specification: SpecificationVersion): ValidationIssue[] { return claims.flatMap((claim) => validateClaim(claim, specification)); }
+
+export function validateAcceptedClaimSet(claims: Claim[], specification: SpecificationVersion): ValidationIssue[] {
+  const issues = validateClaimSet(claims, specification);
+  const accepted = claims.filter((claim) => claim.status === "ACCEPTED" && claim.specificationVersionId === specification.id);
+  const lowers = accepted.filter((claim) => claim.relation === ">=" || claim.relation === ">");
+  const uppers = accepted.filter((claim) => claim.relation === "<=" || claim.relation === "<");
+  for (const lower of lowers) for (const upper of uppers) {
+    const comparison = compareExact(lower.value, upper.value);
+    if (comparison === 1 || (comparison === 0 && (lower.relation === ">" || upper.relation === "<"))) issues.push({ code: "CONTRADICTORY_ACCEPTED_CLAIMS", message: `${lower.id} and ${upper.id} describe an impossible interval.`, severity: "ERROR" });
+  }
+  return issues;
+}

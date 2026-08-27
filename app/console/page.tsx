@@ -5,6 +5,7 @@ import { listAllLimits, listCandidateClaims, listPapers, getAcceptedBoundsForLim
 import { detectContradiction, type BoundClaim } from "../../src/domain/contradiction";
 import type { CandidateClaimExtraction } from "../../src/lib/ai/extract-claims";
 import { addSource, decideCandidateClaim, runExtraction } from "./actions";
+import { EditorialWorkspace } from "./editorial-workspace";
 import "./console.css";
 
 export default async function ConsolePage() {
@@ -19,9 +20,10 @@ export default async function ConsolePage() {
   }
 
   return <main className="console-page">
-    <Link href="/">&larr; Back to Registry</Link>
+    <header><Link className="brand" href="/"><span className="brand-mark"><i /><i /><i /></span><span>Limits Registry</span></Link><Link href="/">Public Registry ↗</Link></header>
+    <p className="section-kicker">Internal editorial workspace</p>
     <h1>Research Console</h1>
-    <p className="lede">Signed in as {session.user.email} · {session.user.role}. Sources and AI extraction are draft-only — nothing here publishes without editorial review.</p>
+    <p className="lede">Signed in as {session.user.email} · {session.user.role}. Sources, AI extraction, and record drafting are draft-only — nothing here publishes without editorial review.</p>
 
     <section>
       <h2>Add a source</h2>
@@ -74,5 +76,7 @@ export default async function ConsolePage() {
       })}
       {pending.length === 0 && <p>Nothing awaiting review.</p>}
     </section>
+
+    <EditorialWorkspace />
   </main>;
 }

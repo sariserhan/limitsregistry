@@ -2,6 +2,26 @@ import type { Claim, Direction, ExactValue, LimitStatus, SpecificationVersion } 
 
 export type Frontier = { lowerBound: ExactValue | null; upperBound: ExactValue | null; achievable: ExactValue | null; gap: string; status: LimitStatus; explanation: string[]; issues: string[] };
 
+export function compareExact(left: ExactValue, right: ExactValue): -1 | 0 | 1 | null {
+  if (left.kind === "text" || right.kind === "text") return null;
+  const ln = left.kind === "integer" ? left.value : left.numerator;
+  const ld = left.kind === "integer" ? 1n : left.denominator;
+  const rn = right.kind === "integer" ? right.value : right.numerator;
+  const rd = right.kind === "integer" ? 1n : right.denominator;
+  const difference = ln * rd - rn * ld;
+  return difference < 0n ? -1 : difference > 0n ? 1 : 0;
+}
+
+export function relationSatisfied(value: ExactValue, relation: Claim["relation"], bound: ExactValue): boolean | null {
+  const comparison = compareExact(value, bound);
+  if (comparison === null) return null;
+  if (relation === "<") return comparison < 0;
+  if (relation === "<=") return comparison <= 0;
+  if (relation === ">") return comparison > 0;
+  if (relation === ">=") return comparison >= 0;
+  return comparison === 0;
+}
+
 function toNumber(value: ExactValue | null): number | null {
   if (!value) return null;
   if (value.kind === "integer") return Number(value.value);
@@ -11,8 +31,8 @@ function toNumber(value: ExactValue | null): number | null {
 
 function display(value: ExactValue | null): string { if (!value) return "?"; if (value.kind === "integer") return value.value.toString(); if (value.kind === "rational") return `${value.numerator}/${value.denominator}`; return value.value; }
 
-function betterLower(current: ExactValue | null, next: ExactValue): ExactValue { if (!current) return next; return (toNumber(next) ?? -Infinity) > (toNumber(current) ?? -Infinity) ? next : current; }
-function betterUpper(current: ExactValue | null, next: ExactValue): ExactValue { if (!current) return next; return (toNumber(next) ?? Infinity) < (toNumber(current) ?? Infinity) ? next : current; }
+function betterLower(current: ExactValue | null, next: ExactValue): ExactValue { if (!current) return next; return compareExact(next, current) === 1 ? next : current; }
+function betterUpper(current: ExactValue | null, next: ExactValue): ExactValue { if (!current) return next; return compareExact(next, current) === -1 ? next : current; }
 
 export function deriveFrontier(direction: Direction, specification: SpecificationVersion, claims: Claim[]): Frontier {
   const active = claims.filter((claim) => claim.specificationVersionId === specification.id && claim.status === "ACCEPTED");
@@ -30,12 +50,13 @@ export function deriveFrontier(direction: Direction, specification: Specificatio
 
   const lower = toNumber(lowerBound);
   const upper = toNumber(upperBound);
-  const inconsistent = lower !== null && upper !== null && lower > upper;
+  const comparison = lowerBound && upperBound ? compareExact(lowerBound, upperBound) : null;
+  const inconsistent = comparison === 1;
   if (inconsistent) {
     issues.push("LOWER_BOUND_EXCEEDS_UPPER_BOUND");
     explanation.push("Accepted Claims produce an impossible frontier and require editorial review.");
   }
-  const closed = !inconsistent && lower !== null && upper !== null && lower === upper;
+  const closed = !inconsistent && comparison === 0;
   if (lowerBound) explanation.push(`Strongest accepted lower bound: ${display(lowerBound)}.`);
   if (upperBound) explanation.push(`Strongest accepted upper bound: ${display(upperBound)}.`);
   if (!lowerBound && !upperBound) explanation.push("No accepted numeric bounds exist for this specification.");

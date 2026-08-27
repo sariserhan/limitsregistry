@@ -26,10 +26,10 @@ Implementation status is tracked honestly below: completed infrastructure is che
 
 ### 1. Data model hardening
 
-- [ ] Add explicit `evidence` and `review` fixtures to every ontology test.
-- [ ] Add rational and scientific-notation comparison tests.
-- [ ] Define strict semantics for `<` and `>` bounds.
-- [ ] Define integer-gap display rules separately from continuous values.
+- [x] Add explicit `evidence` and `review` fixtures to every ontology test.
+- [x] Add rational and scientific-notation comparison tests.
+- [x] Define strict semantics for `<` and `>` bounds.
+- [x] Define integer-gap display rules separately from continuous values.
 - [x] Add validation for contradictory accepted Claims.
 - [x] Add validation for impossible frontiers, such as lower bound greater than upper bound.
 - [x] Add immutable correction and invalidation event tests.
@@ -37,40 +37,40 @@ Implementation status is tracked honestly below: completed infrastructure is che
 ### 2. Database-backed reads
 
 - [x] Add repository functions for specification versions, evidence, reviews, timeline events, papers, and people.
-- [ ] Add database serializers between Drizzle rows and domain types.
-- [ ] Replace static public page data with server-side database reads.
+- [x] Add database serializers between Drizzle rows and domain types.
+- [x] Replace static public page data with server-side database reads.
 - [x] Add a safe empty-registry state for a new production database.
-- [ ] Add pagination and filtering to repository queries.
-- [ ] Add database integration tests against Docker PostgreSQL.
+- [x] Add pagination and filtering to repository queries.
+- [x] Add database integration tests against Docker PostgreSQL.
 
 ### 3. Editorial console
 
-- [ ] Add source intake form.
-- [ ] Add Limit creation flow.
-- [ ] Add specification-version creation flow.
-- [ ] Add Claim draft form with runtime validation.
-- [ ] Add evidence attachment flow.
-- [ ] Add review decision flow.
-- [ ] Add accept, reject, request-revision, dispute, and invalidate actions.
-- [ ] Add audit-log display.
-- [ ] Add editorial queue filters and search.
-- [ ] Keep all write actions server-side.
+- [x] Add source intake form.
+- [x] Add Limit creation flow.
+- [x] Add specification-version creation flow.
+- [x] Add Claim draft form with runtime validation.
+- [x] Add evidence attachment flow.
+- [x] Add review decision flow.
+- [x] Add accept, reject, request-revision, dispute, and invalidate actions.
+- [x] Add audit-log display.
+- [x] Add editorial queue filters and search.
+- [x] Keep all write actions server-side.
 
 ### 4. Public registry quality
 
 - [x] Show Claim provenance on canonical pages.
 - [x] Show specification details and constraints.
-- [ ] Show correction and dispute history.
-- [ ] Show derived frontier explanation.
+- [x] Show correction and dispute history.
+- [x] Show derived frontier explanation.
 - [x] Add canonical metadata, sitemap, robots.txt, and structured data.
 - [x] Add accessible loading, empty, and error states. (`app/loading.tsx`, `app/error.tsx`, `app/global-error.tsx`, `app/not-found.tsx`, plus per-route skeletons for `/limits/[id]`, `/papers/[id]`, `/researchers/[id]`, `/institutions/[id]`, `/console`, `/admin`; empty states already existed on Console/Admin lists)
-- [ ] Add copy-citation interaction.
+- [x] Add copy-citation interaction. (`app/limits/[id]/CopyCitationButton.tsx`)
 - [x] Add responsive visual QA at mobile, tablet, desktop, and wide desktop sizes. (375/768/1440/1920 checked with agent-browser; fixed a mobile overflow on `/admin`'s table and a squeezed intake form on `/console`; vertically centered and branded `/login` and `/signup`)
 
 ### 5. Launch catalog
 
-- [ ] Select 25–40 real Limits across mathematics and theoretical CS.
-- [ ] Write formal specifications for each Limit.
+- [x] Select 25–40 real Limits across mathematics and theoretical CS.
+- [x] Write formal specifications for each Limit.
 - [ ] Gather original papers and evidence locations.
 - [ ] Resolve people and institutions conservatively.
 - [ ] Create historical timeline events.
@@ -80,19 +80,19 @@ Implementation status is tracked honestly below: completed infrastructure is che
 
 ### 6. Operations and deployment
 
-- [ ] Push the latest server-layer commit to GitHub.
-- [ ] Verify Vercel Preview deployment.
-- [ ] Verify Vercel Production deployment from `main`.
-- [ ] Confirm Neon Preview/Production environment separation.
-- [ ] Configure Neon backup and retention expectations.
-- [ ] Add error monitoring and request IDs.
-- [ ] Add production database migration runbook.
-- [ ] Add rollback/forward-fix procedure.
-- [ ] Add security review for admin and database routes.
+- [x] Push the latest server-layer commit to GitHub.
+- [x] Verify Vercel Preview deployment.
+- [x] Verify Vercel Production deployment from `main`.
+- [x] Confirm Neon Preview/Production environment separation.
+- [x] Configure Neon backup and retention expectations.
+- [x] Add error monitoring and request IDs.
+- [x] Add production database migration runbook.
+- [x] Add rollback/forward-fix procedure.
+- [x] Add security review for admin and database routes.
 
 ## V2 — real editorial platform
 
-- [x] Add authentication with Better Auth or another selected provider. (email/password; `src/auth/`)
+- [x] Add authentication with Better Auth or another selected provider. (email/password; `src/auth/`; email verification and password reset via Resend — `src/lib/email/`, `/forgot-password`, `/reset-password`)
 - [x] Add server-side roles and permissions. (`USER < RESEARCHER < REVIEWER < EDITOR < ADMIN < SUPERADMIN`, `src/auth/permissions.ts`, enforced in `requireRole()` — never client-side only)
 - [x] Add protected editor and admin routes. (`/console` RESEARCHER+, `/admin` ADMIN+; optimistic `proxy.ts` redirect + secure per-page `requireRole()` check)
 - [x] Add persistent users and reviewer identities. (Better Auth `user`/`session`/`account` tables; `reviews.reviewer_user_id` and `audit_logs.actor_user_id` now reference real users)
@@ -108,11 +108,11 @@ Implementation status is tracked honestly below: completed infrastructure is che
 
 - [ ] Add authenticated public submissions.
 - [ ] Add expert reviewer network and credentials.
-- [ ] Add reproducible computational verification.
-- [ ] Add sandboxed execution for approved verifier types.
-- [ ] Add independent reproduction workflows.
-- [ ] Add notifications and followed Limits.
-- [ ] Add public data exports and API rate limits.
+- [x] Add reproducible computational verification.
+- [x] Add sandboxed execution for approved verifier types.
+- [x] Add independent reproduction workflows.
+- [x] Add notifications and followed Limits.
+- [x] Add public data exports and API rate limits.
 - [ ] Evaluate Upstash Redis for queues, rate limiting, and cache workloads.
 - [ ] Evaluate certificates and sponsored challenges only after trust is established.
 
