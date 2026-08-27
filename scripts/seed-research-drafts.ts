@@ -4,7 +4,7 @@ import postgres from "postgres";
 import { drizzle } from "drizzle-orm/postgres-js";
 import { and, eq } from "drizzle-orm";
 import * as schema from "../src/db/schema";
-import { researchedDraftPackets } from "../src/domain/research-packets";
+import { researchedDraftPackets, aiScalingResearchPackets } from "../src/domain/research-packets";
 
 const url = process.env.DATABASE_URL;
 if (!url) throw new Error("DATABASE_URL is required.");
@@ -14,7 +14,7 @@ const evidenceType = (type: string): "PAPER" | "EXPERIMENT" | "REPRODUCTION" | "
 
 async function run() {
   let imported = 0;
-  for (const packet of researchedDraftPackets) {
+  for (const packet of [...researchedDraftPackets, ...aiScalingResearchPackets]) {
     const existing = await db.select({ id: schema.limits.id }).from(schema.limits).where(eq(schema.limits.registryNumber, packet.limit.id)).limit(1);
     if (existing[0]) continue;
     const [limit] = await db.insert(schema.limits).values({ registryNumber: packet.limit.id, slug: packet.limit.id.toLowerCase(), title: packet.limit.title, summary: packet.limit.summary, category: packet.limit.category, direction: packet.limit.direction, metricName: "specified quantity", status: "DRAFT" }).returning();
