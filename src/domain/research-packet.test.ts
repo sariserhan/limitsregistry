@@ -131,3 +131,14 @@ describe("additional AI research packets", () => {
     expect(aiTrainingHardnessResearchPacket.claims[0]?.value).toEqual({ kind: "text", value: "NP-complete" });
   });
 });
+
+import { aiVcDimensionResearchPacket, aiDepthSeparationResearchPacket, aiNoFreeLunchResearchPacket, aiRobustnessAccuracyResearchPacket } from "./research-packets";
+
+describe("extended AI research packets", () => {
+  it("captures capacity, depth, impossibility, and robustness limits", () => {
+    expect(aiVcDimensionResearchPacket.claims[0]?.value).toEqual({ kind: "text", value: "O(WL log W)" });
+    expect(aiDepthSeparationResearchPacket.limit.limitKind).toBe("THEORETICAL_BOUND");
+    expect(aiNoFreeLunchResearchPacket.limit.limitKind).toBe("IMPOSSIBILITY_RESULT");
+    expect(aiRobustnessAccuracyResearchPacket.limit.direction).toBe("MAXIMIZE");
+  });
+});
