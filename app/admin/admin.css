@@ -49,6 +49,10 @@
 .admin-inbox-reply p { color:var(--muted); }
 
 .admin-gallery-frame { border:1px solid var(--line); background:#fff; }
+.admin-gallery-item summary { cursor:pointer; font:600 15px 'Space Grotesk',sans-serif; list-style:none; }
+.admin-gallery-item summary::-webkit-details-marker { display:none; }
+.admin-gallery-item summary::before { content:"+ "; color:var(--faint); font:12px 'DM Mono',monospace; }
+.admin-gallery-item[open] summary::before { content:"− "; }
 
 @media (max-width:640px) {
   .admin-shell { padding:48px 24px 70px; }
