@@ -6,7 +6,7 @@ import { listAllLimits, listCandidateClaims, listPapers, getAcceptedBoundsForLim
 import { listSubmissions } from "../../src/db/repository.submissions";
 import { detectContradiction, type BoundClaim } from "../../src/domain/contradiction";
 import type { CandidateClaimExtraction } from "../../src/lib/ai/extract-claims";
-import { addSource, decideCandidateClaim, decideSubmission, runExtraction } from "./actions";
+import { addSource, decideCandidateClaim, decideSubmission, runExtraction, extractPdfCandidateClaims } from "./actions";
 import { EditorialWorkspace } from "./editorial-workspace";
 import "./console.css";
 
@@ -57,6 +57,7 @@ export default async function ConsolePage() {
             {limits.map((l) => <option key={l.id} value={l.id}>{l.registryNumber} — {l.title}</option>)}
           </select>
           <button type="submit">Extract candidate claims</button>
+          {p.arxivId && <form action={extractPdfCandidateClaims}><input type="hidden" name="paperId" value={p.id} /><input type="hidden" name="limitId" value="" /><button type="submit">Extract from arXiv PDF</button></form>}
         </form>}
       </div>)}
       {papers.length === 0 && <p>No sources yet.</p>}
