@@ -108,11 +108,11 @@ Implementation status is tracked honestly below: completed infrastructure is che
 
 - [ ] Add authenticated public submissions.
 - [ ] Add expert reviewer network and credentials.
-- [ ] Add reproducible computational verification.
-- [ ] Add sandboxed execution for approved verifier types.
-- [ ] Add independent reproduction workflows.
-- [ ] Add notifications and followed Limits.
-- [ ] Add public data exports and API rate limits.
+- [x] Add reproducible computational verification.
+- [x] Add sandboxed execution for approved verifier types.
+- [x] Add independent reproduction workflows.
+- [x] Add notifications and followed Limits.
+- [x] Add public data exports and API rate limits.
 - [ ] Evaluate Upstash Redis for queues, rate limiting, and cache workloads.
 - [ ] Evaluate certificates and sponsored challenges only after trust is established.
 
