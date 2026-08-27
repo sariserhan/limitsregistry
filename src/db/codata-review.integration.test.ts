@@ -12,6 +12,10 @@ describe.skipIf(!sql)("CODATA bulk editorial review integration",()=>{
     const reviewerA=randomUUID(),reviewerB=randomUUID(),editor=randomUUID();
     const userIds=[reviewerA,reviewerB,editor];
     try{
+      // reviews.reviewer_user_id and audit_logs.actor_user_id are FK-constrained to user.id — these
+      // three identities need real rows before recordCodataBatchReview/publishReviewedCodataBatch
+      // can insert against them.
+      await sql!`insert into "user" ${sql!(userIds.map((id)=>({id,name:`Fixture ${id.slice(0,8)}`,email:`${id}@codata-review-fixture.test`,email_verified:true,role:"EDITOR"})))}`;
       await expect(publishReviewedCodataBatch({actorUserId:editor,rationale:"Attempted publication before the required independent review threshold."})).rejects.toThrow("two independent");
       expect((await recordCodataBatchReview({reviewerUserId:reviewerA,rationale:"Inspected the frozen NIST source, quantities, values, uncertainties, units, and generated specifications."})).reviewed).toBe(200);
       await expect(recordCodataBatchReview({reviewerUserId:reviewerA,rationale:"A duplicate review by the same identity must not satisfy independent review requirements."})).rejects.toThrow("already reviewed");
@@ -30,6 +34,7 @@ describe.skipIf(!sql)("CODATA bulk editorial review integration",()=>{
       await sql!`delete from timeline_events where event_type='REGISTRY_PUBLICATION' and metadata->>'batch'='CODATA_2022'`;
       await sql!`update claims c set status='DRAFT' from limit_spec_versions s,limits l where c.specification_version_id=s.id and s.limit_id=l.id and l.registry_number like 'LR-001%'`;
       await sql!`update limits set status='DRAFT',published_at=null where registry_number like 'LR-001%'`;
+      await sql!`delete from "user" where id in ${sql!(userIds)}`;
     }
   });
 });
