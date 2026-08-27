@@ -21,7 +21,7 @@ export default function Home({ initialLimits, initialClaims }: BrowseClientProps
   const claims = initialClaims;
   const [selectedId, setSelectedId] = useState(limits[4]?.id ?? limits[0]?.id);
   const [query, setQuery] = useState("");
-  const [consoleMode, setConsoleMode] = useState(false);
+  const consoleMode = false;
   const [category, setCategory] = useState("All categories");
   const selected = limits.find((limit) => limit.id === selectedId) ?? limits[0];
   const filtered = useMemo(() => limits.filter((limit) => {
@@ -34,7 +34,7 @@ export default function Home({ initialLimits, initialClaims }: BrowseClientProps
     <header className="topbar">
       <a className="brand" href="#top" aria-label="Limits Registry home"><BrandIcon className="brand-mark" /><span>Limits Registry</span></a>
       <nav className="topnav" aria-label="Primary navigation"><a className="active" href="#registry">Registry</a><a href="#open">Open Limits</a><a href="/search">Search</a><a href="/dependencies">Graph</a><a href="/bounties">Bounties</a><a href="/watchlists">Watchlists</a><a href="#about">About</a></nav>
-      <button className={`console-switch ${consoleMode ? "selected" : ""}`} onClick={() => setConsoleMode(!consoleMode)}><span className="console-dot" />{consoleMode ? "Public Registry" : "Research Console"}<ChevronIcon /></button>
+      <a className="console-switch" href="/console"><span className="console-dot" />Research Console<ChevronIcon /></a>
     </header>
 
     {consoleMode ? <section className="console-view" id="top">
