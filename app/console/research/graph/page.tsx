@@ -1,0 +1,5 @@
+import Link from "next/link";
+import { requireRole } from "../../../../src/auth/session";
+import { listDependencies } from "../../../../src/db/repository.research";
+import "../../console.css";
+export default async function GraphPage() { await requireRole("RESEARCHER"); const edges = await listDependencies(); const nodes = [...new Set(edges.flatMap(e => [e.sourceLimitId, e.targetLimitId]))]; return <main className="console-page"><header><Link className="brand" href="/console/research">← Research Infrastructure</Link></header><p className="section-kicker">Knowledge graph</p><h1>Limit dependencies</h1><p className="lede">Only draft and accepted links are shown to researchers; links do not imply a published mathematical reduction until reviewed.</p><section><h2>Graph ({nodes.length} records · {edges.length} links)</h2>{edges.length ? edges.map(e => <article className="candidate-card" key={e.id}><strong>{e.sourceLimitId} → {e.targetLimitId}</strong><div>{e.relation} · {e.reviewStatus}</div>{e.evidenceClaimId && <small>Evidence Claim: {e.evidenceClaimId}</small>}</article>) : <p>No dependency links submitted yet.</p>}</section></main>; }
