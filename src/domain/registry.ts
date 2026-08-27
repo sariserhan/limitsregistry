@@ -1,5 +1,5 @@
 export type BrowseLimit = {
-  id: string; title: string; category: string; status: "OPEN" | "PROVEN"; direction: "MAXIMIZE" | "MINIMIZE"; summary: string;
+  id: string; title: string; category: string; status: "OPEN" | "PROVEN" | "DISPUTED" | "RETIRED"; direction: "MAXIMIZE" | "MINIMIZE"; summary: string;
   achievable: string; bound: string; gap: string; claims: number; papers: number;
 };
 

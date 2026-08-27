@@ -15,7 +15,7 @@ export async function getWeeklyDigestData(): Promise<WeeklyDigestData> {
 
   const newlyPublished = await db.select({ registryNumber: limits.registryNumber, title: limits.title })
     .from(limits)
-    .where(and(inArray(limits.status, ["OPEN", "PROVEN"]), gte(limits.publishedAt, since)));
+    .where(and(inArray(limits.status, ["OPEN", "PROVEN", "DISPUTED", "RETIRED"]), gte(limits.publishedAt, since)));
 
   const acceptedClaimRows = await db.select({ claimNumber: claims.claimNumber, registryNumber: limits.registryNumber, title: limits.title })
     .from(claims)

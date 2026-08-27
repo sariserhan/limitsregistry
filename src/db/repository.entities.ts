@@ -6,7 +6,7 @@ import { claimPapers, claimPeople, claims, institutions, limits, papers, people,
 // These pages are public, unauthenticated reads — never expose a claim that hasn't
 // cleared review, or one whose Limit hasn't been published, no matter how it's reached.
 const PUBLIC_CLAIM_STATUS = eq(claims.status, "ACCEPTED");
-const PUBLIC_LIMIT_STATUS = inArray(limits.status, ["OPEN", "PROVEN"]);
+const PUBLIC_LIMIT_STATUS = inArray(limits.status, ["OPEN", "PROVEN", "DISPUTED", "RETIRED"]);
 
 export async function getPaper(id: string) {
   const rows = await db.select().from(papers).where(eq(papers.id, id)).limit(1);

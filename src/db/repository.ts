@@ -7,8 +7,8 @@ import { serializeClaim, serializeEvidence, serializeLimit, serializeSpecificati
 import { deriveFrontier } from "../domain/frontier";
 import { detectAndRecordBreakthroughs } from "./repository.breakthroughs";
 
-export const listPublishedLimits = unstable_cache(async () => db.select().from(limits).where(inArray(limits.status, ["OPEN", "PROVEN"])).orderBy(asc(limits.registryNumber)), ["published-limits"], { revalidate: 60, tags: ["published-limits"] });
-export async function getPublishedLimit(registryNumber: string) { const read = unstable_cache(async () => { const rows = await db.select().from(limits).where(and(inArray(limits.status, ["OPEN", "PROVEN"]), eq(limits.registryNumber, registryNumber))).limit(1); return rows[0] ?? null; }, ["published-limit", registryNumber], { revalidate: 60, tags: ["published-limits", `published-limit-${registryNumber}`] }); return read(); }
+export const listPublishedLimits = unstable_cache(async () => db.select().from(limits).where(inArray(limits.status, ["OPEN", "PROVEN", "DISPUTED", "RETIRED"])).orderBy(asc(limits.registryNumber)), ["published-limits"], { revalidate: 60, tags: ["published-limits"] });
+export async function getPublishedLimit(registryNumber: string) { const read = unstable_cache(async () => { const rows = await db.select().from(limits).where(and(inArray(limits.status, ["OPEN", "PROVEN", "DISPUTED", "RETIRED"]), eq(limits.registryNumber, registryNumber))).limit(1); return rows[0] ?? null; }, ["published-limit", registryNumber], { revalidate: 60, tags: ["published-limits", `published-limit-${registryNumber}`] }); return read(); }
 export async function getLimitClaims(limitId: string) { const specs = await db.select({ id: specificationVersions.id }).from(specificationVersions).where(eq(specificationVersions.limitId, limitId)); if (specs.length === 0) return []; return db.select({ claim: claims, evidence: evidence }).from(claims).innerJoin(claimEvidence, eq(claimEvidence.claimId, claims.id)).innerJoin(evidence, eq(evidence.id, claimEvidence.evidenceId)).where(eq(claims.specificationVersionId, specs[0].id)).orderBy(asc(claims.createdAt)); }
 export async function getDatabaseHealth() { const result = await db.execute<{ ok: number }>(sql`select 1 as ok`); return result[0]?.ok === 1; }
 
@@ -46,7 +46,7 @@ export async function getPublishedLimitWithFrontier(registryNumber: string) {
 
 export async function searchPublishedLimits(query: string, resultLimit = 10) {
   const pattern = `%${query}%`;
-  return db.select().from(limits).where(and(inArray(limits.status, ["OPEN", "PROVEN"]), sql`(${limits.title} ilike ${pattern} or ${limits.category} ilike ${pattern} or ${limits.summary} ilike ${pattern})`)).limit(resultLimit);
+  return db.select().from(limits).where(and(inArray(limits.status, ["OPEN", "PROVEN", "DISPUTED", "RETIRED"]), sql`(${limits.title} ilike ${pattern} or ${limits.category} ilike ${pattern} or ${limits.summary} ilike ${pattern})`)).limit(resultLimit);
 }
 export async function listEditorialQueue(query = "") {
   const pattern = `%${query}%`;
@@ -111,7 +111,7 @@ export async function getCertificate(certificateNumber: string) { const rows = a
 
 /** One cached read for the public Browse surface; prevents database records from inheriting launch-fixture frontiers. */
 export async function listPublishedLimitsWithFrontiers() {
-  const rows = await db.select({ limit: limits, specification: specificationVersions, claim: claims }).from(limits).innerJoin(specificationVersions, eq(specificationVersions.limitId, limits.id)).leftJoin(claims, eq(claims.specificationVersionId, specificationVersions.id)).where(inArray(limits.status, ["OPEN", "PROVEN"])).orderBy(asc(limits.registryNumber), sql`${specificationVersions.versionNumber} desc`);
+  const rows = await db.select({ limit: limits, specification: specificationVersions, claim: claims }).from(limits).innerJoin(specificationVersions, eq(specificationVersions.limitId, limits.id)).leftJoin(claims, eq(claims.specificationVersionId, specificationVersions.id)).where(inArray(limits.status, ["OPEN", "PROVEN", "DISPUTED", "RETIRED"])).orderBy(asc(limits.registryNumber), sql`${specificationVersions.versionNumber} desc`);
   const grouped = new Map<string, { limit: typeof limits.$inferSelect; specification: typeof specificationVersions.$inferSelect; claimRows: Array<typeof claims.$inferSelect> }>();
   for (const row of rows) {
     const current = grouped.get(row.limit.id);
