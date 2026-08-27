@@ -3,6 +3,7 @@ import { and, asc, eq, inArray, sql } from "drizzle-orm";
 import { db } from "./client";
 import { claimEvidence, claims, evidence, limits, specificationVersions, reviews, auditLogs, certificates } from "./schema";
 import { serializeClaim, serializeEvidence, serializeLimit, serializeSpecification } from "./serializers";
+import { deriveFrontier } from "../domain/frontier";
 
 export const listPublishedLimits = unstable_cache(async () => db.select().from(limits).where(inArray(limits.status, ["OPEN", "PROVEN"])).orderBy(asc(limits.registryNumber)), ["published-limits"], { revalidate: 60, tags: ["published-limits"] });
 export async function getPublishedLimit(registryNumber: string) { const read = unstable_cache(async () => { const rows = await db.select().from(limits).where(and(inArray(limits.status, ["OPEN", "PROVEN"]), eq(limits.registryNumber, registryNumber))).limit(1); return rows[0] ?? null; }, ["published-limit", registryNumber], { revalidate: 60, tags: ["published-limits", `published-limit-${registryNumber}`] }); return read(); }
@@ -27,6 +28,23 @@ export async function getLimitResearchData(limitId: string) {
     return { specification: serializeSpecification(spec), claims: rows.map(({ claim }) => serializeClaim(claim)), evidence: rows.flatMap(({ evidence: item }) => item ? [serializeEvidence(item)] : []) };
   }, ["limit-research", limitId], { revalidate: 60, tags: [`limit-research-${limitId}`] });
   return read();
+}
+
+// getPublishedDomainLimit's serialized shape overwrites `.id` with the registry number
+// (serializeLimit maps id: row.registryNumber) — passing that into getLimitResearchData(limitId)
+// compares a uuid column against a registry-number string and silently returns no specification.
+// This uses the raw row (real DB uuid still on `.id`) so the frontier is actually computed.
+export async function getPublishedLimitWithFrontier(registryNumber: string) {
+  const limit = await getPublishedLimit(registryNumber);
+  if (!limit) return null;
+  const { specification, claims: claimsData } = await getLimitResearchData(limit.id);
+  const frontier = specification ? deriveFrontier(limit.direction, specification, claimsData) : null;
+  return { limit, specification, claims: claimsData, frontier };
+}
+
+export async function searchPublishedLimits(query: string, resultLimit = 10) {
+  const pattern = `%${query}%`;
+  return db.select().from(limits).where(and(inArray(limits.status, ["OPEN", "PROVEN"]), sql`(${limits.title} ilike ${pattern} or ${limits.category} ilike ${pattern} or ${limits.summary} ilike ${pattern})`)).limit(resultLimit);
 }
 export async function listEditorialQueue(query = "") {
   const pattern = `%${query}%`;

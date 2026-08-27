@@ -1,5 +1,4 @@
-import { getPublishedLimit, getLimitResearchData } from "../../../../src/db/repository";
-import { deriveFrontier } from "../../../../src/domain/frontier";
+import { getPublishedLimitWithFrontier } from "../../../../src/db/repository";
 
 type PageProps = { params: Promise<{ registryNumber: string }> };
 
@@ -45,14 +44,11 @@ export async function GET(_request: Request, { params }: PageProps) {
   const { registryNumber: rawParam } = await params;
   const registryNumber = rawParam.replace(/\.svg$/i, "");
 
-  const limit = await getPublishedLimit(registryNumber);
+  const result = await getPublishedLimitWithFrontier(registryNumber);
   // Always 200 with a valid SVG, even for "not found" — an <img> in a README should never
   // render as a broken-image icon just because some fetchers only render 2xx bodies.
-  if (!limit) return svgResponse(renderBadge("limits registry", "not found", GRAY));
+  if (!result) return svgResponse(renderBadge("limits registry", "not found", GRAY));
+  if (!result.frontier) return svgResponse(renderBadge(result.limit.registryNumber, "no specification", GRAY));
 
-  const { specification, claims } = await getLimitResearchData(limit.id);
-  if (!specification) return svgResponse(renderBadge(limit.registryNumber, "no specification", GRAY));
-
-  const frontier = deriveFrontier(limit.direction, specification, claims);
-  return svgResponse(renderBadge(limit.registryNumber, frontier.gap, COLORS[frontier.status] ?? GRAY));
+  return svgResponse(renderBadge(result.limit.registryNumber, result.frontier.gap, COLORS[result.frontier.status] ?? GRAY));
 }
