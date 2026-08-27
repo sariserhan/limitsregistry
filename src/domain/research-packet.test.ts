@@ -156,3 +156,28 @@ describe("computation, coding, cloud, and network research packets", () => {
     expect(apiRateResearchPacket.specification.constraints.provider).toBe("named provider");
   });
 });
+
+import { researchedDraftPackets, researchQueueCandidates } from "./research-packets";
+
+describe("researched draft ingestion batch", () => {
+  it("keeps every researched candidate draft-only and unreviewed", () => {
+    expect(researchedDraftPackets.length).toBeGreaterThanOrEqual(20);
+    for (const packet of researchedDraftPackets) {
+      expect(packet.limit.status).toBe("DRAFT");
+      expect(packet.publicationState).toBe("DRAFT");
+      expect(packet.registryReviewStatus).toBe("UNREVIEWED");
+      expect(packet.independentRegistryReviews).toBe(0);
+      expect(packet.ingestionReadiness).toBe("READY_FOR_EDITORIAL_REVIEW");
+      expect(packet.claims.every((claim) => claim.status === "DRAFT")).toBe(true);
+      expect(packet.claims.every((claim) => claim.registryReviewStatus === "UNREVIEWED")).toBe(true);
+      expect(packet.claims.every((claim) => claim.evidenceIds.length > 0)).toBe(true);
+    }
+  });
+
+  it("keeps unresolved specifications in the research queue", () => {
+    expect(researchQueueCandidates.length).toBe(13);
+    expect(researchQueueCandidates.every((candidate) => candidate.publicationState === "DRAFT")).toBe(true);
+    expect(researchQueueCandidates.every((candidate) => candidate.ingestionReadiness === "RESEARCH_QUEUE")).toBe(true);
+    expect(researchQueueCandidates.every((candidate) => candidate.registryReviewStatus === "UNREVIEWED")).toBe(true);
+  });
+});

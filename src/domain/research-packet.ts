@@ -1,11 +1,16 @@
 import type { Claim, Evidence, Limit, RegistryReviewStatus, ScientificStatus, SpecificationVersion } from "./types";
 
+export type IngestionReadiness = "READY_FOR_EDITORIAL_REVIEW" | "READY_WITH_SPEC_CAVEAT" | "RESEARCH_QUEUE";
+
 export type ResearchPacket = {
   limit: Limit;
   specification: SpecificationVersion;
   claims: Claim[];
   evidence: Evidence[];
   registryReviewStatus: RegistryReviewStatus;
+  publicationState?: "DRAFT";
+  ingestionReadiness?: IngestionReadiness;
+  independentRegistryReviews?: number;
 };
 
 const specification: SpecificationVersion = {
