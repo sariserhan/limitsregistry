@@ -1,6 +1,6 @@
 import type { Claim, Direction, ExactValue, LimitStatus, SpecificationVersion } from "./types";
 
-export type Frontier = { lowerBound: ExactValue | null; upperBound: ExactValue | null; achievable: ExactValue | null; gap: string; status: LimitStatus; explanation: string[] };
+export type Frontier = { lowerBound: ExactValue | null; upperBound: ExactValue | null; achievable: ExactValue | null; gap: string; status: LimitStatus; explanation: string[]; issues: string[] };
 
 function toNumber(value: ExactValue | null): number | null {
   if (!value) return null;
@@ -20,6 +20,7 @@ export function deriveFrontier(direction: Direction, specification: Specificatio
   let upperBound: ExactValue | null = null;
   let achievable: ExactValue | null = null;
   const explanation: string[] = [];
+  const issues: string[] = [];
 
   for (const claim of active) {
     if (claim.relation === ">=" || claim.relation === ">") lowerBound = betterLower(lowerBound, claim.value);
@@ -27,10 +28,16 @@ export function deriveFrontier(direction: Direction, specification: Specificatio
     if (claim.claimType === "CONSTRUCTION" || claim.claimType === "EXACT_VALUE") achievable = direction === "MAXIMIZE" ? betterLower(achievable, claim.value) : betterUpper(achievable, claim.value);
   }
 
-  const lower = toNumber(lowerBound); const upper = toNumber(upperBound);
-  const closed = lower !== null && upper !== null && lower === upper;
+  const lower = toNumber(lowerBound);
+  const upper = toNumber(upperBound);
+  const inconsistent = lower !== null && upper !== null && lower > upper;
+  if (inconsistent) {
+    issues.push("LOWER_BOUND_EXCEEDS_UPPER_BOUND");
+    explanation.push("Accepted Claims produce an impossible frontier and require editorial review.");
+  }
+  const closed = !inconsistent && lower !== null && upper !== null && lower === upper;
   if (lowerBound) explanation.push(`Strongest accepted lower bound: ${display(lowerBound)}.`);
   if (upperBound) explanation.push(`Strongest accepted upper bound: ${display(upperBound)}.`);
   if (!lowerBound && !upperBound) explanation.push("No accepted numeric bounds exist for this specification.");
-  return { lowerBound, upperBound, achievable, gap: closed ? "Closed" : lower !== null && upper !== null ? `${display(lowerBound)} to ${display(upperBound)}` : "Unknown", status: closed ? "PROVEN" : "OPEN", explanation };
+  return { lowerBound, upperBound, achievable, gap: closed ? "Closed" : lower !== null && upper !== null ? `${display(lowerBound)} to ${display(upperBound)}` : "Unknown", status: inconsistent ? "DISPUTED" : closed ? "PROVEN" : "OPEN", explanation, issues };
 }
