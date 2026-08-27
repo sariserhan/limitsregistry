@@ -1,10 +1,11 @@
+import { unstable_cache } from "next/cache";
 import { and, asc, eq, inArray, sql } from "drizzle-orm";
 import { db } from "./client";
 import { claimEvidence, claims, evidence, limits, specificationVersions, reviews, auditLogs } from "./schema";
 import { serializeClaim, serializeEvidence, serializeLimit, serializeSpecification } from "./serializers";
 
-export async function listPublishedLimits() { return db.select().from(limits).where(inArray(limits.status, ["OPEN", "PROVEN"])).orderBy(asc(limits.registryNumber)); }
-export async function getPublishedLimit(registryNumber: string) { const rows = await db.select().from(limits).where(and(inArray(limits.status, ["OPEN", "PROVEN"]), eq(limits.registryNumber, registryNumber))).limit(1); return rows[0] ?? null; }
+export const listPublishedLimits = unstable_cache(async () => db.select().from(limits).where(inArray(limits.status, ["OPEN", "PROVEN"])).orderBy(asc(limits.registryNumber)), ["published-limits"], { revalidate: 60, tags: ["published-limits"] });
+export async function getPublishedLimit(registryNumber: string) { const read = unstable_cache(async () => { const rows = await db.select().from(limits).where(and(inArray(limits.status, ["OPEN", "PROVEN"]), eq(limits.registryNumber, registryNumber))).limit(1); return rows[0] ?? null; }, ["published-limit", registryNumber], { revalidate: 60, tags: ["published-limits", `published-limit-${registryNumber}`] }); return read(); }
 export async function getLimitClaims(limitId: string) { const specs = await db.select({ id: specificationVersions.id }).from(specificationVersions).where(eq(specificationVersions.limitId, limitId)); if (specs.length === 0) return []; return db.select({ claim: claims, evidence: evidence }).from(claims).innerJoin(claimEvidence, eq(claimEvidence.claimId, claims.id)).innerJoin(evidence, eq(evidence.id, claimEvidence.evidenceId)).where(eq(claims.specificationVersionId, specs[0].id)).orderBy(asc(claims.createdAt)); }
 export async function getDatabaseHealth() { const result = await db.execute<{ ok: number }>(sql`select 1 as ok`); return result[0]?.ok === 1; }
 
@@ -18,11 +19,14 @@ export async function getPublishedDomainLimit(registryNumber: string) {
   return row ? serializeLimit(row) : null;
 }
 export async function getLimitResearchData(limitId: string) {
-  const specs = await db.select().from(specificationVersions).where(eq(specificationVersions.limitId, limitId)).orderBy(sql`${specificationVersions.versionNumber} desc`);
-  const spec = specs[0];
-  if (!spec) return { specification: null, claims: [], evidence: [] };
-  const rows = await db.select({ claim: claims, evidence }).from(claims).leftJoin(claimEvidence, eq(claimEvidence.claimId, claims.id)).leftJoin(evidence, eq(evidence.id, claimEvidence.evidenceId)).where(eq(claims.specificationVersionId, spec.id)).orderBy(asc(claims.createdAt));
-  return { specification: serializeSpecification(spec), claims: rows.map(({ claim }) => serializeClaim(claim)), evidence: rows.flatMap(({ evidence: item }) => item ? [serializeEvidence(item)] : []) };
+  const read = unstable_cache(async () => {
+    const specs = await db.select().from(specificationVersions).where(eq(specificationVersions.limitId, limitId)).orderBy(sql`${specificationVersions.versionNumber} desc`);
+    const spec = specs[0];
+    if (!spec) return { specification: null, claims: [], evidence: [] };
+    const rows = await db.select({ claim: claims, evidence }).from(claims).leftJoin(claimEvidence, eq(claimEvidence.claimId, claims.id)).leftJoin(evidence, eq(evidence.id, claimEvidence.evidenceId)).where(eq(claims.specificationVersionId, spec.id)).orderBy(asc(claims.createdAt));
+    return { specification: serializeSpecification(spec), claims: rows.map(({ claim }) => serializeClaim(claim)), evidence: rows.flatMap(({ evidence: item }) => item ? [serializeEvidence(item)] : []) };
+  }, ["limit-research", limitId], { revalidate: 60, tags: [`limit-research-${limitId}`] });
+  return read();
 }
 export async function listEditorialQueue(query = "") {
   const pattern = `%${query}%`;

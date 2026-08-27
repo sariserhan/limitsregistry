@@ -3,6 +3,7 @@ import { reportError } from "../../../src/ops/monitoring";
 import { listPublishedDomainLimits } from "../../../src/db/repository";
 
 export const runtime = "nodejs";
+export const revalidate = 60;
 
 export async function GET() {
   try { return NextResponse.json({ data: await listPublishedDomainLimits() }); }
