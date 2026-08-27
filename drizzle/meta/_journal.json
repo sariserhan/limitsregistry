@@ -33,15 +33,43 @@
     {
       "idx": 4,
       "version": "7",
-      "when": 1787853368882,
-      "tag": "0004_admin_dashboard_tables",
+      "when": 1787854382510,
+      "tag": "0004_research-infrastructure",
       "breakpoints": true
     },
     {
       "idx": 5,
       "version": "7",
-      "when": 1787856814571,
-      "tag": "0005_bounties",
+      "when": 1787855091100,
+      "tag": "0005_semantic-search",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1787855449186,
+      "tag": "0006_semantic-search-index",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1787856587501,
+      "tag": "0007_dependency-graph-hardening",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1787857223898,
+      "tag": "0008_verification-reproducibility",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1787857738483,
+      "tag": "0009_admin_dashboard_and_bounties",
       "breakpoints": true
     }
   ]

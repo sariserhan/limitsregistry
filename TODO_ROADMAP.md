@@ -21,6 +21,7 @@ Implementation status is tracked honestly below: completed infrastructure is che
 - [x] Server-side repository layer
 - [x] Database health endpoint
 - [x] Tests, typecheck, lint, and production build
+- [x] Normalize researched candidate packets as draft-only, source-linked records with editorial-readiness and research-queue states. (`src/domain/research-packets.ts`; no draft can contribute to a published frontier)
 
 ## V1 — finish the trusted registry
 
