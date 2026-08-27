@@ -10,7 +10,7 @@ export async function listUserFollows(subscriberKey: string) {
   return db.select({ follow: follows, limit: { id: limits.id, registryNumber: limits.registryNumber, title: limits.title, status: limits.status } }).from(follows).innerJoin(limits, eq(limits.id, follows.limitId)).where(eq(follows.subscriberKey, subscriberKey)).orderBy(asc(limits.registryNumber));
 }
 export async function subscribeToLimit(input: { subscriberKey: string; email: string; limitId: string; frequency: WatchFrequency }) {
-  const [limit] = await db.select({ id: limits.id }).from(limits).where(and(eq(limits.id, input.limitId), inArray(limits.status, ["OPEN", "PROVEN"])));
+  const [limit] = await db.select({ id: limits.id }).from(limits).where(and(eq(limits.id, input.limitId), inArray(limits.status, ["OPEN", "PROVEN", "DISPUTED", "RETIRED"])));
   if (!limit) throw new Error("Only published Limits can be followed.");
   const [follow] = await db.insert(follows).values({ ...input, email: input.email.toLowerCase(), enabled: true, unsubscribedAt: null }).onConflictDoUpdate({ target: [follows.limitId, follows.subscriberKey], set: { email: input.email.toLowerCase(), frequency: input.frequency, enabled: true, unsubscribedAt: null, updatedAt: new Date() } }).returning();
   return follow;
