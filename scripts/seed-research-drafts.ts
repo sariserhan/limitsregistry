@@ -2,7 +2,7 @@
 import "dotenv/config";
 import postgres from "postgres";
 import { drizzle } from "drizzle-orm/postgres-js";
-import { and, eq } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import * as schema from "../src/db/schema";
 import { researchedDraftPackets, aiScalingResearchPackets } from "../src/domain/research-packets";
 

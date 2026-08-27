@@ -1,0 +1,1 @@
+CREATE INDEX IF NOT EXISTS "semantic_embedding_hnsw_idx" ON "semantic_documents" USING hnsw ("embedding" vector_cosine_ops);

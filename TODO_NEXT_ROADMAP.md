@@ -4,13 +4,13 @@ This roadmap tracks the remaining work after the current research infrastructure
 
 ## 1. Semantic search
 
-- [ ] Enable PostgreSQL `pgvector` in Docker and Neon.
-- [ ] Add vector columns and migration.
-- [ ] Generate embeddings for Limits, specifications, Claims, and papers.
-- [ ] Add embedding refresh and failure handling.
-- [ ] Add semantic search repository functions and `/api/search`.
-- [ ] Add exact-search and semantic-search UI modes.
-- [ ] Add authorization, empty-state, and relevance tests.
+- [x] Enable PostgreSQL `pgvector` in Docker and Neon.
+- [x] Add vector columns and migration.
+- [x] Generate embeddings for Limits, specifications, Claims, and papers. (public-corpus indexer is implemented; production currently has no publishable rows and no `AI_GATEWAY_API_KEY`)
+- [x] Add embedding refresh and failure handling.
+- [x] Add semantic search repository functions and `/api/search`.
+- [x] Add exact-search and semantic-search UI modes.
+- [x] Add authorization, empty-state, and relevance tests.
 
 ## 2. Dependency graph
 

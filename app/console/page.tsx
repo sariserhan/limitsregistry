@@ -6,7 +6,7 @@ import { listAllLimits, listCandidateClaims, listPapers, getAcceptedBoundsForLim
 import { listSubmissions } from "../../src/db/repository.submissions";
 import { detectContradiction, type BoundClaim } from "../../src/domain/contradiction";
 import type { CandidateClaimExtraction } from "../../src/lib/ai/extract-claims";
-import { addSource, decideCandidateClaim, decideSubmission, runExtraction, extractPdfCandidateClaims, importBibtex } from "./actions";
+import { addSource, decideCandidateClaim, decideSubmission, runExtraction, extractPdfCandidateClaims, importBibtex, reindexSemanticSearch } from "./actions";
 import { EditorialWorkspace } from "./editorial-workspace";
 import "./console.css";
 
@@ -31,10 +31,12 @@ export default async function ConsolePage() {
   }
 
   return <main className="console-page">
-    <header><Link className="brand" href="/"><BrandIcon className="brand-mark" /><span>Limits Registry</span></Link><Link href="/">Public Registry ↗</Link></header>
+    <header><Link className="brand" href="/"><BrandIcon className="brand-mark" /><span>Limits Registry</span></Link><nav><Link href="/search">Search</Link> · <Link href="/console/research">Infrastructure</Link> · <Link href="/">Public Registry ↗</Link></nav></header>
     <p className="section-kicker">Internal editorial workspace</p>
     <h1>Research Console</h1>
     <p className="lede">Signed in as {session.user.email} · {session.user.role}. Sources, AI extraction, and record drafting are draft-only — nothing here publishes without editorial review.</p>
+
+    {canDecide ? <section><h2>Semantic search index</h2><p>Refreshes the public index from published Limits, accepted Claims, specifications, and linked papers.</p><form action={reindexSemanticSearch}><button type="submit">Refresh semantic index</button></form></section> : null}
 
     <section>
       <h2>Add a source</h2>

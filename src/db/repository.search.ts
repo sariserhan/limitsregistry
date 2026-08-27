@@ -1,0 +1,55 @@
+import "server-only";
+import { and, asc, cosineDistance, desc, eq, ilike, inArray, isNotNull, or, sql } from "drizzle-orm";
+import { db } from "./client";
+import { claimPapers, claims, limits, papers, semanticDocuments, specificationVersions } from "./schema";
+import { contentHash, embedSearchDocuments, embedSearchQuery, SEARCH_EMBEDDING_MODEL } from "../lib/search/embeddings";
+import { embeddingNeedsRefresh, exactRelevance, normalizeSearchQuery, searchResultUrl, type SearchEntityType, type SearchResult } from "../search/search";
+
+type IndexDocument = { entityType: SearchEntityType; entityId: string; registryNumber: string | null; title: string; content: string };
+export async function collectPublicSearchDocuments(): Promise<IndexDocument[]> {
+  const publicStatus = inArray(limits.status, ["OPEN", "PROVEN"]);
+  const currentSpec = eq(specificationVersions.versionNumber, sql<number>`(select max(lsv.version_number) from limit_spec_versions lsv where lsv.limit_id = "limits"."id")`);
+  const [limitRows, specRows, claimRows, paperRows] = await Promise.all([
+    db.select({ entityId: limits.id, registryNumber: limits.registryNumber, title: limits.title, summary: limits.summary, category: limits.category }).from(limits).where(publicStatus),
+    db.select({ entityId: specificationVersions.id, registryNumber: limits.registryNumber, title: limits.title, formalStatement: specificationVersions.formalStatement, constraints: specificationVersions.constraints }).from(specificationVersions).innerJoin(limits, eq(limits.id, specificationVersions.limitId)).where(and(publicStatus, currentSpec)),
+    db.select({ entityId: claims.id, registryNumber: limits.registryNumber, title: limits.title, claimNumber: claims.claimNumber, relation: claims.relation, value: claims.valueExact, method: claims.methodSummary }).from(claims).innerJoin(specificationVersions, eq(specificationVersions.id, claims.specificationVersionId)).innerJoin(limits, eq(limits.id, specificationVersions.limitId)).where(and(publicStatus, currentSpec, eq(claims.status, "ACCEPTED"))),
+    db.selectDistinct({ entityId: papers.id, registryNumber: limits.registryNumber, title: papers.title, abstract: papers.abstract, venue: papers.venue }).from(papers).innerJoin(claimPapers, eq(claimPapers.paperId, papers.id)).innerJoin(claims, eq(claims.id, claimPapers.claimId)).innerJoin(specificationVersions, eq(specificationVersions.id, claims.specificationVersionId)).innerJoin(limits, eq(limits.id, specificationVersions.limitId)).where(and(publicStatus, currentSpec, eq(claims.status, "ACCEPTED"))),
+  ]);
+  return [
+    ...limitRows.map(r => ({ entityType: "LIMIT" as const, entityId: r.entityId, registryNumber: r.registryNumber, title: r.title, content: `${r.registryNumber} ${r.title}\n${r.category}\n${r.summary}` })),
+    ...specRows.map(r => ({ entityType: "SPECIFICATION" as const, entityId: r.entityId, registryNumber: r.registryNumber, title: `${r.title} — specification`, content: `${r.formalStatement}\n${JSON.stringify(r.constraints)}` })),
+    ...claimRows.map(r => ({ entityType: "CLAIM" as const, entityId: r.entityId, registryNumber: r.registryNumber, title: `${r.claimNumber} — ${r.title}`, content: `${r.relation} ${r.value}\n${r.method ?? ""}` })),
+    ...paperRows.map(r => ({ entityType: "PAPER" as const, entityId: r.entityId, registryNumber: r.registryNumber, title: r.title, content: `${r.venue ?? ""}\n${r.abstract ?? ""}` })),
+  ];
+}
+export async function refreshPublicSearchIndex() {
+  const documents = await collectPublicSearchDocuments();
+  const corpusKeys = new Set(documents.map(document => `${document.entityType}:${document.entityId}`));
+  const indexedRows = await db.select({ id: semanticDocuments.id, entityType: semanticDocuments.entityType, entityId: semanticDocuments.entityId }).from(semanticDocuments);
+  for (const row of indexedRows) if (!corpusKeys.has(`${row.entityType}:${row.entityId}`)) await db.delete(semanticDocuments).where(eq(semanticDocuments.id, row.id));
+  let embedded = 0, unchanged = 0, failed = 0;
+  for (const document of documents) {
+    const hash = contentHash(`${document.title}\n${document.content}`);
+    const current = await db.select({ id: semanticDocuments.id, contentHash: semanticDocuments.contentHash, status: semanticDocuments.embeddingStatus }).from(semanticDocuments).where(and(eq(semanticDocuments.entityType, document.entityType), eq(semanticDocuments.entityId, document.entityId))).limit(1);
+    if (!embeddingNeedsRefresh(current[0]?.contentHash ?? null, current[0]?.status ?? null, hash)) { unchanged++; continue; }
+    await db.insert(semanticDocuments).values({ ...document, contentHash: hash, embeddingModel: SEARCH_EMBEDDING_MODEL, embeddingStatus: "PENDING", embeddingError: null }).onConflictDoUpdate({ target: [semanticDocuments.entityType, semanticDocuments.entityId], set: { registryNumber: document.registryNumber, title: document.title, content: document.content, contentHash: hash, embeddingModel: SEARCH_EMBEDDING_MODEL, embeddingStatus: "PENDING", embeddingError: null, updatedAt: new Date() } });
+  }
+  const pending = await db.select().from(semanticDocuments).where(eq(semanticDocuments.embeddingStatus, "PENDING")).orderBy(asc(semanticDocuments.createdAt));
+  for (let offset = 0; offset < pending.length; offset += 50) {
+    const batch = pending.slice(offset, offset + 50);
+    try { const vectors = await embedSearchDocuments(batch.map(item => `${item.title}\n${item.content}`)); for (let i = 0; i < batch.length; i++) { const item = batch[i], vector = vectors[i]; if (!item || !vector) continue; await db.update(semanticDocuments).set({ embedding: vector, embeddingStatus: "READY", embeddingError: null, lastEmbeddedAt: new Date(), updatedAt: new Date() }).where(eq(semanticDocuments.id, item.id)); embedded++; } }
+    catch (error) { const message = error instanceof Error ? error.message.slice(0, 1000) : "Embedding failed."; for (const item of batch) await db.update(semanticDocuments).set({ embeddingStatus: "FAILED", embeddingError: message, updatedAt: new Date() }).where(eq(semanticDocuments.id, item.id)); failed += batch.length; }
+  }
+  return { documents: documents.length, embedded, unchanged, failed };
+}
+export async function isSearchEntityPublic(entityType: SearchEntityType, entityId: string) {
+  if (entityType === "LIMIT") return Boolean((await db.select({ id: limits.id }).from(limits).where(and(eq(limits.id, entityId), inArray(limits.status, ["OPEN", "PROVEN"]))).limit(1))[0]);
+  if (entityType === "SPECIFICATION") return Boolean((await db.select({ id: specificationVersions.id }).from(specificationVersions).innerJoin(limits, eq(limits.id, specificationVersions.limitId)).where(and(eq(specificationVersions.id, entityId), inArray(limits.status, ["OPEN", "PROVEN"]))).limit(1))[0]);
+  if (entityType === "CLAIM") return Boolean((await db.select({ id: claims.id }).from(claims).innerJoin(specificationVersions, eq(specificationVersions.id, claims.specificationVersionId)).innerJoin(limits, eq(limits.id, specificationVersions.limitId)).where(and(eq(claims.id, entityId), eq(claims.status, "ACCEPTED"), inArray(limits.status, ["OPEN", "PROVEN"]))).limit(1))[0]);
+  return Boolean((await db.select({ id: papers.id }).from(papers).innerJoin(claimPapers, eq(claimPapers.paperId, papers.id)).innerJoin(claims, eq(claims.id, claimPapers.claimId)).innerJoin(specificationVersions, eq(specificationVersions.id, claims.specificationVersionId)).innerJoin(limits, eq(limits.id, specificationVersions.limitId)).where(and(eq(papers.id, entityId), eq(claims.status, "ACCEPTED"), inArray(limits.status, ["OPEN", "PROVEN"]))).limit(1))[0]);
+}
+async function keepPublicResults(results: SearchResult[], limit: number) { const visibility = await Promise.all(results.map(result => isSearchEntityPublic(result.entityType, result.entityId))); return results.filter((_, index) => visibility[index]).slice(0, limit); }
+function mapResult(row: { entityType: string; entityId: string; registryNumber: string | null; title: string; content: string; score: number }): SearchResult { const entityType = row.entityType as SearchEntityType; return { entityType, entityId: row.entityId, registryNumber: row.registryNumber, title: row.title, excerpt: row.content.slice(0, 240), url: searchResultUrl(entityType, row.entityId, row.registryNumber), score: Math.max(0, Math.min(1, row.score)) }; }
+export async function exactPublicSearch(rawQuery: string, limit = 20) { const query = normalizeSearchQuery(rawQuery); if (!query) return []; const pattern = `%${query}%`; const rows = await db.select({ entityType: semanticDocuments.entityType, entityId: semanticDocuments.entityId, registryNumber: semanticDocuments.registryNumber, title: semanticDocuments.title, content: semanticDocuments.content }).from(semanticDocuments).where(or(ilike(semanticDocuments.title, pattern), ilike(semanticDocuments.content, pattern))).limit(Math.min(limit, 50)); return keepPublicResults(rows.map(row => mapResult({ ...row, score: exactRelevance(query, row.title, row.content) })).sort((a, b) => b.score - a.score), limit); }
+export async function semanticPublicSearch(rawQuery: string, limit = 20) { const query = normalizeSearchQuery(rawQuery); if (!query) return []; const vector = await embedSearchQuery(query); const distance = cosineDistance(semanticDocuments.embedding, vector); const rows = await db.select({ entityType: semanticDocuments.entityType, entityId: semanticDocuments.entityId, registryNumber: semanticDocuments.registryNumber, title: semanticDocuments.title, content: semanticDocuments.content, distance }).from(semanticDocuments).where(and(eq(semanticDocuments.embeddingStatus, "READY"), isNotNull(semanticDocuments.embedding))).orderBy(distance).limit(Math.min(limit, 50)); return keepPublicResults(rows.map(row => mapResult({ ...row, score: 1 - Number(row.distance) })), limit); }
+export async function searchIndexStatus() { const rows = await db.select({ status: semanticDocuments.embeddingStatus, count: sql<number>`count(*)::int` }).from(semanticDocuments).groupBy(semanticDocuments.embeddingStatus).orderBy(desc(sql`count(*)`)); return rows; }

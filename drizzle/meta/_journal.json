@@ -36,6 +36,20 @@
       "when": 1787854382510,
       "tag": "0004_research-infrastructure",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1787855091100,
+      "tag": "0005_semantic-search",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1787855449186,
+      "tag": "0006_semantic-search-index",
+      "breakpoints": true
     }
   ]
 }

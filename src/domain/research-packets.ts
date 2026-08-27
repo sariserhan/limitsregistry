@@ -20,7 +20,7 @@ export const mantelResearchPacket: ResearchPacket = {
 };
 
 
-const packetSpec = (id: string, limitId: string, formalStatement: string, constraints: Record<string, string>, asymptotic = true): SpecificationVersion => ({ id, limitId, version: 1, formalStatement, constraints, asymptotic, probabilistic: false });
+const packetSpec = (id: string, limitId: string, formalStatement: string, constraints: Record<string, string>, asymptotic = true, probabilistic = false): SpecificationVersion => ({ id, limitId, version: 1, formalStatement, constraints, asymptotic, probabilistic });
 const textClaim = (id: string, specId: string, relation: Claim["relation"], value: string, claimType: Claim["claimType"], author: string, year: number, source: string, evidenceId: string, scientificStatus: Claim["scientificStatus"] = "ACCEPTED"): Claim => ({ id, specificationVersionId: specId, relation, value: { kind: "text", value }, claimType, status: "ACCEPTED", epistemicStatus: scientificStatus === "UNCERTAIN" ? "LITERATURE_ASSERTED" : "SOURCE_CONFIRMED", scientificStatus, registryReviewStatus: "UNREVIEWED", evidenceIds: [evidenceId], author, year, source });
 
 const cernySpec = packetSpec("SP-LR-000114-V1", "LR-000114", "C(n) is the maximum shortest reset-word length over synchronizing complete deterministic automata with n states.", { automaton: "complete DFA", states: "n", quantity: "reset threshold" }, true);
@@ -175,7 +175,7 @@ export const aiRobustnessAccuracyResearchPacket: ResearchPacket = { limit: { id:
 
 export const extendedAiResearchPackets: ResearchPacket[] = [aiRnnWidthResearchPacket, aiTrainingHardnessResearchPacket, aiVcDimensionResearchPacket, aiDepthSeparationResearchPacket, aiNoFreeLunchResearchPacket, aiRobustnessAccuracyResearchPacket];
 
-const infraSpec = (id: string, limitId: string, statement: string, constraints: Record<string, string>, asymptotic = true, probabilistic = false): SpecificationVersion => packetSpec(id, limitId, statement, constraints, asymptotic);
+const infraSpec = (id: string, limitId: string, statement: string, constraints: Record<string, string>, asymptotic = true, probabilistic = false): SpecificationVersion => packetSpec(id, limitId, statement, constraints, asymptotic, probabilistic);
 const infraEvidence = (id: string, label: string, url: string, method = "THEORETICAL_DERIVATION"): Evidence => ({ id, type: method === "MEASUREMENT_PROTOCOL" ? "OBSERVATION" : "MATHEMATICAL_PROOF", method, verificationLevel: "SOURCE_CONFIRMED", label, sourceUrl: url });
 const infraClaim = (id: string, specId: string, relation: Claim["relation"], value: string, type: Claim["claimType"], author: string, year: number, source: string, evidenceId: string, basis: NonNullable<Claim["evidenceBasis"]>[number] = "THEORETICAL_DERIVATION"): Claim => exactTextClaim(id, specId, relation, value, type, author, year, source, evidenceId, basis);
 

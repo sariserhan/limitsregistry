@@ -9,6 +9,7 @@ import { findDuplicatePaper } from "../../src/domain/duplicate-detection";
 import { extractCandidateClaims, EXTRACTION_MODEL, EXTRACTION_PROMPT_VERSION } from "../../src/lib/ai/extract-claims";
 import { insertCandidateClaim, insertPaper, listPapers, setCandidateClaimStatus } from "../../src/db/repository.console";
 import { setSubmissionStatus } from "../../src/db/repository.submissions";
+import { refreshPublicSearchIndex } from "../../src/db/repository.search";
 
 export async function importBibtex(formData: FormData) {
   await requireRole("RESEARCHER");
@@ -89,5 +90,12 @@ export async function decideSubmission(formData: FormData) {
   if (!SUBMISSION_DECISIONS.includes(decision as (typeof SUBMISSION_DECISIONS)[number])) throw new Error("Invalid decision.");
   if (!notes) throw new Error("Add a note explaining the decision.");
   await setSubmissionStatus(id, decision as (typeof SUBMISSION_DECISIONS)[number], session.user.id, notes);
+  revalidatePath("/console");
+}
+
+export async function reindexSemanticSearch() {
+  await requireRole("EDITOR");
+  await refreshPublicSearchIndex();
+  revalidatePath("/search");
   revalidatePath("/console");
 }
