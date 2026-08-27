@@ -2,7 +2,7 @@ import { deriveFrontier, type Frontier } from "./frontier";
 import { browseLimits, type BrowseLimit } from "./registry";
 import type { Claim, ExactValue, SpecificationVersion } from "./types";
 
-export type PublishedLimit = BrowseLimit & { specification: SpecificationVersion; claimsData: Claim[]; frontier: Frontier };
+export type PublishedLimit = BrowseLimit & { publishedAt?: string; specification: SpecificationVersion; claimsData: Claim[]; frontier: Frontier };
 
 const numeric = (value: string): bigint | null => /^\d+$/.test(value) ? BigInt(value) : null;
 
