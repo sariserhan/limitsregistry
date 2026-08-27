@@ -6,6 +6,7 @@
 
 .announcement-banner{display:flex;align-items:center;gap:12px;justify-content:center;padding:12px 20px;font-size:13px;text-align:center}.announcement-label{font:10px 'DM Mono',monospace;text-transform:uppercase;letter-spacing:.08em;padding:2px 8px;border:1px solid currentColor;flex-shrink:0}.announcement-info{background:#eaf0ff;color:#1c3fc7}.announcement-warning{background:#fdf3e2;color:var(--amber)}.announcement-critical{background:#fbe9e8;color:var(--red)}
 @media(max-width:640px){.announcement-banner{flex-direction:column;gap:6px;padding:12px 16px}}
+.admin-mode-banner{display:flex;align-items:center;justify-content:center;gap:10px;padding:9px 20px;font-size:12px;text-align:center;background:var(--ink);color:#fff;text-decoration:none}.admin-mode-banner:hover{background:#000}.admin-mode-label{font:10px 'DM Mono',monospace;text-transform:uppercase;letter-spacing:.08em;padding:2px 8px;border:1px solid #fff}.admin-mode-arrow{color:var(--faint)}
 * { box-sizing:border-box; }
 html { scroll-behavior:smooth; }
 body { margin:0; color:var(--ink); background:#fff; font-family:'DM Sans', sans-serif; }
