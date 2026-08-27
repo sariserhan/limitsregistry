@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { requireRole } from "../../src/auth/session";
 import { fetchSourceMetadata } from "../../src/lib/ingestion/intake";
-import { extractPdfText } from "../../src/lib/ingestion/pdf";
+import { enqueueSourceIngestion } from "../../src/db/repository.ingestion";
 import { getPaper } from "../../src/db/repository.entities";
 import { findDuplicatePaper } from "../../src/domain/duplicate-detection";
 import { extractCandidateClaims, EXTRACTION_MODEL, EXTRACTION_PROMPT_VERSION } from "../../src/lib/ai/extract-claims";
@@ -59,15 +59,15 @@ export async function runExtraction(formData: FormData) {
 }
 
 export async function extractPdfCandidateClaims(formData: FormData) {
-  await requireRole("RESEARCHER");
+  const session = await requireRole("RESEARCHER");
   const paperId = String(formData.get("paperId") ?? "");
   const limitId = String(formData.get("limitId") ?? "") || null;
   const paper = await getPaper(paperId);
-  if (!paper?.arxivId) throw new Error("PDF extraction is currently limited to arXiv sources.");
-  const pdf = await extractPdfText(`https://arxiv.org/pdf/${encodeURIComponent(paper.arxivId)}.pdf`);
-  if (pdf.text.length > 50000) throw new Error("PDF exceeds the extraction limit.");
-  const extraction = await extractCandidateClaims({ title: paper.title, abstract: pdf.text });
-  await insertCandidateClaim({ paperId, limitId, extraction, model: EXTRACTION_MODEL, promptVersion: `${EXTRACTION_PROMPT_VERSION}+pdf` });
+  if (!paper) throw new Error("Paper not found.");
+  const suppliedUrl = String(formData.get("pdfUrl") ?? "").trim();
+  const sourceUrl = suppliedUrl || (paper.arxivId ? `https://arxiv.org/pdf/${encodeURIComponent(paper.arxivId)}.pdf` : "");
+  if (!sourceUrl) throw new Error("Add an allowlisted official publisher PDF URL.");
+  await enqueueSourceIngestion({ paperId, limitId, requestedByUserId: session.user.id, sourceUrl, sourceType: paper.arxivId && !suppliedUrl ? "ARXIV" : "DOI_PUBLISHER" });
   revalidatePath("/console");
 }
 

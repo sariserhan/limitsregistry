@@ -4,6 +4,7 @@ import { requireRole } from "../../src/auth/session";
 import { hasRole, type Role } from "../../src/auth/permissions";
 import { listAllLimits, listCandidateClaims, listPapers, getAcceptedBoundsForLimit } from "../../src/db/repository.console";
 import { listSubmissions } from "../../src/db/repository.submissions";
+import { listSourceIngestionJobs } from "../../src/db/repository.ingestion";
 import { detectContradiction, type BoundClaim } from "../../src/domain/contradiction";
 import type { CandidateClaimExtraction } from "../../src/lib/ai/extract-claims";
 import { addSource, decideCandidateClaim, decideSubmission, runExtraction, extractPdfCandidateClaims, importBibtex, reindexSemanticSearch } from "./actions";
@@ -20,7 +21,7 @@ const SUBMISSION_TYPE_LABELS: Record<string, string> = {
 
 export default async function ConsolePage() {
   const session = await requireRole("RESEARCHER");
-  const [papers, limits, candidates, submissions] = await Promise.all([listPapers(), listAllLimits(), listCandidateClaims(), listSubmissions()]);
+  const [papers, limits, candidates, submissions, sourceJobs] = await Promise.all([listPapers(), listAllLimits(), listCandidateClaims(), listSubmissions(), listSourceIngestionJobs()]);
   const canDecide = hasRole(session.user.role as Role, "EDITOR");
   const pendingSubmissions = submissions.filter((s) => s.submission.status === "SUBMITTED" || s.submission.status === "UNDER_REVIEW");
 
@@ -67,10 +68,19 @@ export default async function ConsolePage() {
             {limits.map((l) => <option key={l.id} value={l.id}>{l.registryNumber} — {l.title}</option>)}
           </select>
           <button type="submit">Extract candidate claims</button>
-          {p.arxivId && <form action={extractPdfCandidateClaims}><input type="hidden" name="paperId" value={p.id} /><input type="hidden" name="limitId" value="" /><button type="submit">Extract from arXiv PDF</button></form>}
         </form>}
+        <form className="pdf-job-form" action={extractPdfCandidateClaims}><input type="hidden" name="paperId" value={p.id} /><select name="limitId" defaultValue=""><option value="">No Limit linked</option>{limits.map((l) => <option key={l.id} value={l.id}>{l.registryNumber} — {l.title}</option>)}</select>{p.arxivId ? <small>Secure arXiv PDF: {p.arxivId}</small> : <input name="pdfUrl" type="url" pattern="https://.*" placeholder="Allowlisted official publisher PDF URL" required />}<button type="submit">Queue PDF extraction</button></form>
       </div>)}
       {papers.length === 0 && <p>No sources yet.</p>}
+    </section>
+
+    <section>
+      <h2>PDF extraction jobs ({sourceJobs.length})</h2>
+      {sourceJobs.length ? sourceJobs.map(({ job, paper }) => <article className="source-job" key={job.id}>
+        <header><strong>{paper.title}</strong><span className="job-status">{job.status.replaceAll("_", " ")}</span></header>
+        <small>{job.sourceType} · Attempt {job.attempts}/{job.maxAttempts}{job.pageCount ? ` · ${job.pageCount} pages` : ""}{job.byteSize ? ` · ${(job.byteSize / 1048576).toFixed(2)} MB` : ""}</small>
+        {job.errorMessage ? <p role="alert">{job.errorMessage}</p> : null}
+      </article>) : <p>No PDF jobs queued.</p>}
     </section>
 
     <section>

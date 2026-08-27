@@ -71,10 +71,10 @@ This roadmap tracks the remaining work after the current research infrastructure
 - [x] Add arXiv PDF extraction.
 - [x] Add AI draft extraction from extracted text.
 - [x] Add BibTeX import and single/batch export.
-- [ ] Add secure DOI/publisher PDF allowlist.
-- [ ] Persist PDF extraction status and page count.
-- [ ] Add background processing, retries, size limits, and failure states.
-- [ ] Add source-ingestion integration tests.
+- [x] Add secure DOI/publisher PDF allowlist.
+- [x] Persist PDF extraction status and page count.
+- [x] Add background processing, retries, size limits, and failure states.
+- [x] Add source-ingestion integration tests.
 
 ## 8. UI integration
 

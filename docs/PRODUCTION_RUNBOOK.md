@@ -32,3 +32,9 @@ Use the `x-request-id` response header and structured server logs. If health is 
 - Perform a restore drill on a non-production branch before the first public launch and after major schema changes.
 
 Neon retention is configured in the Neon project console/plan, not through application code.
+
+## Source-ingestion worker
+
+`/api/cron/source-ingestion` runs every five minutes and requires `CRON_SECRET`. It claims at most two due jobs per invocation with `FOR UPDATE SKIP LOCKED`; stale ten-minute leases return to the retry queue. Jobs retry up to three times with exponential backoff, while policy violations and size/page-limit failures fail permanently.
+
+Set `PDF_PUBLISHER_ALLOWLIST` to a comma-separated list of exact publisher PDF hosts reviewed by an administrator. Redirects are revalidated, and HTTPS, DNS, MIME/signature, 15 MB, 300-page, and extracted-text limits are enforced. Do not add generic redirectors, user-content hosts, localhost, IP literals, or broad wildcard domains.
