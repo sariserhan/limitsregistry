@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { BrandIcon } from "../../../src/components/brand-icon";
 import { getClaimsForPerson, getInstitutionsForPerson, getPerson } from "../../../src/db/repository.entities";
 
 type PageProps = { params: Promise<{ id: string }> };
@@ -11,7 +12,7 @@ export default async function ResearcherPage({ params }: PageProps) {
   const [claims, affiliations] = await Promise.all([getClaimsForPerson(person.id), getInstitutionsForPerson(person.id)]);
 
   return <main className="canonical-page">
-    <header className="canonical-header"><Link className="brand" href="/"><span className="brand-mark"><i /><i /><i /></span><span>Limits Registry</span></Link><nav><Link href="/">Browse</Link></nav><span className="header-tag">RESEARCHER</span></header>
+    <header className="canonical-header"><Link className="brand" href="/"><BrandIcon className="brand-mark" /><span>Limits Registry</span></Link><nav><Link href="/">Browse</Link></nav><span className="header-tag">RESEARCHER</span></header>
     <section className="canonical-intro">
       <div className="canonical-category">{person.profileStatus.replaceAll("_", " ")}</div>
       <h1>{person.displayName}</h1>

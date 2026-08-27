@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { BrandIcon } from "../../src/components/brand-icon";
 import { authClient } from "../../src/auth/client";
 import "../login/auth-form.css";
 
@@ -22,7 +23,7 @@ export default function ForgotPasswordPage() {
   }
 
   return <main className="auth-shell">
-    <Link className="auth-brand" href="/"><span className="brand-mark"><i /><i /><i /></span><span>Limits Registry</span></Link>
+    <Link className="auth-brand" href="/"><BrandIcon className="brand-mark" /><span>Limits Registry</span></Link>
     <h1>Reset password</h1>
     {sent ? <p>If an account exists for {email}, a reset link is on its way. Check your inbox.</p> : <>
       <p>Enter your account email and we&rsquo;ll send a link to reset your password.</p>

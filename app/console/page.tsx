@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { BrandIcon } from "../../src/components/brand-icon";
 import { requireRole } from "../../src/auth/session";
 import { hasRole, type Role } from "../../src/auth/permissions";
 import { listAllLimits, listCandidateClaims, listPapers, getAcceptedBoundsForLimit } from "../../src/db/repository.console";
@@ -30,7 +31,7 @@ export default async function ConsolePage() {
   }
 
   return <main className="console-page">
-    <header><Link className="brand" href="/"><span className="brand-mark"><i /><i /><i /></span><span>Limits Registry</span></Link><Link href="/">Public Registry ↗</Link></header>
+    <header><Link className="brand" href="/"><BrandIcon className="brand-mark" /><span>Limits Registry</span></Link><Link href="/">Public Registry ↗</Link></header>
     <p className="section-kicker">Internal editorial workspace</p>
     <h1>Research Console</h1>
     <p className="lede">Signed in as {session.user.email} · {session.user.role}. Sources, AI extraction, and record drafting are draft-only — nothing here publishes without editorial review.</p>

@@ -5,6 +5,8 @@ import type { PublishedLimit } from "../src/domain/published";
 import { formatExact } from "../src/domain/published";
 
 
+import { BrandIcon } from "../src/components/brand-icon";
+
 type BrowseClientProps = { initialLimits: PublishedLimit[]; initialClaims: typeof import("../src/domain/registry").browseClaims };
 
 
@@ -30,7 +32,7 @@ export default function Home({ initialLimits, initialClaims }: BrowseClientProps
 
   return <main className="app-shell">
     <header className="topbar">
-      <a className="brand" href="#top" aria-label="Limits Registry home"><span className="brand-mark"><i /><i /><i /></span><span>Limits Registry</span></a>
+      <a className="brand" href="#top" aria-label="Limits Registry home"><BrandIcon className="brand-mark" /><span>Limits Registry</span></a>
       <nav className="topnav" aria-label="Primary navigation"><a className="active" href="#registry">Registry</a><a href="#open">Open Limits</a><a href="#about">About</a></nav>
       <button className={`console-switch ${consoleMode ? "selected" : ""}`} onClick={() => setConsoleMode(!consoleMode)}><span className="console-dot" />{consoleMode ? "Public Registry" : "Research Console"}<ChevronIcon /></button>
     </header>

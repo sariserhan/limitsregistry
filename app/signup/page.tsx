@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { BrandIcon } from "../../src/components/brand-icon";
 import { signUp } from "../../src/auth/client";
 import "../login/auth-form.css";
 
@@ -26,7 +27,7 @@ export default function SignupPage() {
   }
 
   return <main className="auth-shell">
-    <Link className="auth-brand" href="/"><span className="brand-mark"><i /><i /><i /></span><span>Limits Registry</span></Link>
+    <Link className="auth-brand" href="/"><BrandIcon className="brand-mark" /><span>Limits Registry</span></Link>
     <h1>Request access</h1>
     <p>New accounts start with read-only access. An admin grants Research Console and review permissions.</p>
     <form onSubmit={handleSubmit}>

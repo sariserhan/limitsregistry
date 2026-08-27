@@ -1,9 +1,10 @@
+import { BrandIcon } from "./brand-icon";
 import "../../app/status.css";
 
 export function CanonicalSkeleton({ tag }: { tag: string }) {
   return <main className="canonical-page" aria-busy="true" aria-live="polite">
     <header className="canonical-header">
-      <span className="brand"><span className="brand-mark"><i /><i /><i /></span><span>Limits Registry</span></span>
+      <span className="brand"><BrandIcon className="brand-mark" /><span>Limits Registry</span></span>
       <span className="header-tag">{tag}</span>
     </header>
     <section className="canonical-intro">

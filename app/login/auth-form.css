@@ -1,10 +1,6 @@
 .auth-shell { max-width:400px; margin:0 auto; min-height:100vh; display:flex; flex-direction:column; justify-content:center; padding:60px 24px; }
 .auth-brand { display:flex; align-items:center; gap:11px; color:var(--ink); text-decoration:none; font:600 15px 'Space Grotesk',sans-serif; letter-spacing:-.03em; margin-bottom:40px; }
-.auth-brand .brand-mark { width:20px; height:20px; border:1.5px solid var(--ink); display:flex; align-items:flex-end; gap:2px; padding:3px; }
-.auth-brand .brand-mark i { display:block; flex:1; background:var(--blue); }
-.auth-brand .brand-mark i:nth-child(1) { height:45%; }
-.auth-brand .brand-mark i:nth-child(2) { height:72%; }
-.auth-brand .brand-mark i:nth-child(3) { height:100%; }
+.auth-brand .brand-mark { width:24px; height:24px; display:inline-flex; align-items:center; justify-content:center; flex-shrink:0; border-radius:50%; object-fit:contain; }
 .auth-shell h1 { font:600 32px 'Space Grotesk',sans-serif; letter-spacing:-.04em; margin:0 0 8px; }
 .auth-shell > p { color:var(--muted); font-size:14px; margin:0 0 34px; }
 .auth-field { display:flex; flex-direction:column; gap:6px; margin-bottom:18px; }

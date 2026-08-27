@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { BrandIcon } from "../../../src/components/brand-icon";
 import { getInstitution, getPeopleForInstitution } from "../../../src/db/repository.entities";
 
 type PageProps = { params: Promise<{ id: string }> };
@@ -11,7 +12,7 @@ export default async function InstitutionPage({ params }: PageProps) {
   const affiliated = await getPeopleForInstitution(institution.id);
 
   return <main className="canonical-page">
-    <header className="canonical-header"><Link className="brand" href="/"><span className="brand-mark"><i /><i /><i /></span><span>Limits Registry</span></Link><nav><Link href="/">Browse</Link></nav><span className="header-tag">INSTITUTION</span></header>
+    <header className="canonical-header"><Link className="brand" href="/"><BrandIcon className="brand-mark" /><span>Limits Registry</span></Link><nav><Link href="/">Browse</Link></nav><span className="header-tag">INSTITUTION</span></header>
     <section className="canonical-intro">
       <div className="canonical-category">{institution.type ?? "Institution"}</div>
       <h1>{institution.name}</h1>
