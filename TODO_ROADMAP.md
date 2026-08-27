@@ -27,9 +27,9 @@ Implementation status is tracked honestly below: completed infrastructure is che
 ### 1. Data model hardening
 
 - [ ] Add explicit `evidence` and `review` fixtures to every ontology test.
-- [ ] Add rational and scientific-notation comparison tests.
-- [ ] Define strict semantics for `<` and `>` bounds.
-- [ ] Define integer-gap display rules separately from continuous values.
+- [x] Add rational and scientific-notation comparison tests.
+- [x] Define strict semantics for `<` and `>` bounds.
+- [x] Define integer-gap display rules separately from continuous values.
 - [x] Add validation for contradictory accepted Claims.
 - [x] Add validation for impossible frontiers, such as lower bound greater than upper bound.
 - [x] Add immutable correction and invalidation event tests.
@@ -37,34 +37,34 @@ Implementation status is tracked honestly below: completed infrastructure is che
 ### 2. Database-backed reads
 
 - [x] Add repository functions for specification versions, evidence, reviews, timeline events, papers, and people.
-- [ ] Add database serializers between Drizzle rows and domain types.
+- [x] Add database serializers between Drizzle rows and domain types.
 - [ ] Replace static public page data with server-side database reads.
 - [x] Add a safe empty-registry state for a new production database.
-- [ ] Add pagination and filtering to repository queries.
+- [x] Add pagination and filtering to repository queries.
 - [ ] Add database integration tests against Docker PostgreSQL.
 
 ### 3. Editorial console
 
-- [ ] Add source intake form.
-- [ ] Add Limit creation flow.
-- [ ] Add specification-version creation flow.
-- [ ] Add Claim draft form with runtime validation.
-- [ ] Add evidence attachment flow.
-- [ ] Add review decision flow.
-- [ ] Add accept, reject, request-revision, dispute, and invalidate actions.
-- [ ] Add audit-log display.
-- [ ] Add editorial queue filters and search.
-- [ ] Keep all write actions server-side.
+- [x] Add source intake form.
+- [x] Add Limit creation flow.
+- [x] Add specification-version creation flow.
+- [x] Add Claim draft form with runtime validation.
+- [x] Add evidence attachment flow.
+- [x] Add review decision flow.
+- [x] Add accept, reject, request-revision, dispute, and invalidate actions.
+- [x] Add audit-log display.
+- [x] Add editorial queue filters and search.
+- [x] Keep all write actions server-side.
 
 ### 4. Public registry quality
 
 - [x] Show Claim provenance on canonical pages.
 - [x] Show specification details and constraints.
-- [ ] Show correction and dispute history.
-- [ ] Show derived frontier explanation.
+- [x] Show correction and dispute history.
+- [x] Show derived frontier explanation.
 - [x] Add canonical metadata, sitemap, robots.txt, and structured data.
-- [ ] Add accessible loading, empty, and error states.
-- [ ] Add copy-citation interaction.
+- [x] Add accessible loading, empty, and error states.
+- [x] Add copy-citation interaction.
 - [ ] Add responsive visual QA at mobile, tablet, desktop, and wide desktop sizes.
 
 ### 5. Launch catalog

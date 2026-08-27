@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
-import { listPublishedLimits } from "../../../src/db/repository";
+import { listPublishedDomainLimits } from "../../../src/db/repository";
 
 export const runtime = "nodejs";
 
 export async function GET() {
-  try { return NextResponse.json({ data: await listPublishedLimits() }); }
+  try { return NextResponse.json({ data: await listPublishedDomainLimits() }); }
   catch { return NextResponse.json({ error: "Registry data is temporarily unavailable." }, { status: 503 }); }
 }
