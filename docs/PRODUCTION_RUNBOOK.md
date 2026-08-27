@@ -21,4 +21,4 @@ Keep Neon point-in-time restore and retention enabled according to the selected 
 
 ## Incident checks
 
-Use the request ID from the response header and structured server logs. If health is 503, stop editorial writes, inspect Neon status/connectivity, and prefer a forward-fix or deployment rollback only after confirming schema compatibility.
+Use the `x-request-id` response header and structured server logs. If health is 503, stop editorial writes, inspect Neon status/connectivity, and prefer a forward-fix or deployment rollback only after confirming schema compatibility.
