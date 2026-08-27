@@ -1,0 +1,14 @@
+.admin-shell { padding:74px 9.2vw 100px; max-width:1100px; margin:0 auto; }
+.admin-shell h1 { font:600 40px 'Space Grotesk',sans-serif; letter-spacing:-.05em; margin:0 0 8px; }
+.admin-shell > p { color:var(--muted); margin:0 0 40px; }
+.admin-table-scroll { overflow-x:auto; border-top:1px solid var(--ink); }
+.admin-table { width:100%; min-width:520px; border-collapse:collapse; }
+.admin-table th { text-align:left; font:10px 'DM Mono',monospace; text-transform:uppercase; letter-spacing:.08em; color:var(--faint); padding:12px 10px; white-space:nowrap; }
+.admin-table td { padding:14px 10px; border-bottom:1px solid var(--line); font-size:13px; vertical-align:middle; white-space:nowrap; }
+.admin-table select { font-size:12px; padding:6px 8px; border:1px solid var(--line); background:#fff; }
+.admin-table button { border:0; background:var(--blue); color:#fff; padding:7px 12px; font-size:12px; margin-left:8px; }
+
+@media (max-width:640px) {
+  .admin-shell { padding:48px 24px 70px; }
+  .admin-shell h1 { font-size:30px; }
+}

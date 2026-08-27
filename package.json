@@ -15,12 +15,15 @@
     "db:studio": "drizzle-kit studio"
   },
   "dependencies": {
+    "ai": "^7.0.83",
+    "better-auth": "^1.7.2",
     "dotenv": "^17.4.2",
     "drizzle-orm": "^0.45.2",
     "next": "^16.3.3",
     "postgres": "^3.4.9",
     "react": "18.3.1",
     "react-dom": "18.3.1",
+    "resend": "^6.24.0",
     "zod": "^4.4.3"
   },
   "devDependencies": {

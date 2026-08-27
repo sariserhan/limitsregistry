@@ -1,0 +1,31 @@
+.console-page { padding:74px 9.2vw 100px; max-width:1100px; margin:0 auto; }
+.console-page h1 { font:600 40px 'Space Grotesk',sans-serif; letter-spacing:-.05em; margin:0 0 8px; }
+.console-page > p.lede { color:var(--muted); margin:0 0 40px; }
+.console-page section { margin-bottom:52px; }
+.console-page h2 { font:600 18px 'Space Grotesk',sans-serif; border-bottom:1px solid var(--ink); padding-bottom:10px; margin:0 0 18px; }
+.intake-form { display:flex; gap:10px; }
+.intake-form input { flex:1; border:1px solid var(--line); padding:11px 12px; font-size:14px; }
+.intake-form button { border:0; background:var(--blue); color:#fff; padding:0 20px; font-size:13px; }
+.source-card { border-bottom:1px solid var(--line); padding:16px 0; display:flex; justify-content:space-between; gap:20px; align-items:start; }
+.source-card strong { font:600 14px 'Space Grotesk',sans-serif; display:block; margin-bottom:4px; }
+.source-card small { color:var(--faint); font:10px 'DM Mono',monospace; }
+.source-card form { display:flex; gap:8px; align-items:center; flex-shrink:0; }
+.source-card select { font-size:12px; padding:6px; border:1px solid var(--line); }
+.source-card button { border:0; background:var(--ink); color:#fff; padding:8px 12px; font-size:12px; }
+.candidate-card { border:1px solid var(--line); padding:16px; margin-bottom:14px; }
+.candidate-card header { display:flex; justify-content:space-between; color:var(--faint); font:10px 'DM Mono',monospace; text-transform:uppercase; margin-bottom:10px; }
+.candidate-item { border-top:1px solid var(--line); padding:10px 0; font-size:13px; }
+.candidate-item .warn { color:#b3261e; font-size:12px; margin-top:4px; }
+.candidate-actions { display:flex; gap:8px; margin-top:12px; }
+.candidate-actions button { border:0; padding:8px 14px; font-size:12px; }
+.candidate-actions button[value="PROMOTED"] { background:var(--green); color:#fff; }
+.candidate-actions button[value="DISMISSED"] { background:var(--line); }
+
+@media (max-width:640px) {
+  .console-page { padding:48px 24px 70px; }
+  .console-page h1 { font-size:30px; }
+  .intake-form { flex-direction:column; }
+  .source-card { flex-direction:column; align-items:stretch; }
+  .source-card form { flex-wrap:wrap; }
+  .source-card select { flex:1; min-width:0; }
+}
