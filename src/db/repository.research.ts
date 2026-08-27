@@ -114,5 +114,10 @@ export async function listPublishedVerificationHistory(limitId: string) {
   return db.select({ artifact: verificationArtifacts, execution: verifierExecutions, claimNumber: claims.claimNumber }).from(verificationArtifacts).innerJoin(claims, eq(claims.id, verificationArtifacts.claimId)).innerJoin(specificationVersions, eq(specificationVersions.id, claims.specificationVersionId)).innerJoin(verifierExecutions, eq(verifierExecutions.artifactId, verificationArtifacts.id)).where(and(eq(specificationVersions.limitId, limitId), eq(claims.status, "ACCEPTED"), eq(verificationArtifacts.reviewStatus, "ACCEPTED"), eq(verificationArtifacts.verificationLevel, "MACHINE_CHECKED"), eq(verifierExecutions.status, "PASSED"), eq(verifierExecutions.reproducible, true))).orderBy(desc(verifierExecutions.completedAt));
 }
 export const listBounties = () => db.select().from(researchBounties).orderBy(desc(researchBounties.createdAt));
+export async function createBounty(input: { limitId?: string | null; title: string; sponsor: string; description: string; sourceUrl: string; amount?: string | null; currency?: string | null }) {
+  if (!/^https:\/\//i.test(input.sourceUrl)) throw new Error("Source URL must use HTTPS.");
+  const [row] = await db.insert(researchBounties).values({ limitId: input.limitId || null, title: input.title.trim(), sponsor: input.sponsor.trim(), description: input.description.trim(), sourceUrl: input.sourceUrl, amount: input.amount || null, currency: input.currency || null }).returning();
+  return row;
+}
 export const listBreakthroughEvents = (limitId: string) => db.select().from(breakthroughEvents).where(eq(breakthroughEvents.limitId, limitId)).orderBy(desc(breakthroughEvents.occurredAt));
 export const listWatchlistEvents = (limitId: string) => db.select().from(watchlistEvents).where(and(eq(watchlistEvents.limitId, limitId), isNotNull(watchlistEvents.publishedAt))).orderBy(desc(watchlistEvents.createdAt));

@@ -1,5 +1,5 @@
 import "server-only";
-import { desc, eq } from "drizzle-orm";
+import { desc, eq, inArray } from "drizzle-orm";
 import { db } from "./client";
 import { breakthroughEvents, watchlistEvents, auditLogs, claims, specificationVersions, limits } from "./schema";
 import { serializeClaim, serializeSpecification } from "./serializers";
@@ -11,6 +11,21 @@ export async function listBreakthroughEventsForLimit(limitId: string) {
     .leftJoin(claims, eq(claims.id, breakthroughEvents.claimId))
     .where(eq(breakthroughEvents.limitId, limitId))
     .orderBy(desc(breakthroughEvents.occurredAt));
+}
+
+// Site-wide feed — only ever reads from a table that's exclusively written by
+// detectAndRecordBreakthroughs after a real ACCEPTED transition, so every row here already
+// passed the draft/disputed guard; no extra published-only filtering is needed at read time.
+export async function listRecentBreakthroughEvents(resultLimit = 50) {
+  const rows = await db.select({ event: breakthroughEvents, claimNumber: claims.claimNumber, relation: claims.relation, valueExact: claims.valueExact })
+    .from(breakthroughEvents)
+    .leftJoin(claims, eq(claims.id, breakthroughEvents.claimId))
+    .orderBy(desc(breakthroughEvents.occurredAt))
+    .limit(resultLimit);
+  if (rows.length === 0) return [];
+  const limitRows = await db.select({ id: limits.id, registryNumber: limits.registryNumber, title: limits.title }).from(limits).where(inArray(limits.id, [...new Set(rows.map((r) => r.event.limitId))]));
+  const limitById = new Map(limitRows.map((l) => [l.id, l]));
+  return rows.flatMap((row) => { const limit = limitById.get(row.event.limitId); return limit ? [{ ...row, limit }] : []; });
 }
 
 async function persistBreakthroughEvents(events: BreakthroughDetection[], limitId: string, claimId: string, actorUserId: string) {

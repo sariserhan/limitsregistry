@@ -4,6 +4,7 @@ import { requireRole } from "../../src/auth/session";
 import { hasRole, type Role } from "../../src/auth/permissions";
 import { listAllLimits, listCandidateClaims, listPapers, getAcceptedBoundsForLimit } from "../../src/db/repository.console";
 import { listSubmissions } from "../../src/db/repository.submissions";
+import { searchIndexStatus } from "../../src/db/repository.search";
 import { detectContradiction, type BoundClaim } from "../../src/domain/contradiction";
 import type { CandidateClaimExtraction } from "../../src/lib/ai/extract-claims";
 import { addSource, decideCandidateClaim, decideSubmission, runExtraction, extractPdfCandidateClaims, importBibtex, reindexSemanticSearch } from "./actions";
@@ -20,8 +21,8 @@ const SUBMISSION_TYPE_LABELS: Record<string, string> = {
 
 export default async function ConsolePage() {
   const session = await requireRole("RESEARCHER");
-  const [papers, limits, candidates, submissions] = await Promise.all([listPapers(), listAllLimits(), listCandidateClaims(), listSubmissions()]);
   const canDecide = hasRole(session.user.role as Role, "EDITOR");
+  const [papers, limits, candidates, submissions, indexStatus] = await Promise.all([listPapers(), listAllLimits(), listCandidateClaims(), listSubmissions(), canDecide ? searchIndexStatus() : Promise.resolve([])]);
   const pendingSubmissions = submissions.filter((s) => s.submission.status === "SUBMITTED" || s.submission.status === "UNDER_REVIEW");
 
   const pending = candidates.filter((c) => c.status === "PENDING_REVIEW");
@@ -31,12 +32,12 @@ export default async function ConsolePage() {
   }
 
   return <main className="console-page">
-    <header><Link className="brand" href="/"><BrandIcon className="brand-mark" /><span>Limits Registry</span></Link><nav><Link href="/search">Search</Link> · <Link href="/console/research">Infrastructure</Link> · <Link href="/">Public Registry ↗</Link></nav></header>
+    <header><Link className="brand" href="/"><BrandIcon className="brand-mark" /><span>Limits Registry</span></Link><nav><Link href="/search">Search</Link> · <Link href="/console/research">Infrastructure</Link> · <Link href="/console/research/graph">Graph</Link> · <Link href="/console/research/artifacts">Artifacts</Link> · <Link href="/breakthroughs">Breakthroughs</Link> · <Link href="/">Public Registry ↗</Link></nav></header>
     <p className="section-kicker">Internal editorial workspace</p>
     <h1>Research Console</h1>
     <p className="lede">Signed in as {session.user.email} · {session.user.role}. Sources, AI extraction, and record drafting are draft-only — nothing here publishes without editorial review.</p>
 
-    {canDecide ? <section><h2>Semantic search index</h2><p>Refreshes the public index from published Limits, accepted Claims, specifications, and linked papers.</p><form action={reindexSemanticSearch}><button type="submit">Refresh semantic index</button></form></section> : null}
+    {canDecide ? <section><h2>Semantic search index</h2><p>Refreshes the public index from published Limits, accepted Claims, specifications, and linked papers.</p><p className="index-status" role="status">{indexStatus.length ? indexStatus.map((row) => `${row.status}: ${row.count}`).join(" · ") : "Index is empty — nothing has been embedded yet."}</p><form action={reindexSemanticSearch}><button type="submit">Refresh semantic index</button></form></section> : null}
 
     <section>
       <h2>Add a source</h2>
