@@ -68,8 +68,29 @@
     {
       "idx": 9,
       "version": "7",
-      "when": 1787857738483,
-      "tag": "0009_admin_dashboard_and_bounties",
+      "when": 1787858066537,
+      "tag": "0009_watchlists-notifications",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1787858616136,
+      "tag": "0010_bounty-tracker",
+      "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1787859274850,
+      "tag": "0011_source-ingestion-pipeline",
+      "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1787860569628,
+      "tag": "0012_admin_dashboard_tables",
       "breakpoints": true
     }
   ]

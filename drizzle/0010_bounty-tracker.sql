@@ -1,0 +1,14 @@
+CREATE TABLE IF NOT EXISTS "research_bounties" ("id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL, "limit_id" uuid REFERENCES "limits"("id"), "title" text NOT NULL, "sponsor" text NOT NULL, "description" text NOT NULL, "source_url" text NOT NULL, "status" text DEFAULT 'UNVERIFIED' NOT NULL, "amount" text, "currency" text, "expires_at" timestamp with time zone, "submitted_by_user_id" text, "verified_by_user_id" text, "moderation_note" text, "verified_at" timestamp with time zone, "created_at" timestamp with time zone DEFAULT now() NOT NULL, "updated_at" timestamp with time zone DEFAULT now() NOT NULL);--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "bounties_limit_idx" ON "research_bounties" ("limit_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "bounties_status_idx" ON "research_bounties" ("status");--> statement-breakpoint
+ALTER TABLE "research_bounties" ADD COLUMN IF NOT EXISTS "expires_at" timestamp with time zone;--> statement-breakpoint
+ALTER TABLE "research_bounties" ADD COLUMN IF NOT EXISTS "submitted_by_user_id" text;--> statement-breakpoint
+ALTER TABLE "research_bounties" ADD COLUMN IF NOT EXISTS "verified_by_user_id" text;--> statement-breakpoint
+ALTER TABLE "research_bounties" ADD COLUMN IF NOT EXISTS "moderation_note" text;--> statement-breakpoint
+ALTER TABLE "research_bounties" ADD COLUMN IF NOT EXISTS "verified_at" timestamp with time zone;--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "bounties_public_idx" ON "research_bounties" USING btree ("status","expires_at");--> statement-breakpoint
+DO $$ BEGIN ALTER TABLE "research_bounties" ADD CONSTRAINT "bounties_status_valid" CHECK ("research_bounties"."status" in ('UNVERIFIED', 'VERIFIED', 'REJECTED', 'WITHDRAWN')); EXCEPTION WHEN duplicate_object THEN NULL; END $$;--> statement-breakpoint
+DO $$ BEGIN ALTER TABLE "research_bounties" ADD CONSTRAINT "bounties_currency_valid" CHECK ("research_bounties"."currency" is null or "research_bounties"."currency" ~ '^[A-Z]{3}$'); EXCEPTION WHEN duplicate_object THEN NULL; END $$;--> statement-breakpoint
+DO $$ BEGIN ALTER TABLE "research_bounties" ADD CONSTRAINT "bounties_amount_valid" CHECK ("research_bounties"."amount" is null or ("research_bounties"."amount" ~ '^[0-9]+(\.[0-9]{1,2})?$' and "research_bounties"."amount"::numeric > 0)); EXCEPTION WHEN duplicate_object THEN NULL; END $$;--> statement-breakpoint
+DO $$ BEGIN ALTER TABLE "research_bounties" ADD CONSTRAINT "bounties_amount_currency_paired" CHECK (("research_bounties"."amount" is null and "research_bounties"."currency" is null) or ("research_bounties"."amount" is not null and "research_bounties"."currency" is not null)); EXCEPTION WHEN duplicate_object THEN NULL; END $$;--> statement-breakpoint
+DO $$ BEGIN ALTER TABLE "research_bounties" ADD CONSTRAINT "bounties_source_https_valid" CHECK ("research_bounties"."source_url" ~ '^https://[^[:space:]]+$'); EXCEPTION WHEN duplicate_object THEN NULL; END $$;

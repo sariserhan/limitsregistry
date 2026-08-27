@@ -1,0 +1,1 @@
+export function shouldPublishAcceptedClaimEvent(previousStatus: string, nextStatus: string, limitStatus: string) { return previousStatus !== "ACCEPTED" && nextStatus === "ACCEPTED" && (limitStatus === "OPEN" || limitStatus === "PROVEN"); }

@@ -1,6 +1,6 @@
 {
-  "id": "bc256fb8-066d-49d1-bb63-7b9a91871d61",
-  "prevId": "8cbc5e2b-f841-4b8b-a413-767f834fda4b",
+  "id": "144a8b33-5253-4b2c-896a-497e3a2bd441",
+  "prevId": "bc256fb8-066d-49d1-bb63-7b9a91871d61",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -2443,6 +2443,36 @@
           "primaryKey": false,
           "notNull": false
         },
+        "expires_at": {
+          "name": "expires_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "submitted_by_user_id": {
+          "name": "submitted_by_user_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "verified_by_user_id": {
+          "name": "verified_by_user_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "moderation_note": {
+          "name": "moderation_note",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "verified_at": {
+          "name": "verified_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
         "created_at": {
           "name": "created_at",
           "type": "timestamp with time zone",
@@ -2488,6 +2518,27 @@
           "concurrently": false,
           "method": "btree",
           "with": {}
+        },
+        "bounties_public_idx": {
+          "name": "bounties_public_idx",
+          "columns": [
+            {
+              "expression": "status",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "expires_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
         }
       },
       "foreignKeys": {
@@ -2508,7 +2559,28 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
       "policies": {},
-      "checkConstraints": {},
+      "checkConstraints": {
+        "bounties_status_valid": {
+          "name": "bounties_status_valid",
+          "value": "\"research_bounties\".\"status\" in ('UNVERIFIED', 'VERIFIED', 'REJECTED', 'WITHDRAWN')"
+        },
+        "bounties_currency_valid": {
+          "name": "bounties_currency_valid",
+          "value": "\"research_bounties\".\"currency\" is null or \"research_bounties\".\"currency\" ~ '^[A-Z]{3}$'"
+        },
+        "bounties_amount_valid": {
+          "name": "bounties_amount_valid",
+          "value": "\"research_bounties\".\"amount\" is null or (\"research_bounties\".\"amount\" ~ '^[0-9]+(\\.[0-9]{1,2})?$' and \"research_bounties\".\"amount\"::numeric > 0)"
+        },
+        "bounties_amount_currency_paired": {
+          "name": "bounties_amount_currency_paired",
+          "value": "(\"research_bounties\".\"amount\" is null and \"research_bounties\".\"currency\" is null) or (\"research_bounties\".\"amount\" is not null and \"research_bounties\".\"currency\" is not null)"
+        },
+        "bounties_source_https_valid": {
+          "name": "bounties_source_https_valid",
+          "value": "\"research_bounties\".\"source_url\" ~ '^https://[^[:space:]]+$'"
+        }
+      },
       "isRLSEnabled": false
     },
     "public.reviewer_assignments": {

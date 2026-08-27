@@ -1,7 +1,8 @@
 import { unstable_cache } from "next/cache";
 import { and, asc, eq, inArray, sql } from "drizzle-orm";
 import { db } from "./client";
-import { claimEvidence, claims, evidence, limits, specificationVersions, reviews, auditLogs, certificates } from "./schema";
+import { claimEvidence, claims, evidence, follows, limits, notifications, specificationVersions, reviews, auditLogs, certificates, watchlistEvents } from "./schema";
+import { shouldPublishAcceptedClaimEvent } from "../watchlists/events";
 import { serializeClaim, serializeEvidence, serializeLimit, serializeSpecification } from "./serializers";
 import { deriveFrontier } from "../domain/frontier";
 import { detectAndRecordBreakthroughs } from "./repository.breakthroughs";
@@ -59,14 +60,34 @@ export async function createEditorialSpec(input: { limitId: string; formalStatem
   const [row] = await db.insert(specificationVersions).values({ ...input, assumptions: input.assumptions ?? {}, versionNumber: 1 }).returning();
   return row;
 }
+// Only a genuine transition INTO accepted can generate events — re-saving an already-ACCEPTED
+// claim as ACCEPTED again (or accepting a claim on a still-DRAFT, unpublished Limit) must not
+// fire notifications or a breakthrough a second time.
 export async function updateClaimEditorialStatus(claimId: string, status: "ACCEPTED" | "REJECTED" | "UNDER_REVIEW" | "DISPUTED" | "INVALIDATED", actorUserId: string) {
-  const before = await db.select({ status: claims.status }).from(claims).where(eq(claims.id, claimId)).limit(1);
-  const previousStatus = before[0]?.status ?? null;
-  const [row] = await db.update(claims).set({ status, updatedAt: new Date() }).where(eq(claims.id, claimId)).returning();
-  // Only a genuine transition INTO accepted can be "newly accepted" — re-saving an
-  // already-ACCEPTED claim as ACCEPTED again must not re-fire the same breakthrough.
-  if (row && previousStatus !== "ACCEPTED" && status === "ACCEPTED") await detectAndRecordBreakthroughs(row.id, actorUserId);
-  return row ?? null;
+  const result = await db.transaction(async (tx) => {
+    const records = await tx.select({ claim: claims, limit: limits }).from(claims).innerJoin(specificationVersions, eq(specificationVersions.id, claims.specificationVersionId)).innerJoin(limits, eq(limits.id, specificationVersions.limitId)).where(eq(claims.id, claimId)).limit(1);
+    const record = records[0];
+    if (!record) return null;
+    const [row] = await tx.update(claims).set({ status, updatedAt: new Date() }).where(eq(claims.id, claimId)).returning();
+    const isNewAcceptance = shouldPublishAcceptedClaimEvent(record.claim.status, status, record.limit.status);
+    if (isNewAcceptance) {
+      const payload = { claimId: row.id, claimNumber: row.claimNumber, registryNumber: record.limit.registryNumber, title: `${row.claimNumber} accepted`, summary: `${row.relation} ${row.valueExact}`, url: `/limits/${record.limit.registryNumber}` };
+      const [event] = await tx.insert(watchlistEvents).values({ limitId: record.limit.id, eventType: "CLAIM_ACCEPTED", sourceEntityType: "CLAIM", sourceEntityId: row.id, payload, publishedAt: new Date() }).onConflictDoNothing().returning();
+      if (event) {
+        const subscribers = await tx.select().from(follows).where(and(eq(follows.limitId, record.limit.id), eq(follows.enabled, true)));
+        if (subscribers.length) await tx.insert(notifications).values(subscribers.map((follow) => ({ followId: follow.id, watchlistEventId: event.id, eventType: event.eventType, payload }))).onConflictDoNothing();
+      }
+    }
+    await tx.insert(auditLogs).values({ actorUserId, action: `CLAIM_STATUS_${status}`, entityType: "CLAIM", entityId: claimId, before: record.claim, after: row });
+    return { row, isNewAcceptance };
+  });
+  if (!result) return null;
+  // Runs AFTER the transaction above commits, not inside it — detectAndRecordBreakthroughs
+  // re-reads the claim's status on its own connection, so calling it from inside the still-open
+  // tx would see the pre-update status (READ COMMITTED can't see this transaction's own
+  // uncommitted write from a separate connection) and silently skip every breakthrough.
+  if (result.isNewAcceptance) await detectAndRecordBreakthroughs(result.row.id, actorUserId);
+  return result.row;
 }
 
 export async function createEditorialClaim(input: { claimNumber: string; specificationVersionId: string; claimType: "UPPER_BOUND" | "LOWER_BOUND" | "EXACT_VALUE" | "CONSTRUCTION" | "COUNTEREXAMPLE" | "ASYMPTOTIC_BOUND" | "COMPUTATIONAL_BOUND"; relation: "<" | "<=" | "=" | ">=" | ">"; valueExact: string; epistemicStatus: "LITERATURE_ASSERTED" | "SOURCE_CONFIRMED" | "REPRODUCED" | "PROVEN" | "FORMALLY_PROVEN" | "EMPIRICALLY_SUPPORTED" | "DISPUTED" | "INVALIDATED"; methodSummary?: string }) { const [row] = await db.insert(claims).values({ ...input, scopeParameters: {}, status: "DRAFT" }).returning(); return row; }

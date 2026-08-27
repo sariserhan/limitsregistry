@@ -35,7 +35,11 @@ async function persistBreakthroughEvents(events: BreakthroughDetection[], limitI
     // same fact (watchlistEvents, publishedAt set immediately — this only ever runs for an
     // already-ACCEPTED claim, so there's no draft state left to wait out before publishing).
     const [row] = await db.insert(breakthroughEvents).values({ limitId, claimId, eventType: event.eventType, occurredAt }).returning();
-    await db.insert(watchlistEvents).values({ limitId, eventType: event.eventType, payload: { claimId, detail: event.detail }, publishedAt: occurredAt });
+    // sourceEntityId is the breakthroughEvents row's own id, not claimId — a single ACCEPTED
+    // claim can produce more than one STRONGER_BOUND detection (e.g. both bounds tightened at
+    // once), and watchlistEvents has a unique index on (sourceEntityType, sourceEntityId,
+    // eventType) that would collide if they all pointed at the same claimId.
+    await db.insert(watchlistEvents).values({ limitId, eventType: event.eventType, sourceEntityType: "BREAKTHROUGH_EVENT", sourceEntityId: row.id, payload: { claimId, detail: event.detail }, publishedAt: occurredAt }).onConflictDoNothing();
     await db.insert(auditLogs).values({ actorUserId, action: `BREAKTHROUGH_${event.eventType}`, entityType: "LIMIT", entityId: limitId, after: { breakthroughEventId: row.id, claimId, eventType: event.eventType, detail: event.detail } });
   }
 }
@@ -57,7 +61,10 @@ export async function detectAndRecordBreakthroughs(claimId: string, actorUserId:
 
   const limitRows = await db.select().from(limits).where(eq(limits.id, spec.limitId)).limit(1);
   const limit = limitRows[0];
-  if (!limit) return [];
+  // A DRAFT Limit's Claims can be ACCEPTED editorially before the Limit itself is published —
+  // matches shouldPublishAcceptedClaimEvent's own gate so a still-unpublished Limit never leaks
+  // a breakthrough onto the public feed.
+  if (!limit || (limit.status !== "OPEN" && limit.status !== "PROVEN")) return [];
 
   const siblingClaims = await db.select().from(claims).where(eq(claims.specificationVersionId, spec.id));
   const detections = detectBreakthroughs(limit.direction, serializeSpecification(spec), siblingClaims.map((c) => serializeClaim(c)), serializeClaim(claim));

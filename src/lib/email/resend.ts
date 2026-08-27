@@ -15,8 +15,9 @@ export async function sendEmail({ to, from = SENDERS.support, replyTo, subject, 
   if (!resend) {
     // ponytail: Resend isn't provisioned yet (RESEND_API_KEY unset) — don't break auth flows in dev.
     console.warn(`[email] RESEND_API_KEY not set — skipped "${subject}" to ${to}`);
-    return;
+    return { sent: false as const, error: "RESEND_API_KEY is not configured." };
   }
-  const { error } = await resend.emails.send({ from, to, replyTo, subject, html, text });
-  if (error) console.error(`[email] Resend failed to send "${subject}" to ${to}:`, error);
+  const { data, error } = await resend.emails.send({ from, to, replyTo, subject, html, text });
+  if (error) { console.error("[email] Resend delivery failed.", error); return { sent: false as const, error: error.message }; }
+  return { sent: true as const, id: data?.id ?? null };
 }

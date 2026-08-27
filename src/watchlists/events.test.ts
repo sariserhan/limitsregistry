@@ -1,0 +1,3 @@
+import { describe, expect, it } from "vitest";
+import { shouldPublishAcceptedClaimEvent } from "./events";
+describe("accepted editorial event gating", () => { it("publishes only a new acceptance on a public Limit", () => { expect(shouldPublishAcceptedClaimEvent("DRAFT", "ACCEPTED", "OPEN")).toBe(true); expect(shouldPublishAcceptedClaimEvent("DRAFT", "ACCEPTED", "PROVEN")).toBe(true); expect(shouldPublishAcceptedClaimEvent("ACCEPTED", "ACCEPTED", "OPEN")).toBe(false); expect(shouldPublishAcceptedClaimEvent("DRAFT", "UNDER_REVIEW", "OPEN")).toBe(false); expect(shouldPublishAcceptedClaimEvent("DRAFT", "ACCEPTED", "DRAFT")).toBe(false); }); });

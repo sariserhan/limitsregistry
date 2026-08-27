@@ -48,22 +48,22 @@ This roadmap tracks the remaining work after the current research infrastructure
 
 - [x] Add watchlist-event database table.
 - [x] Add published-only RSS endpoint: `/api/watchlists/rss?limitId=...`.
-- [ ] Add watchlist subscribe/unsubscribe UI.
-- [ ] Add email notification preferences.
-- [ ] Generate events only from accepted editorial changes.
-- [ ] Connect events to email and weekly digest delivery.
-- [ ] Add unsubscribe, retry, and delivery tests.
+- [x] Add watchlist subscribe/unsubscribe UI.
+- [x] Add email notification preferences.
+- [x] Generate events only from accepted editorial changes.
+- [x] Connect events to email and weekly digest delivery.
+- [x] Add unsubscribe, retry, and delivery tests.
 
 ## 6. Prize and bounty tracker
 
 - [x] Add bounty database table.
 - [x] Add authenticated bounty submission API.
 - [x] Add basic bounty listing in Research Infrastructure.
-- [ ] Add bounty creation form.
-- [ ] Add editor verification and moderation actions.
-- [ ] Add public verified-bounty listing.
-- [ ] Add expiration, status, currency, and source validation.
-- [ ] Link verified bounties to canonical Limits.
+- [x] Add bounty creation form.
+- [x] Add editor verification and moderation actions.
+- [x] Add public verified-bounty listing.
+- [x] Add expiration, status, currency, and source validation.
+- [x] Link verified bounties to canonical Limits.
 
 ## 7. PDF and source ingestion
 
@@ -71,10 +71,10 @@ This roadmap tracks the remaining work after the current research infrastructure
 - [x] Add arXiv PDF extraction.
 - [x] Add AI draft extraction from extracted text.
 - [x] Add BibTeX import and single/batch export.
-- [ ] Add secure DOI/publisher PDF allowlist.
-- [ ] Persist PDF extraction status and page count.
-- [ ] Add background processing, retries, size limits, and failure states.
-- [ ] Add source-ingestion integration tests.
+- [x] Add secure DOI/publisher PDF allowlist.
+- [x] Persist PDF extraction status and page count.
+- [x] Add background processing, retries, size limits, and failure states.
+- [x] Add source-ingestion integration tests.
 
 ## 8. UI integration
 
