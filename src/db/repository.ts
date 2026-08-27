@@ -4,6 +4,7 @@ import { db } from "./client";
 import { claimEvidence, claims, evidence, limits, specificationVersions, reviews, auditLogs, certificates } from "./schema";
 import { serializeClaim, serializeEvidence, serializeLimit, serializeSpecification } from "./serializers";
 import { deriveFrontier } from "../domain/frontier";
+import { detectAndRecordBreakthroughs } from "./repository.breakthroughs";
 
 export const listPublishedLimits = unstable_cache(async () => db.select().from(limits).where(inArray(limits.status, ["OPEN", "PROVEN"])).orderBy(asc(limits.registryNumber)), ["published-limits"], { revalidate: 60, tags: ["published-limits"] });
 export async function getPublishedLimit(registryNumber: string) { const read = unstable_cache(async () => { const rows = await db.select().from(limits).where(and(inArray(limits.status, ["OPEN", "PROVEN"]), eq(limits.registryNumber, registryNumber))).limit(1); return rows[0] ?? null; }, ["published-limit", registryNumber], { revalidate: 60, tags: ["published-limits", `published-limit-${registryNumber}`] }); return read(); }
@@ -58,8 +59,13 @@ export async function createEditorialSpec(input: { limitId: string; formalStatem
   const [row] = await db.insert(specificationVersions).values({ ...input, assumptions: input.assumptions ?? {}, versionNumber: 1 }).returning();
   return row;
 }
-export async function updateClaimEditorialStatus(claimId: string, status: "ACCEPTED" | "REJECTED" | "UNDER_REVIEW" | "DISPUTED" | "INVALIDATED") {
+export async function updateClaimEditorialStatus(claimId: string, status: "ACCEPTED" | "REJECTED" | "UNDER_REVIEW" | "DISPUTED" | "INVALIDATED", actorUserId: string) {
+  const before = await db.select({ status: claims.status }).from(claims).where(eq(claims.id, claimId)).limit(1);
+  const previousStatus = before[0]?.status ?? null;
   const [row] = await db.update(claims).set({ status, updatedAt: new Date() }).where(eq(claims.id, claimId)).returning();
+  // Only a genuine transition INTO accepted can be "newly accepted" — re-saving an
+  // already-ACCEPTED claim as ACCEPTED again must not re-fire the same breakthrough.
+  if (row && previousStatus !== "ACCEPTED" && status === "ACCEPTED") await detectAndRecordBreakthroughs(row.id, actorUserId);
   return row ?? null;
 }
 

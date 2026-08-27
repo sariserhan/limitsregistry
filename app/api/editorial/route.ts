@@ -63,7 +63,7 @@ export async function POST(request: Request) {
     if (action === "record-review") { const parsed = reviewSchema.parse(body); return NextResponse.json(await recordEditorialReview({ ...parsed, reviewerUserId: session.user.id })); }
     if (action === "audit-log") return NextResponse.json(await listAuditLog());
     if (action === "issue-certificate") { const bodyData = body as { claimId?: string; certificateType?: "CLAIM_ACCEPTED" | "RECORD_ESTABLISHED" }; if (!bodyData.claimId || !bodyData.certificateType) return NextResponse.json({ error: "claimId and certificateType are required." }, { status: 400 }); return NextResponse.json(await issueClaimCertificate({ claimId: bodyData.claimId, certificateType: bodyData.certificateType, issuedByUserId: session.user.id })); }
-    if (action === "update-claim") { const parsed = statusSchema.parse(body); return NextResponse.json(await updateClaimEditorialStatus(parsed.claimId, parsed.status)); }
+    if (action === "update-claim") { const parsed = statusSchema.parse(body); return NextResponse.json(await updateClaimEditorialStatus(parsed.claimId, parsed.status, session.user.id)); }
     if (action === "create-bounty") { const parsed = bountySchema.parse(body); return NextResponse.json(await createBounty({ ...parsed, addedByUserId: session.user.id })); }
     if (action === "update-bounty-status") { const parsed = bountyStatusSchema.parse(body); return NextResponse.json(await updateBountyStatus(parsed.bountyId, parsed.status)); }
     return NextResponse.json({ error: "Unknown editorial action." }, { status: 400 });

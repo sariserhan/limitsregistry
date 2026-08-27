@@ -37,12 +37,12 @@ This roadmap tracks the remaining work after the current research infrastructure
 
 ## 4. Breakthrough events
 
-- [ ] Detect newly accepted stronger bounds and constructions.
-- [ ] Detect accepted frontier closure.
-- [ ] Persist immutable breakthrough events.
-- [ ] Add audit-log records for generated events.
-- [ ] Display events on canonical pages and feeds.
-- [ ] Add tests proving draft or disputed Claims cannot trigger events.
+- [x] Detect newly accepted stronger bounds and constructions.
+- [x] Detect accepted frontier closure.
+- [x] Persist immutable breakthrough events.
+- [x] Add audit-log records for generated events.
+- [x] Display events on canonical pages and feeds.
+- [x] Add tests proving draft or disputed Claims cannot trigger events.
 
 ## 5. Watchlists and notifications
 
