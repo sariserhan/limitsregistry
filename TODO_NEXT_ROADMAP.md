@@ -81,12 +81,12 @@ This roadmap tracks the remaining work after the current research infrastructure
 - [x] Add Research Infrastructure page: `/console/research`.
 - [x] Add dependency graph review page: `/console/research/graph`.
 - [x] Add artifact status page: `/console/research/artifacts`.
-- [ ] Add navigation links from the main Console.
-- [ ] Add forms for artifacts, dependencies, bounties, and watchlists.
-- [ ] Add semantic-search interface.
-- [ ] Add interactive graph visualization.
-- [ ] Add breakthrough feed and notification controls.
-- [ ] Add accessible loading, empty, error, and success states.
+- [x] Add navigation links from the main Console.
+- [x] Add forms for artifacts, dependencies, bounties, and watchlists.
+- [x] Add semantic-search interface.
+- [x] Add interactive graph visualization.
+- [x] Add breakthrough feed and notification controls.
+- [x] Add accessible loading, empty, error, and success states.
 
 ## 9. Validation and release
 
