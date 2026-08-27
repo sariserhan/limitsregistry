@@ -5,7 +5,7 @@ import type { PublishedLimit } from "../src/domain/published";
 import { formatExact } from "../src/domain/published";
 
 
-import { BrandIcon } from "../src/components/brand-icon";
+import { PublicHeader } from "../src/components/public-header";
 
 type BrowseClientProps = { initialLimits: PublishedLimit[]; initialClaims: typeof import("../src/domain/registry").browseClaims };
 
@@ -31,11 +31,7 @@ export default function Home({ initialLimits, initialClaims }: BrowseClientProps
   }), [limits, query, category]);
 
   return <main className="app-shell">
-    <header className="topbar">
-      <a className="brand" href="#top" aria-label="Limits Registry home"><BrandIcon className="brand-mark" /><span>Limits Registry</span></a>
-      <nav className="topnav" aria-label="Primary navigation"><a className="active" href="#registry">Registry</a><a href="#open">Open Limits</a><a href="/search">Search</a><a href="/dependencies">Graph</a><a href="/bounties">Bounties</a><a href="/watchlists">Watchlists</a><a href="#about">About</a></nav>
-      <a className="console-switch" href="/console"><span className="console-dot" />Research Console<ChevronIcon /></a>
-    </header>
+    <PublicHeader />
 
     {consoleMode ? <section className="console-view" id="top">
       <div className="console-heading"><div><p className="section-kicker">Editorial workspace</p><h1>Research Console</h1><p>Turn source material into reviewable, evidence-backed Claims.</p></div><button className="primary-button">Add a source <ArrowIcon /></button></div>

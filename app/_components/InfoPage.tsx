@@ -1,17 +1,11 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { BrandIcon } from "../../src/components/brand-icon";
+import { PublicHeader } from "../../src/components/public-header";
 
 export default function InfoPage({ kicker, title, intro, children }: { kicker: string; title: string; intro: string; children: ReactNode }) {
   return (
     <main className="info-page">
-      <header className="info-header">
-        <Link className="brand" href="/">
-          <BrandIcon className="brand-mark" />
-          <span>Limits Registry</span>
-        </Link>
-        <Link href="/">Back to registry ↗</Link>
-      </header>
+      <PublicHeader />
       <article className="info-content">
         <p className="section-kicker">{kicker}</p>
         <h1>{title}</h1>

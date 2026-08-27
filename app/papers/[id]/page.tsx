@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { BrandIcon } from "../../../src/components/brand-icon";
+import { PublicHeader } from "../../../src/components/public-header";
 import { getClaimsForPaper, getPaper } from "../../../src/db/repository.entities";
 
 type PageProps = { params: Promise<{ id: string }> };
@@ -12,7 +12,7 @@ export default async function PaperPage({ params }: PageProps) {
   const claims = await getClaimsForPaper(paper.id);
 
   return <main className="canonical-page">
-    <header className="canonical-header"><Link className="brand" href="/"><BrandIcon className="brand-mark" /><span>Limits Registry</span></Link><nav><Link href="/">Browse</Link></nav><span className="header-tag">PAPER</span></header>
+    <PublicHeader />
     <section className="canonical-intro">
       <div className="canonical-category">{paper.venue ?? "Unpublished venue"}</div>
       <h1>{paper.title}</h1>
