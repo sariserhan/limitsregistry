@@ -5,7 +5,20 @@ import { z } from "zod";
 import { createEditorialLimit, createEditorialSpec, createEditorialClaim, createEditorialEvidence, recordEditorialReview, listAuditLog, listEditorialQueue, updateClaimEditorialStatus } from "../../../src/db/repository";
 
 const limitSchema = z.object({ action: z.literal("create-limit"), registryNumber: z.string().regex(/^LR-[0-9]{6}$/), slug: z.string().min(2), title: z.string().min(2), summary: z.string().min(10), category: z.string().min(2), direction: z.enum(["MINIMIZE", "MAXIMIZE"]), token: z.string().min(1) });
-const specSchema = z.object({ action: z.literal("create-spec"), limitId: z.string().uuid(), formalStatement: z.string().min(10), constraints: z.record(z.string(), z.unknown()), token: z.string().min(1) });
+// The "Constraints" field in editorial-workspace.tsx is a single text input (placeholder
+// "domain=finite"), not a JSON object — it sends a comma-separated key=value string. Parse
+// that into a record instead of requiring an object, which every submission failed against.
+function parseConstraints(raw: string): Record<string, string> {
+  const constraints: Record<string, string> = {};
+  for (const pair of raw.split(",")) {
+    const [key, ...rest] = pair.split("=");
+    const trimmedKey = key?.trim();
+    if (!trimmedKey || rest.length === 0) continue;
+    constraints[trimmedKey] = rest.join("=").trim();
+  }
+  return constraints;
+}
+const specSchema = z.object({ action: z.literal("create-spec"), limitId: z.string().uuid(), formalStatement: z.string().min(10), constraints: z.string().min(1).transform(parseConstraints), token: z.string().min(1) });
 const statusSchema = z.object({ action: z.literal("update-claim"), claimId: z.string().uuid(), status: z.enum(["ACCEPTED", "REJECTED", "UNDER_REVIEW", "DISPUTED", "INVALIDATED"]), token: z.string().min(1) });
 // Plain `===` on secrets leaks timing information (it returns as soon as a byte
 // differs), letting an attacker recover the token byte-by-byte. timingSafeEqual
