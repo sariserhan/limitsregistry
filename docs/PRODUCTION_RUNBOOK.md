@@ -22,3 +22,13 @@ Keep Neon point-in-time restore and retention enabled according to the selected 
 ## Incident checks
 
 Use the `x-request-id` response header and structured server logs. If health is 503, stop editorial writes, inspect Neon status/connectivity, and prefer a forward-fix or deployment rollback only after confirming schema compatibility.
+
+
+## Neon backup and retention checklist
+
+- Enable Neon point-in-time restore and confirm the retention window allowed by the production plan.
+- Keep Preview and Production on separate Neon branches/projects and separate Vercel environment variables.
+- Record the selected retention window and last restore drill date in the change log.
+- Perform a restore drill on a non-production branch before the first public launch and after major schema changes.
+
+Neon retention is configured in the Neon project console/plan, not through application code.

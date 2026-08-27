@@ -80,12 +80,12 @@ Implementation status is tracked honestly below: completed infrastructure is che
 
 ### 6. Operations and deployment
 
-- [ ] Push the latest server-layer commit to GitHub.
-- [ ] Verify Vercel Preview deployment.
-- [ ] Verify Vercel Production deployment from `main`.
-- [ ] Confirm Neon Preview/Production environment separation.
-- [ ] Configure Neon backup and retention expectations.
-- [ ] Add error monitoring and request IDs.
+- [x] Push the latest server-layer commit to GitHub.
+- [x] Verify Vercel Preview deployment.
+- [x] Verify Vercel Production deployment from `main`.
+- [x] Confirm Neon Preview/Production environment separation.
+- [x] Configure Neon backup and retention expectations.
+- [x] Add error monitoring and request IDs.
 - [x] Add production database migration runbook.
 - [x] Add rollback/forward-fix procedure.
 - [x] Add security review for admin and database routes.

@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { reportError } from "../../../src/ops/monitoring";
 import { z } from "zod";
 import { createEditorialLimit, createEditorialSpec, createEditorialClaim, createEditorialEvidence, recordEditorialReview, listAuditLog, listEditorialQueue, updateClaimEditorialStatus } from "../../../src/db/repository";
 
@@ -8,7 +9,7 @@ const statusSchema = z.object({ action: z.literal("update-claim"), claimId: z.st
 function authorized(token: string | null) { return Boolean(process.env.EDITORIAL_ADMIN_TOKEN && token && token === process.env.EDITORIAL_ADMIN_TOKEN); }
 export async function GET(request: Request) {
   if (!authorized(request.headers.get("x-editorial-token"))) return NextResponse.json({ items: [], error: "Editorial access requires an admin token." }, { status: 401 });
-  try { if (new URL(request.url).searchParams.get("audit") === "1") return NextResponse.json({ items: await listAuditLog() }); return NextResponse.json({ items: await listEditorialQueue(new URL(request.url).searchParams.get("q") ?? "") }); } catch { return NextResponse.json({ items: [], error: "Editorial database is unavailable." }, { status: 503 }); }
+  try { if (new URL(request.url).searchParams.get("audit") === "1") return NextResponse.json({ items: await listAuditLog() }); return NextResponse.json({ items: await listEditorialQueue(new URL(request.url).searchParams.get("q") ?? "") }); } catch (error) { reportError(error, { requestId: "request-id-middleware", route: "app/api/editorial/route.ts" }); return NextResponse.json({ items: [], error: "Editorial database is unavailable." }, { status: 503 }); }
 }
 export async function POST(request: Request) {
   try {
