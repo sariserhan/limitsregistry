@@ -1,0 +1,4 @@
+import { createHash, createPrivateKey, sign } from "node:crypto";
+export function canonicalJson(value: unknown): string { if (Array.isArray(value)) return `[${value.map(canonicalJson).join(",")}]`; if (value && typeof value === "object") return `{${Object.keys(value as Record<string, unknown>).sort().map((key) => `${JSON.stringify(key)}:${canonicalJson((value as Record<string, unknown>)[key])}`).join(",")}}`; return JSON.stringify(value); }
+export function hashCertificateSnapshot(snapshot: Record<string, unknown>): string { return createHash("sha256").update(canonicalJson(snapshot)).digest("hex"); }
+export function signCertificateHash(hash: string): { signature: string | null; algorithm: string } { const privateKey = process.env.CERTIFICATE_SIGNING_PRIVATE_KEY; if (!privateKey) return { signature: null, algorithm: "SHA-256" }; return { signature: sign(null, Buffer.from(hash), createPrivateKey(privateKey)).toString("base64url"), algorithm: "Ed25519/SHA-256" }; }

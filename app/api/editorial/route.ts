@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { timingSafeEqual } from "node:crypto";
 import { reportError } from "../../../src/ops/monitoring";
 import { z } from "zod";
-import { createEditorialLimit, createEditorialSpec, createEditorialClaim, createEditorialEvidence, recordEditorialReview, listAuditLog, listEditorialQueue, updateClaimEditorialStatus } from "../../../src/db/repository";
+import { createEditorialLimit, createEditorialSpec, createEditorialClaim, createEditorialEvidence, recordEditorialReview, issueClaimCertificate, listAuditLog, listEditorialQueue, updateClaimEditorialStatus } from "../../../src/db/repository";
 
 const limitSchema = z.object({ action: z.literal("create-limit"), registryNumber: z.string().regex(/^LR-[0-9]{6}$/), slug: z.string().min(2), title: z.string().min(2), summary: z.string().min(10), category: z.string().min(2), direction: z.enum(["MINIMIZE", "MAXIMIZE"]), token: z.string().min(1) });
 const specSchema = z.object({ action: z.literal("create-spec"), limitId: z.string().uuid(), formalStatement: z.string().min(10), constraints: z.record(z.string(), z.unknown()), token: z.string().min(1) });
@@ -33,6 +33,7 @@ export async function POST(request: Request) {
     if (action === "create-evidence") return NextResponse.json(await createEditorialEvidence(body as never));
     if (action === "record-review") return NextResponse.json(await recordEditorialReview(body as never));
     if (action === "audit-log") return NextResponse.json(await listAuditLog());
+    if (action === "issue-certificate") { const bodyData = body as { claimId?: string; certificateType?: "CLAIM_ACCEPTED" | "RECORD_ESTABLISHED" }; if (!bodyData.claimId || !bodyData.certificateType) return NextResponse.json({ error: "claimId and certificateType are required." }, { status: 400 }); return NextResponse.json(await issueClaimCertificate({ claimId: bodyData.claimId, certificateType: bodyData.certificateType })); }
     if (action === "update-claim") { const parsed = statusSchema.parse(body); return NextResponse.json(await updateClaimEditorialStatus(parsed.claimId, parsed.status)); }
     return NextResponse.json({ error: "Unknown editorial action." }, { status: 400 });
   } catch (error) { return NextResponse.json({ error: error instanceof z.ZodError ? error.issues[0]?.message ?? "Invalid input." : "Editorial action failed." }, { status: 400 }); }

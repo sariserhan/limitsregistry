@@ -114,7 +114,7 @@ Implementation status is tracked honestly below: completed infrastructure is che
 - [x] Add notifications and followed Limits.
 - [x] Add public data exports and API rate limits.
 - [x] Evaluate Upstash Redis for queues, rate limiting, and cache workloads.
-- [ ] Evaluate certificates and sponsored challenges only after trust is established.
+- [x] Evaluate certificates and sponsored challenges only after trust is established.
 
 ## Explicit non-goals for now
 
