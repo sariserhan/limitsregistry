@@ -103,3 +103,20 @@ describe("additional foundational research packets", () => {
     }
   });
 });
+
+import { aiMinimumWidthResearchPacket, aiPacSampleResearchPacket, aiRobustnessResearchPacket, aiApproximationRateResearchPacket, aiTransformerExpressivityResearchPacket } from "./research-packets";
+
+describe("AI research packets", () => {
+  it("represents formal AI theory and certified robustness separately", () => {
+    for (const packet of [aiMinimumWidthResearchPacket, aiPacSampleResearchPacket, aiApproximationRateResearchPacket]) {
+      expect(packet.limit.category).toContain("AI");
+      expect(packet.limit.limitKind).toBe("THEORETICAL_BOUND");
+      expect(packet.registryReviewStatus).toBe("UNREVIEWED");
+    }
+    expect(aiRobustnessResearchPacket.limit.limitKind).toBe("EMPIRICAL_FRONTIER");
+  });
+  it("does not invent a transformer theorem before the task is specified", () => {
+    expect(aiTransformerExpressivityResearchPacket.claims).toHaveLength(0);
+    expect(aiTransformerExpressivityResearchPacket.specification.constraints.task).toBe("UNSPECIFIED");
+  });
+});
