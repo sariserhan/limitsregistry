@@ -14,7 +14,10 @@ function makePublished(limit: BrowseLimit): PublishedLimit {
   if (achievable !== null) claimsData.push({ id: `CLM-${limit.id}-A`, specificationVersionId: specification.id, claimType: "CONSTRUCTION", relation: ">=", value: { kind: "integer", value: achievable }, status: "ACCEPTED", epistemicStatus: "SOURCE_CONFIRMED", evidenceIds: [], author: "Registry source", year: 2025, source: "Curated launch record" });
   if (bound !== null) claimsData.push({ id: `CLM-${limit.id}-B`, specificationVersionId: specification.id, claimType: "UPPER_BOUND", relation: "<=", value: { kind: "integer", value: bound }, status: "ACCEPTED", epistemicStatus: limit.status === "PROVEN" ? "PROVEN" : "SOURCE_CONFIRMED", evidenceIds: [], author: "Registry source", year: 2025, source: "Curated launch record" });
   const frontier = deriveFrontier(limit.direction, specification, claimsData);
-  return { ...limit, status: frontier.status === "PROVEN" ? "PROVEN" : "OPEN", specification, claimsData, frontier };
+  // limit.status (spread below) is curated, correct data — don't override it with frontier.status,
+  // which only reflects claims parsed by numeric() and misreports OPEN for any algebraic/symbolic
+  // achievable or bound (e.g. "n² / 4", "π⁴ / 384") since numeric() only matches plain digit strings.
+  return { ...limit, specification, claimsData, frontier };
 }
 
 export const publishedLimits = browseLimits.map(makePublished);
