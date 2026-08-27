@@ -38,3 +38,7 @@ export async function getAcceptedBoundsForLimit(limitId: string) {
     .where(and(eq(specificationVersions.limitId, limitId), eq(claims.status, "ACCEPTED")));
   return rows.filter((r) => r.valueNumeric !== null).map((r) => ({ relation: r.relation, valueNumeric: Number(r.valueNumeric) }));
 }
+
+export async function listClaimsForVerification() {
+  return db.select({ id: claims.id, claimNumber: claims.claimNumber, valueExact: claims.valueExact, status: claims.status }).from(claims).orderBy(desc(claims.createdAt));
+}

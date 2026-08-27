@@ -28,12 +28,12 @@ This roadmap tracks the remaining work after the current research infrastructure
 - [x] Add verification-artifact database table.
 - [x] Add artifact submission API.
 - [x] Add artifact status page.
-- [ ] Add artifact submission form.
-- [ ] Add reviewer decisions and audit entries.
-- [ ] Add verifier execution records.
-- [ ] Add Lean 4, Coq, Isabelle, and SAT result adapters.
-- [ ] Issue `MACHINE_CHECKED` only after a reproducible successful build.
-- [ ] Show reproduction history on canonical Limit pages.
+- [x] Add artifact submission form.
+- [x] Add reviewer decisions and audit entries.
+- [x] Add verifier execution records.
+- [x] Add Lean 4, Coq, Isabelle, and SAT result adapters.
+- [x] Issue `MACHINE_CHECKED` only after a reproducible successful build.
+- [x] Show reproduction history on canonical Limit pages.
 
 ## 4. Breakthrough events
 

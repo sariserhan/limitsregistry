@@ -57,6 +57,13 @@
       "when": 1787856587501,
       "tag": "0007_dependency-graph-hardening",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1787857223898,
+      "tag": "0008_verification-reproducibility",
+      "breakpoints": true
     }
   ]
 }

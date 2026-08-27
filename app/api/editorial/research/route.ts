@@ -1,9 +1,10 @@
 import { NextResponse } from "next/server";
 import { requireRole } from "../../../../src/auth/session";
 import { db } from "../../../../src/db/client";
-import { researchBounties, verificationArtifacts } from "../../../../src/db/schema";
-import { createDependency } from "../../../../src/db/repository.research";
+import { researchBounties } from "../../../../src/db/schema";
+import { createDependency, createVerificationArtifact } from "../../../../src/db/repository.research";
 import { DEPENDENCY_RELATIONS, type DependencyRelation } from "../../../../src/domain/dependencies";
+import { ARTIFACT_VERIFIERS, type ArtifactVerifier } from "../../../../src/verification/artifact-adapters";
 export const runtime = "nodejs";
 export async function POST(request: Request) {
   await requireRole("RESEARCHER");
@@ -11,8 +12,8 @@ export async function POST(request: Request) {
   const kind = body.kind;
   if (kind === "artifact") {
     if (!body.claimId || !body.verifier || !body.repositoryUrl || !body.commitHash) return NextResponse.json({ error: "claimId, verifier, repositoryUrl, and commitHash are required." }, { status: 400 });
-    const [row] = await db.insert(verificationArtifacts).values({ claimId: body.claimId, verifier: body.verifier, repositoryUrl: body.repositoryUrl, commitHash: body.commitHash, verifierVersion: body.verifierVersion || null }).returning();
-    return NextResponse.json({ data: row }, { status: 201 });
+    if (!ARTIFACT_VERIFIERS.includes(body.verifier as ArtifactVerifier)) return NextResponse.json({ error: "Unsupported verifier." }, { status: 400 });
+    try { const row = await createVerificationArtifact({ claimId: body.claimId, verifier: body.verifier as ArtifactVerifier, repositoryUrl: body.repositoryUrl, commitHash: body.commitHash, verifierVersion: body.verifierVersion || null }); return NextResponse.json({ data: row }, { status: 201 }); } catch (error) { return NextResponse.json({ error: error instanceof Error ? error.message : "Artifact could not be created." }, { status: 400 }); }
   }
   if (kind === "dependency") {
     if (!body.sourceLimitId || !body.targetLimitId || !body.relation) return NextResponse.json({ error: "sourceLimitId, targetLimitId, and relation are required." }, { status: 400 });
