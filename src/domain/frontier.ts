@@ -22,6 +22,16 @@ export function relationSatisfied(value: ExactValue, relation: Claim["relation"]
   return comparison === 0;
 }
 
+// compareExact can't order two text-kind bounds (asymptotic notation, algebraic formulas aren't
+// numerically comparable without symbolic math), so it always returns null for them — which meant
+// a ">=" and "<=" claim asserting the identical formula could never close the frontier, even though
+// string-identical bounds obviously meet. This only ever reports equality, never a mismatch as
+// DISPUTED: two differently-written formulas could still be mathematically equivalent, so a string
+// mismatch is "unknown", not "impossible".
+function textBoundsEqual(left: ExactValue, right: ExactValue): boolean {
+  return left.kind === "text" && right.kind === "text" && left.value.trim() === right.value.trim();
+}
+
 function toNumber(value: ExactValue | null): number | null {
   if (!value) return null;
   if (value.kind === "integer") return Number(value.value);
@@ -51,12 +61,13 @@ export function deriveFrontier(direction: Direction, specification: Specificatio
   const lower = toNumber(lowerBound);
   const upper = toNumber(upperBound);
   const comparison = lowerBound && upperBound ? compareExact(lowerBound, upperBound) : null;
+  const textClosed = comparison === null && !!lowerBound && !!upperBound && textBoundsEqual(lowerBound, upperBound);
   const inconsistent = comparison === 1;
   if (inconsistent) {
     issues.push("LOWER_BOUND_EXCEEDS_UPPER_BOUND");
     explanation.push("Accepted Claims produce an impossible frontier and require editorial review.");
   }
-  const closed = !inconsistent && comparison === 0;
+  const closed = !inconsistent && (comparison === 0 || textClosed);
   if (lowerBound) explanation.push(`Strongest accepted lower bound: ${display(lowerBound)}.`);
   if (upperBound) explanation.push(`Strongest accepted upper bound: ${display(upperBound)}.`);
   if (!lowerBound && !upperBound) explanation.push("No accepted numeric bounds exist for this specification.");
