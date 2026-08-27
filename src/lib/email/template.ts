@@ -56,7 +56,7 @@ function shell(preheader: string, title: string, bodyHtml: string): string {
       <table role="presentation" class="lr-container" width="580" cellpadding="0" cellspacing="0" style="width:580px; max-width:100%;">
         <tr><td class="lr-pad lr-ink" style="padding:0 10px 28px;">
           <span class="lr-ink" style="display:inline-flex; align-items:center; gap:9px; font:600 15px/1 'Space Grotesk',-apple-system,sans-serif; color:${INK}; letter-spacing:-.02em;">
-            <span class="lr-line" style="display:inline-block; width:16px; height:16px; border:1.5px solid ${INK};">&nbsp;</span>
+            <img src="https://limitsregistry.com/favicon-64.png" width="20" height="20" alt="" style="display:block; width:20px; height:20px;" />
             Limits Registry
           </span>
         </td></tr>
