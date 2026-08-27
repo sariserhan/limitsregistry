@@ -48,11 +48,11 @@ This roadmap tracks the remaining work after the current research infrastructure
 
 - [x] Add watchlist-event database table.
 - [x] Add published-only RSS endpoint: `/api/watchlists/rss?limitId=...`.
-- [ ] Add watchlist subscribe/unsubscribe UI.
-- [ ] Add email notification preferences.
-- [ ] Generate events only from accepted editorial changes.
-- [ ] Connect events to email and weekly digest delivery.
-- [ ] Add unsubscribe, retry, and delivery tests.
+- [x] Add watchlist subscribe/unsubscribe UI.
+- [x] Add email notification preferences.
+- [x] Generate events only from accepted editorial changes.
+- [x] Connect events to email and weekly digest delivery.
+- [x] Add unsubscribe, retry, and delivery tests.
 
 ## 6. Prize and bounty tracker
 

@@ -1,7 +1,8 @@
 import { unstable_cache } from "next/cache";
 import { and, asc, eq, inArray, sql } from "drizzle-orm";
 import { db } from "./client";
-import { claimEvidence, claims, evidence, limits, specificationVersions, reviews, auditLogs, certificates } from "./schema";
+import { claimEvidence, claims, evidence, follows, limits, notifications, specificationVersions, reviews, auditLogs, certificates, watchlistEvents } from "./schema";
+import { shouldPublishAcceptedClaimEvent } from "../watchlists/events";
 import { serializeClaim, serializeEvidence, serializeLimit, serializeSpecification } from "./serializers";
 
 export const listPublishedLimits = unstable_cache(async () => db.select().from(limits).where(inArray(limits.status, ["OPEN", "PROVEN"])).orderBy(asc(limits.registryNumber)), ["published-limits"], { revalidate: 60, tags: ["published-limits"] });
@@ -40,9 +41,19 @@ export async function createEditorialSpec(input: { limitId: string; formalStatem
   const [row] = await db.insert(specificationVersions).values({ ...input, assumptions: input.assumptions ?? {}, versionNumber: 1 }).returning();
   return row;
 }
-export async function updateClaimEditorialStatus(claimId: string, status: "ACCEPTED" | "REJECTED" | "UNDER_REVIEW" | "DISPUTED" | "INVALIDATED") {
-  const [row] = await db.update(claims).set({ status, updatedAt: new Date() }).where(eq(claims.id, claimId)).returning();
-  return row ?? null;
+export async function updateClaimEditorialStatus(claimId: string, status: "ACCEPTED" | "REJECTED" | "UNDER_REVIEW" | "DISPUTED" | "INVALIDATED", actorUserId?: string) {
+  return db.transaction(async (tx) => {
+    const records = await tx.select({ claim: claims, limit: limits }).from(claims).innerJoin(specificationVersions, eq(specificationVersions.id, claims.specificationVersionId)).innerJoin(limits, eq(limits.id, specificationVersions.limitId)).where(eq(claims.id, claimId)).limit(1);
+    const record = records[0]; if (!record) return null;
+    const [row] = await tx.update(claims).set({ status, updatedAt: new Date() }).where(eq(claims.id, claimId)).returning();
+    if (shouldPublishAcceptedClaimEvent(record.claim.status, status, record.limit.status)) {
+      const payload = { claimId: row.id, claimNumber: row.claimNumber, registryNumber: record.limit.registryNumber, title: ` accepted`, summary: ` `, url: `/limits/` };
+      const [event] = await tx.insert(watchlistEvents).values({ limitId: record.limit.id, eventType: "CLAIM_ACCEPTED", sourceEntityType: "CLAIM", sourceEntityId: row.id, payload, publishedAt: new Date() }).onConflictDoNothing().returning();
+      if (event) { const subscribers = await tx.select().from(follows).where(and(eq(follows.limitId, record.limit.id), eq(follows.enabled, true))); if (subscribers.length) await tx.insert(notifications).values(subscribers.map((follow) => ({ followId: follow.id, watchlistEventId: event.id, eventType: event.eventType, payload }))).onConflictDoNothing(); }
+    }
+    if (actorUserId) await tx.insert(auditLogs).values({ actorUserId, action: `CLAIM_STATUS_`, entityType: "CLAIM", entityId: claimId, before: record.claim, after: row });
+    return row;
+  });
 }
 
 export async function createEditorialClaim(input: { claimNumber: string; specificationVersionId: string; claimType: "UPPER_BOUND" | "LOWER_BOUND" | "EXACT_VALUE" | "CONSTRUCTION" | "COUNTEREXAMPLE" | "ASYMPTOTIC_BOUND" | "COMPUTATIONAL_BOUND"; relation: "<" | "<=" | "=" | ">=" | ">"; valueExact: string; epistemicStatus: "LITERATURE_ASSERTED" | "SOURCE_CONFIRMED" | "REPRODUCED" | "PROVEN" | "FORMALLY_PROVEN" | "EMPIRICALLY_SUPPORTED" | "DISPUTED" | "INVALIDATED"; methodSummary?: string }) { const [row] = await db.insert(claims).values({ ...input, scopeParameters: {}, status: "DRAFT" }).returning(); return row; }

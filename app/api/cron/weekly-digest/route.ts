@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { timingSafeEqual } from "node:crypto";
 import { getWeeklyDigestData, listDigestRecipients } from "../../../../src/db/repository.digest";
 import { sendWeeklyDigestEmail } from "../../../../src/lib/email/digest-email";
+import { deliverWatchlistNotifications } from "../../../../src/watchlists/delivery";
 
 // Same constant-time comparison pattern as app/api/editorial/route.ts — a plain
 // `!==` on a bearer secret leaks timing information byte-by-byte.
@@ -18,7 +19,8 @@ export async function GET(request: Request) {
 
   const data = await getWeeklyDigestData();
   const recipients = await listDigestRecipients();
-  await Promise.all(recipients.map((r) => sendWeeklyDigestEmail(r.email, r.name, data)));
+  const [watchlist] = await Promise.all([deliverWatchlistNotifications("WEEKLY"), Promise.all(recipients.map((r) => sendWeeklyDigestEmail(r.email, r.name, data)))]);
+  const instantRetries = await deliverWatchlistNotifications("INSTANT");
 
-  return NextResponse.json({ sent: recipients.length, newlyPublished: data.newlyPublished.length, acceptedClaims: data.acceptedClaims.length, newSubmissions: data.newSubmissions.length });
+  return NextResponse.json({ sent: recipients.length, watchlist, instantRetries, newlyPublished: data.newlyPublished.length, acceptedClaims: data.acceptedClaims.length, newSubmissions: data.newSubmissions.length });
 }
