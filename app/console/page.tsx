@@ -21,10 +21,12 @@ const SUBMISSION_TYPE_LABELS: Record<string, string> = {
   CORRECTION: "Correction",
 };
 
-export default async function ConsolePage() {
+type Props = { searchParams: Promise<{ success?: string; error?: string }> };
+
+export default async function ConsolePage({ searchParams }: Props) {
   const session = await requireRole("RESEARCHER");
   const canDecide = hasRole(session.user.role as Role, "EDITOR");
-  const [papers, limits, candidates, submissions, sourceJobs, indexStatus] = await Promise.all([listPapers(), listAllLimits(), listCandidateClaims(), listSubmissions(), listSourceIngestionJobs(), canDecide ? searchIndexStatus() : Promise.resolve([])]);
+  const [papers, limits, candidates, submissions, sourceJobs, indexStatus, params] = await Promise.all([listPapers(), listAllLimits(), listCandidateClaims(), listSubmissions(), listSourceIngestionJobs(), canDecide ? searchIndexStatus() : Promise.resolve([]), searchParams]);
   const pendingSubmissions = submissions.filter((s) => s.submission.status === "SUBMITTED" || s.submission.status === "UNDER_REVIEW");
 
   const pending = candidates.filter((c) => c.status === "PENDING_REVIEW");
@@ -38,6 +40,7 @@ export default async function ConsolePage() {
     <p className="section-kicker">Internal editorial workspace</p>
     <h1>Research Console</h1>
     <p className="lede">Signed in as {session.user.email} · {session.user.role}. Sources, AI extraction, and record drafting are draft-only — nothing here publishes without editorial review.</p>
+    {(params.success || params.error) && <p className={params.error ? "graph-message graph-error" : "graph-message"} role="status">{params.error ?? params.success}</p>}
 
     <ConsoleTabs tabs={[
       {
@@ -128,7 +131,7 @@ export default async function ConsolePage() {
             </div>
             {canDecide && <form className="candidate-actions" action={decideSubmission} style={{ flexDirection: "column", alignItems: "stretch", gap: 8 }}>
               <input type="hidden" name="id" value={submission.id} />
-              <textarea name="notes" placeholder="Reviewer note (required)" rows={2} style={{ font: "inherit", padding: 8, border: "1px solid var(--line)" }} />
+              <textarea name="notes" placeholder="Reviewer note (required)" rows={2} required style={{ font: "inherit", padding: 8, border: "1px solid var(--line)" }} />
               <div style={{ display: "flex", gap: 8 }}>
                 <button name="decision" value="ACCEPTED">Accept</button>
                 <button name="decision" value="NEEDS_REVISION">Needs revision</button>

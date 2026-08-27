@@ -25,7 +25,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
   const showMaintenance = settings.maintenanceEnabled && !bypassMaintenance;
   const isAdmin = hasRole(session?.user.role as Role, "ADMIN");
 
-  return <html lang="en"><body>
+  return <html lang="en" data-scroll-behavior="smooth"><body>
     {isAdmin && <AdminModeBanner />}
     {!showMaintenance && settings.announcementEnabled && <AnnouncementBanner message={settings.announcementMessage} level={settings.announcementLevel} />}
     {showMaintenance ? <MaintenanceScreen message={settings.maintenanceMessage} /> : children}

@@ -17,7 +17,13 @@ export async function getSession() {
 export async function requireRole(minimum: Role) {
   const session = await getSession();
   if (!session || !hasRole(session.user.role as Role, minimum)) {
-    redirect(`/login?next=${encodeURIComponent(`/`)}`);
+    // proxy.ts stamps x-pathname on every request — reuse it here instead of hardcoding "/", so
+    // signing in from a role-gated redirect actually returns to the page that was requested
+    // (this previously always bounced back to the homepage, even from deep links like
+    // /watchlists or /reviewer-profile).
+    const requestHeaders = await headers();
+    const next = requestHeaders.get("x-pathname") || "/";
+    redirect(`/login?next=${encodeURIComponent(next)}`);
   }
   return session;
 }
