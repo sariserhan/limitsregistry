@@ -1,5 +1,5 @@
 import "server-only";
-import { sendEmail } from "./resend";
+import { sendEmail, SENDERS } from "./resend";
 import { escapeHtml, renderEmail } from "./template";
 
 export async function sendVerificationEmail(to: string, name: string, url: string) {
@@ -11,7 +11,7 @@ export async function sendVerificationEmail(to: string, name: string, url: strin
     ctaUrl: url,
     note: "If you didn't create this account, you can safely ignore this email.",
   });
-  await sendEmail({ to, subject: "Verify your email — Limits Registry", html, text });
+  await sendEmail({ to, from: SENDERS.support, replyTo: SENDERS.support, subject: "Verify your email — Limits Registry", html, text });
 }
 
 export async function sendResetPasswordEmail(to: string, name: string, url: string) {
@@ -23,7 +23,7 @@ export async function sendResetPasswordEmail(to: string, name: string, url: stri
     ctaUrl: url,
     note: "If you didn't request this, you can safely ignore this email — your password won't change.",
   });
-  await sendEmail({ to, subject: "Reset your password — Limits Registry", html, text });
+  await sendEmail({ to, from: SENDERS.support, replyTo: SENDERS.support, subject: "Reset your password — Limits Registry", html, text });
 }
 
 export async function sendWelcomeEmail(to: string, name: string) {
@@ -34,7 +34,7 @@ export async function sendWelcomeEmail(to: string, name: string) {
     intro: "Your email is verified. New accounts start with read-only access — an admin grants Research Console and review permissions from there.",
     ctaLabel: "Explore the Registry",
     ctaUrl: siteUrl,
-    note: "Questions about access? Reply to this email.",
+    note: "Questions about access? Reply to this email and it'll reach Support directly.",
   });
-  await sendEmail({ to, subject: "Welcome to Limits Registry", html, text });
+  await sendEmail({ to, from: SENDERS.welcome, replyTo: SENDERS.support, subject: "Welcome to Limits Registry", html, text });
 }
