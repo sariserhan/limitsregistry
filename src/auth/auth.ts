@@ -4,7 +4,7 @@ import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { nextCookies } from "better-auth/next-js";
 import { db } from "../db/client";
 import * as schema from "../db/schema";
-import { sendResetPasswordEmail, sendVerificationEmail } from "../lib/email/auth-emails";
+import { sendResetPasswordEmail, sendVerificationEmail, sendWelcomeEmail } from "../lib/email/auth-emails";
 
 export const auth = betterAuth({
   database: drizzleAdapter(db, { provider: "pg", schema }),
@@ -21,6 +21,7 @@ export const auth = betterAuth({
     sendVerificationEmail: async ({ user, url }) => sendVerificationEmail(user.email, user.name, url),
     sendOnSignUp: true,
     autoSignInAfterVerification: true,
+    afterEmailVerification: async (user) => sendWelcomeEmail(user.email, user.name),
   },
   user: {
     additionalFields: {
