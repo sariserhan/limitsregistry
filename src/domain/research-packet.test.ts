@@ -33,7 +33,7 @@ describe("additional normalized research packets", () => {
   });
 });
 
-import { sortingNetworkResearchPackets, landauerResearchPacket, minimalGenomeResearchPacket } from "./research-packets";
+import { sortingNetworkResearchPackets, landauerResearchPacket, speedOfLightResearchPacket, minimalGenomeResearchPacket, minimalGenomeSizeResearchPacket } from "./research-packets";
 
 describe("sorting network research packets", () => {
   it("derives exact frontiers for 9 and 10 inputs", () => {
@@ -55,12 +55,23 @@ describe("sorting network research packets", () => {
 
 describe("cross-domain research packets", () => {
   it("preserves Landauer's exact theoretical lower bound", () => {
-    expect(landauerResearchPacket.limit.limitKind).toBe("FUNDAMENTAL_CONSTANT");
+    expect(landauerResearchPacket.limit.limitKind).toBe("THEORETICAL_BOUND");
     expect(landauerResearchPacket.claims[0]?.value).toEqual({ kind: "text", value: "k_B T ln(2)" });
   });
   it("keeps the minimal-genome result as an observed open frontier", () => {
     expect(minimalGenomeResearchPacket.limit.limitKind).toBe("OBSERVED_RECORD");
     expect(minimalGenomeResearchPacket.limit.status).toBe("OPEN");
     expect(minimalGenomeResearchPacket.claims[0]?.value).toEqual({ kind: "integer", value: 473n });
+  });
+});
+
+
+describe("canonical limit states", () => {
+  it("represents exact constants and separate genome metrics", () => {
+    expect(landauerResearchPacket.limit.limitKind).toBe("THEORETICAL_BOUND");
+    expect(speedOfLightResearchPacket.limit.canonicalStatus).toBe("EXACT");
+    expect(speedOfLightResearchPacket.claims[0]?.relation).toBe("=");
+    expect(minimalGenomeSizeResearchPacket.limit.id).not.toBe(minimalGenomeResearchPacket.limit.id);
+    expect(minimalGenomeSizeResearchPacket.claims[0]?.value).toEqual({ kind: "integer", value: 531560n });
   });
 });
