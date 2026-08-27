@@ -108,3 +108,19 @@ export async function issueClaimCertificate(input: { claimId: string; certificat
 
 
 export async function getCertificate(certificateNumber: string) { const rows = await db.select().from(certificates).where(eq(certificates.certificateNumber, certificateNumber)).limit(1); return rows[0] ?? null; }
+
+/** One cached read for the public Browse surface; prevents database records from inheriting launch-fixture frontiers. */
+export async function listPublishedLimitsWithFrontiers() {
+  const rows = await db.select({ limit: limits, specification: specificationVersions, claim: claims }).from(limits).innerJoin(specificationVersions, eq(specificationVersions.limitId, limits.id)).leftJoin(claims, eq(claims.specificationVersionId, specificationVersions.id)).where(inArray(limits.status, ["OPEN", "PROVEN"])).orderBy(asc(limits.registryNumber), sql`${specificationVersions.versionNumber} desc`);
+  const grouped = new Map<string, { limit: typeof limits.$inferSelect; specification: typeof specificationVersions.$inferSelect; claimRows: Array<typeof claims.$inferSelect> }>();
+  for (const row of rows) {
+    const current = grouped.get(row.limit.id);
+    if (!current) grouped.set(row.limit.id, { limit: row.limit, specification: row.specification, claimRows: row.claim ? [row.claim] : [] });
+    else if (current.specification.id === row.specification.id && row.claim) current.claimRows.push(row.claim);
+  }
+  return [...grouped.values()].map(({ limit, specification, claimRows }) => {
+    const serializedSpecification = serializeSpecification(specification);
+    const serializedClaims = claimRows.map((claim) => serializeClaim(claim));
+    return { limit, specification: serializedSpecification, claims: serializedClaims, frontier: deriveFrontier(limit.direction, serializedSpecification, serializedClaims) };
+  });
+}

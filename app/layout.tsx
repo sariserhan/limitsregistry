@@ -11,7 +11,7 @@ import { hasRole, type Role } from "../src/auth/permissions";
 
 export const metadata: Metadata = {
   title: "Limits Registry — The verified boundaries of what is possible",
-  description: "A curated public record of mathematical and theoretical computer science limits.",
+  description: "A curated public record of the verified boundaries of what is possible.",
 };
 
 // Always allowed through, even during maintenance — otherwise an admin could lock themselves

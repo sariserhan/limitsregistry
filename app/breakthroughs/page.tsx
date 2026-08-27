@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { Metadata } from "next";
-import { BrandIcon } from "../../src/components/brand-icon";
+import { PublicHeader } from "../../src/components/public-header";
 import { listRecentBreakthroughEvents } from "../../src/db/repository.breakthroughs";
 import "./breakthroughs.css";
 
@@ -12,7 +12,7 @@ const LABEL: Record<string, string> = { STRONGER_BOUND: "Stronger bound accepted
 export default async function BreakthroughsPage() {
   const events = await listRecentBreakthroughEvents(50);
   return <main className="breakthroughs-page">
-    <header><Link className="brand" href="/"><BrandIcon className="brand-mark" /><span>Limits Registry</span></Link><nav><Link href="/dependencies">Dependencies</Link><Link href="/search">Search</Link></nav></header>
+    <PublicHeader />
     <section className="breakthroughs-intro">
       <p className="section-kicker">Recent activity</p>
       <h1>What just moved.</h1>

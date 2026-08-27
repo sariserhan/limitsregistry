@@ -14,7 +14,9 @@
     "db:push": "drizzle-kit push",
     "db:studio": "drizzle-kit studio",
     "db:seed:research": "tsx scripts/seed-research-drafts.ts",
-    "db:seed:codata": "tsx scripts/seed-codata-2022.ts"
+    "db:seed:codata": "tsx scripts/seed-codata-2022.ts",
+    "db:seed:miplib": "tsx scripts/seed-miplib-2017.ts",
+    "db:publish:founding-queue": "tsx scripts/publish-founding-queue.ts"
   },
   "dependencies": {
     "@modelcontextprotocol/server": "^2.0.0",
