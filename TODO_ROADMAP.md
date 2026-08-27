@@ -2,6 +2,8 @@
 
 ## Current status
 
+Implementation status is tracked honestly below: completed infrastructure is checked off, while database-backed UI reads, editorial writes, and launch-catalog curation remain open.
+
 - [x] Next.js + TypeScript application scaffold
 - [x] Public Browse experience
 - [x] Canonical `/limits/[id]` pages
@@ -28,16 +30,16 @@
 - [ ] Add rational and scientific-notation comparison tests.
 - [ ] Define strict semantics for `<` and `>` bounds.
 - [ ] Define integer-gap display rules separately from continuous values.
-- [ ] Add validation for contradictory accepted Claims.
-- [ ] Add validation for impossible frontiers, such as lower bound greater than upper bound.
-- [ ] Add immutable correction and invalidation event tests.
+- [x] Add validation for contradictory accepted Claims.
+- [x] Add validation for impossible frontiers, such as lower bound greater than upper bound.
+- [x] Add immutable correction and invalidation event tests.
 
 ### 2. Database-backed reads
 
-- [ ] Add repository functions for specification versions, evidence, reviews, timeline events, papers, and people.
+- [x] Add repository functions for specification versions, evidence, reviews, timeline events, papers, and people.
 - [ ] Add database serializers between Drizzle rows and domain types.
 - [ ] Replace static public page data with server-side database reads.
-- [ ] Add a safe empty-registry state for a new production database.
+- [x] Add a safe empty-registry state for a new production database.
 - [ ] Add pagination and filtering to repository queries.
 - [ ] Add database integration tests against Docker PostgreSQL.
 
@@ -56,11 +58,11 @@
 
 ### 4. Public registry quality
 
-- [ ] Show Claim provenance on canonical pages.
-- [ ] Show specification details and constraints.
+- [x] Show Claim provenance on canonical pages.
+- [x] Show specification details and constraints.
 - [ ] Show correction and dispute history.
 - [ ] Show derived frontier explanation.
-- [ ] Add canonical metadata, sitemap, robots.txt, and structured data.
+- [x] Add canonical metadata, sitemap, robots.txt, and structured data.
 - [ ] Add accessible loading, empty, and error states.
 - [ ] Add copy-citation interaction.
 - [ ] Add responsive visual QA at mobile, tablet, desktop, and wide desktop sizes.
