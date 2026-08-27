@@ -36,6 +36,13 @@
       "when": 1787853368882,
       "tag": "0004_admin_dashboard_tables",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1787856814571,
+      "tag": "0005_bounties",
+      "breakpoints": true
     }
   ]
 }

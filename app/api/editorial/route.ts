@@ -4,6 +4,7 @@ import { z } from "zod";
 import { getSession } from "../../../src/auth/session";
 import { hasRole } from "../../../src/auth/permissions";
 import { createEditorialLimit, createEditorialSpec, createEditorialClaim, createEditorialEvidence, recordEditorialReview, issueClaimCertificate, listAuditLog, listEditorialQueue, updateClaimEditorialStatus } from "../../../src/db/repository";
+import { createBounty, listAllBounties, updateBountyStatus } from "../../../src/db/repository.bounties";
 
 const limitSchema = z.object({ action: z.literal("create-limit"), registryNumber: z.string().regex(/^LR-[0-9]{6}$/), slug: z.string().min(2), title: z.string().min(2), summary: z.string().min(10), category: z.string().min(2), direction: z.enum(["MINIMIZE", "MAXIMIZE"]) });
 // The "Constraints" field in editorial-workspace.tsx is a single text input (placeholder
@@ -22,6 +23,10 @@ function parseConstraints(raw: string): Record<string, string> {
 const specSchema = z.object({ action: z.literal("create-spec"), limitId: z.string().uuid(), formalStatement: z.string().min(10), constraints: z.string().min(1).transform(parseConstraints) });
 const statusSchema = z.object({ action: z.literal("update-claim"), claimId: z.string().uuid(), status: z.enum(["ACCEPTED", "REJECTED", "UNDER_REVIEW", "DISPUTED", "INVALIDATED"]) });
 const reviewSchema = z.object({ action: z.literal("record-review"), claimId: z.string().uuid(), decision: z.enum(["ACCEPTED", "REJECTED", "NEEDS_REVISION"]), rationale: z.string().min(10), conflictDisclosed: z.boolean().default(true) });
+// url is validated as an actual URL but only ever stored/rendered as an informational link —
+// see the comment on the bounties table: this is never a claim that funds/eligibility are verified.
+const bountySchema = z.object({ action: z.literal("create-bounty"), limitId: z.string().uuid(), name: z.string().min(2), sponsor: z.string().min(2), amount: z.string().optional(), url: z.string().url(), notes: z.string().optional() });
+const bountyStatusSchema = z.object({ action: z.literal("update-bounty-status"), bountyId: z.string().uuid(), status: z.enum(["ACTIVE", "CLAIMED", "EXPIRED", "WITHDRAWN"]) });
 
 // Real auth, gated by role rather than a shared secret pasted into the browser — this route
 // was still on a legacy EDITORIAL_ADMIN_TOKEN bearer check even after the rest of the app
@@ -34,7 +39,12 @@ async function authorizedSession() {
 }
 export async function GET(request: Request) {
   if (!(await authorizedSession())) return NextResponse.json({ items: [], error: "Editorial access requires an editor session." }, { status: 401 });
-  try { if (new URL(request.url).searchParams.get("audit") === "1") return NextResponse.json({ items: await listAuditLog() }); return NextResponse.json({ items: await listEditorialQueue(new URL(request.url).searchParams.get("q") ?? "") }); } catch (error) { reportError(error, { requestId: "request-id-middleware", route: "app/api/editorial/route.ts" }); return NextResponse.json({ items: [], error: "Editorial database is unavailable." }, { status: 503 }); }
+  try {
+    const params = new URL(request.url).searchParams;
+    if (params.get("audit") === "1") return NextResponse.json({ items: await listAuditLog() });
+    if (params.get("bounties") === "1") return NextResponse.json({ items: await listAllBounties() });
+    return NextResponse.json({ items: await listEditorialQueue(params.get("q") ?? "") });
+  } catch (error) { reportError(error, { requestId: "request-id-middleware", route: "app/api/editorial/route.ts" }); return NextResponse.json({ items: [], error: "Editorial database is unavailable." }, { status: 503 }); }
 }
 export async function POST(request: Request) {
   try {
@@ -54,6 +64,8 @@ export async function POST(request: Request) {
     if (action === "audit-log") return NextResponse.json(await listAuditLog());
     if (action === "issue-certificate") { const bodyData = body as { claimId?: string; certificateType?: "CLAIM_ACCEPTED" | "RECORD_ESTABLISHED" }; if (!bodyData.claimId || !bodyData.certificateType) return NextResponse.json({ error: "claimId and certificateType are required." }, { status: 400 }); return NextResponse.json(await issueClaimCertificate({ claimId: bodyData.claimId, certificateType: bodyData.certificateType, issuedByUserId: session.user.id })); }
     if (action === "update-claim") { const parsed = statusSchema.parse(body); return NextResponse.json(await updateClaimEditorialStatus(parsed.claimId, parsed.status)); }
+    if (action === "create-bounty") { const parsed = bountySchema.parse(body); return NextResponse.json(await createBounty({ ...parsed, addedByUserId: session.user.id })); }
+    if (action === "update-bounty-status") { const parsed = bountyStatusSchema.parse(body); return NextResponse.json(await updateBountyStatus(parsed.bountyId, parsed.status)); }
     return NextResponse.json({ error: "Unknown editorial action." }, { status: 400 });
   } catch (error) { return NextResponse.json({ error: error instanceof z.ZodError ? error.issues[0]?.message ?? "Invalid input." : "Editorial action failed." }, { status: 400 }); }
 }

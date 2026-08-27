@@ -3,6 +3,7 @@
 import { FormEvent, useEffect, useState } from "react";
 
 type QueueItem = { id: string; claimNumber: string; valueExact: string; status: string; claimType: string };
+type Bounty = { id: string; name: string; sponsor: string; amount: string | null; url: string; status: string };
 
 /**
  * Full editorial CRUD (Limits, specs, claims, evidence, reviews, audit log) against
@@ -15,10 +16,13 @@ type QueueItem = { id: string; claimNumber: string; valueExact: string; status: 
 export function EditorialWorkspace({ canDecide }: { canDecide: boolean }) {
   const [items, setItems] = useState<QueueItem[]>([]);
   const [audit, setAudit] = useState<unknown[]>([]);
+  const [bounties, setBounties] = useState<Bounty[]>([]);
   const [query, setQuery] = useState("");
   const [message, setMessage] = useState("Loading review queue…");
 
   async function loadAudit() { const response = await fetch("/api/editorial?audit=1"); const data = await response.json(); setAudit(data.items ?? []); }
+  async function loadBounties() { const response = await fetch("/api/editorial?bounties=1"); const data = await response.json(); setBounties(data.items ?? []); }
+  async function updateBounty(id: string, status: string) { const response = await fetch("/api/editorial", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ action: "update-bounty-status", bountyId: id, status }) }); setMessage(response.ok ? "Bounty updated." : "Could not update bounty."); void loadBounties(); }
   async function refresh(value = query) { const response = await fetch(`/api/editorial?q=${encodeURIComponent(value)}`); const data = await response.json(); setItems(data.items ?? []); setMessage(data.error ?? `${(data.items ?? []).length} queue items loaded.`); }
   useEffect(() => {
     if (!canDecide) return;
@@ -58,6 +62,10 @@ export function EditorialWorkspace({ canDecide }: { canDecide: boolean }) {
         <hr />
         <h2>Review decision</h2>
         <form onSubmit={e => void submitAction(e, "record-review")}><label>Claim UUID<input name="claimId" required /></label><label>Decision<select name="decision"><option>ACCEPTED</option><option>REJECTED</option><option>NEEDS_REVISION</option></select></label><label>Rationale<textarea name="rationale" minLength={10} required /></label><button className="secondary-button" type="submit">Record review</button></form>
+        <hr />
+        <h2>Prize/bounty link</h2>
+        <p>Informational link only — this does not verify funds, eligibility, or escrow.</p>
+        <form onSubmit={e => void submitAction(e, "create-bounty")}><label>Limit UUID<input name="limitId" required /></label><label>Name<input name="name" placeholder="Clay Millennium Prize" required /></label><label>Sponsor<input name="sponsor" placeholder="Clay Mathematics Institute" required /></label><label>Amount (optional)<input name="amount" placeholder="$1,000,000" /></label><label>Official URL<input name="url" type="url" required /></label><label>Notes (optional)<textarea name="notes" /></label><button className="secondary-button" type="submit">Add bounty link</button></form>
       </section>
       <section className="editor-panel">
         <div className="queue-head"><div><h2>Review queue</h2><p>Draft and under-review Claims.</p></div><input aria-label="Filter review queue" value={query} onChange={e => { setQuery(e.target.value); void refresh(e.target.value); }} placeholder="Filter claims" /></div>
@@ -66,6 +74,10 @@ export function EditorialWorkspace({ canDecide }: { canDecide: boolean }) {
       <section className="editor-panel audit-panel">
         <div className="queue-head"><div><h2>Audit log</h2><p>Recent editorial actions.</p></div><button className="secondary-button" type="button" onClick={() => void loadAudit()}>Load log</button></div>
         {audit.length ? audit.map((entry, index) => <pre key={index}>{JSON.stringify(entry, null, 2)}</pre>) : <div className="empty-state"><strong>No audit entries loaded</strong><span>Load the protected audit log when needed.</span></div>}
+      </section>
+      <section className="editor-panel">
+        <div className="queue-head"><div><h2>Bounty links</h2><p>Prize/bounty links attached to Limits.</p></div><button className="secondary-button" type="button" onClick={() => void loadBounties()}>Load bounties</button></div>
+        {bounties.length ? bounties.map(b => <article className="editor-claim" key={b.id}><div><strong>{b.name}</strong><span>{b.sponsor}{b.amount ? ` · ${b.amount}` : ""}</span></div><select aria-label={`Status for ${b.name}`} defaultValue={b.status} onChange={e => void updateBounty(b.id, e.target.value)}><option>ACTIVE</option><option>CLAIMED</option><option>EXPIRED</option><option>WITHDRAWN</option></select></article>) : <div className="empty-state"><strong>No bounties loaded</strong><span>Load bounty links to manage their status.</span></div>}
       </section>
     </div>
     <p role="status" className="console-message">{message}</p>

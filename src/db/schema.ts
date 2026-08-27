@@ -78,3 +78,11 @@ export const inboxMessages = pgTable("inbox_messages", { id: uuid("id").defaultR
 // Audit trail for the admin "compose and send" tool — not a general outbound-email log (auth
 // emails and the weekly digest aren't recorded here, only admin-initiated arbitrary sends).
 export const adminSentEmails = pgTable("admin_sent_emails", { id: uuid("id").defaultRandom().primaryKey(), toEmail: text("to_email").notNull(), subject: text("subject").notNull(), heading: text("heading").notNull(), body: text("body").notNull(), footerNote: text("footer_note"), sentByUserId: text("sent_by_user_id").references(() => user.id).notNull(), createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull() });
+
+// --- V3: prize/bounty links ---
+export const bountyStatusEnum = pgEnum("bounty_status", ["ACTIVE", "CLAIMED", "EXPIRED", "WITHDRAWN"]);
+// Informational links only (name, sponsor, official URL) — deliberately NOT an escrow or
+// eligibility verification system. The Registry states a bounty exists and points to the
+// official rules; it never represents that it has confirmed funds, eligibility, or payout,
+// since that carries real financial/legal weight a wrong Claim value doesn't.
+export const bounties = pgTable("bounties", { id: uuid("id").defaultRandom().primaryKey(), limitId: uuid("limit_id").references(() => limits.id).notNull(), name: text("name").notNull(), sponsor: text("sponsor").notNull(), amount: text("amount"), url: text("url").notNull(), status: bountyStatusEnum("status").default("ACTIVE").notNull(), notes: text("notes"), addedByUserId: text("added_by_user_id").references(() => user.id), ...audit }, (t) => [index("bounties_limit_idx").on(t.limitId)]);
