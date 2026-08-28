@@ -7,12 +7,12 @@ const post = getBlogPost("millennium-prize-problems-list")!;
 export const metadata: Metadata = {
   title: `${post.title} — Limits Registry`,
   description: post.dek,
-  alternates: { canonical: `/blog/${post.slug}` },
-  openGraph: { title: `${post.title} — Limits Registry`, description: post.dek, url: `/blog/${post.slug}`, type: "article" },
+  alternates: { canonical: `/articles/${post.slug}` },
+  openGraph: { title: `${post.title} — Limits Registry`, description: post.dek, url: `/articles/${post.slug}`, type: "article" },
   twitter: { card: "summary_large_image", title: `${post.title} — Limits Registry`, description: post.dek },
 };
 
-export default function Page() { return <InfoPage kicker="Blog · Mathematics" title={post.title} intro={post.dek}>
+export default function Page() { return <InfoPage kicker="Articles · Mathematics" title={post.title} intro={post.dek}>
 
 <p>In May 2000, the Clay Mathematics Institute named seven problems it considered the most important unsolved questions in mathematics, and put a <b>$1,000,000</b> prize on each. Twenty-five years later, six are still open.</p>
 

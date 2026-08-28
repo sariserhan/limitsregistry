@@ -7,12 +7,12 @@ const post = getBlogPost("what-is-a-ramsey-number")!;
 export const metadata: Metadata = {
   title: `${post.title} — Limits Registry`,
   description: post.dek,
-  alternates: { canonical: `/blog/${post.slug}` },
-  openGraph: { title: `${post.title} — Limits Registry`, description: post.dek, url: `/blog/${post.slug}`, type: "article" },
+  alternates: { canonical: `/articles/${post.slug}` },
+  openGraph: { title: `${post.title} — Limits Registry`, description: post.dek, url: `/articles/${post.slug}`, type: "article" },
   twitter: { card: "summary_large_image", title: `${post.title} — Limits Registry`, description: post.dek },
 };
 
-export default function Page() { return <InfoPage kicker="Blog · Combinatorics" title={post.title} intro={post.dek}>
+export default function Page() { return <InfoPage kicker="Articles · Combinatorics" title={post.title} intro={post.dek}>
 
 <p>Invite enough people to a party, and among any group that large, you&rsquo;re guaranteed to find either a clique of mutual acquaintances or a clique of mutual strangers of a certain size &mdash; no matter how the acquaintances happen to be arranged. The Ramsey number R(m, n) is the exact smallest party size where that guarantee kicks in for a clique of m acquaintances or n strangers.</p>
 

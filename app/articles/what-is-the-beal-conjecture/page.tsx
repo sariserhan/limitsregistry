@@ -7,12 +7,12 @@ const post = getBlogPost("what-is-the-beal-conjecture")!;
 export const metadata: Metadata = {
   title: `${post.title} — Limits Registry`,
   description: post.dek,
-  alternates: { canonical: `/blog/${post.slug}` },
-  openGraph: { title: `${post.title} — Limits Registry`, description: post.dek, url: `/blog/${post.slug}`, type: "article" },
+  alternates: { canonical: `/articles/${post.slug}` },
+  openGraph: { title: `${post.title} — Limits Registry`, description: post.dek, url: `/articles/${post.slug}`, type: "article" },
   twitter: { card: "summary_large_image", title: `${post.title} — Limits Registry`, description: post.dek },
 };
 
-export default function Page() { return <InfoPage kicker="Blog · Mathematics" title={post.title} intro={post.dek}>
+export default function Page() { return <InfoPage kicker="Articles · Mathematics" title={post.title} intro={post.dek}>
 
 <h2>The statement</h2>
 <p>If A<sup>x</sup> + B<sup>y</sup> = C<sup>z</sup>, where A, B, C, x, y, and z are positive integers and x, y, z are all greater than 2, then A, B, and C must share a common prime factor.</p>

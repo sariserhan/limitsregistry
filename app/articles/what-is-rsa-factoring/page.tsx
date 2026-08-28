@@ -7,12 +7,12 @@ const post = getBlogPost("what-is-rsa-factoring")!;
 export const metadata: Metadata = {
   title: `${post.title} — Limits Registry`,
   description: post.dek,
-  alternates: { canonical: `/blog/${post.slug}` },
-  openGraph: { title: `${post.title} — Limits Registry`, description: post.dek, url: `/blog/${post.slug}`, type: "article" },
+  alternates: { canonical: `/articles/${post.slug}` },
+  openGraph: { title: `${post.title} — Limits Registry`, description: post.dek, url: `/articles/${post.slug}`, type: "article" },
   twitter: { card: "summary_large_image", title: `${post.title} — Limits Registry`, description: post.dek },
 };
 
-export default function Page() { return <InfoPage kicker="Blog · Cryptography" title={post.title} intro={post.dek}>
+export default function Page() { return <InfoPage kicker="Articles · Cryptography" title={post.title} intro={post.dek}>
 
 <p>RSA encryption &mdash; the algorithm behind a large share of internet security &mdash; relies on one asymmetry: multiplying two large prime numbers together is fast, but recovering those two primes from their product is, as far as anyone has proven, extremely slow. There&rsquo;s no proof that factoring is fundamentally hard in the mathematical sense (that&rsquo;s an open question in complexity theory), but decades of attempts have never found a fast general method &mdash; and that empirical track record is what the RSA Factoring Challenge was built to keep testing.</p>
 

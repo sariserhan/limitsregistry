@@ -7,12 +7,12 @@ const post = getBlogPost("why-are-physical-constants-known-so-precisely")!;
 export const metadata: Metadata = {
   title: `${post.title} — Limits Registry`,
   description: post.dek,
-  alternates: { canonical: `/blog/${post.slug}` },
-  openGraph: { title: `${post.title} — Limits Registry`, description: post.dek, url: `/blog/${post.slug}`, type: "article" },
+  alternates: { canonical: `/articles/${post.slug}` },
+  openGraph: { title: `${post.title} — Limits Registry`, description: post.dek, url: `/articles/${post.slug}`, type: "article" },
   twitter: { card: "summary_large_image", title: `${post.title} — Limits Registry`, description: post.dek },
 };
 
-export default function Page() { return <InfoPage kicker="Blog · Physics" title={post.title} intro={post.dek}>
+export default function Page() { return <InfoPage kicker="Articles · Physics" title={post.title} intro={post.dek}>
 
 <p>Look up the mass of a proton and you&rsquo;ll get a number with ten significant figures and an explicit uncertainty on the last two. That precision isn&rsquo;t a rounding trick &mdash; it&rsquo;s the output of a formal, internationally coordinated process called CODATA, and it&rsquo;s the reason two labs on opposite sides of the world can agree on what &ldquo;one kilogram&rdquo; means without ever comparing physical objects.</p>
 

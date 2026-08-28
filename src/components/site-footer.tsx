@@ -6,7 +6,7 @@ export function SiteFooter() {
     <span>Evidence before assertion.</span>
     <span className="footer-links">
       <Link href="/about">About</Link>
-      <Link href="/blog">Blog</Link>
+      <Link href="/articles">Articles</Link>
       <Link href="/methodology">Methodology</Link>
       <Link href="/developers">API</Link>
       <Link href="/certificates/preview">Certificate preview</Link>

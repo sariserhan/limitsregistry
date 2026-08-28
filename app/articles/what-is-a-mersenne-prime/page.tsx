@@ -7,12 +7,12 @@ const post = getBlogPost("what-is-a-mersenne-prime")!;
 export const metadata: Metadata = {
   title: `${post.title} — Limits Registry`,
   description: post.dek,
-  alternates: { canonical: `/blog/${post.slug}` },
-  openGraph: { title: `${post.title} — Limits Registry`, description: post.dek, url: `/blog/${post.slug}`, type: "article" },
+  alternates: { canonical: `/articles/${post.slug}` },
+  openGraph: { title: `${post.title} — Limits Registry`, description: post.dek, url: `/articles/${post.slug}`, type: "article" },
   twitter: { card: "summary_large_image", title: `${post.title} — Limits Registry`, description: post.dek },
 };
 
-export default function Page() { return <InfoPage kicker="Blog · Number theory" title={post.title} intro={post.dek}>
+export default function Page() { return <InfoPage kicker="Articles · Number theory" title={post.title} intro={post.dek}>
 
 <p>A Mersenne prime is a prime number of the form 2<sup>p</sup> &minus; 1, named for the 17th-century French friar Marin Mersenne, who studied them. Not every value of p gives a prime &mdash; 2<sup>11</sup> &minus; 1 = 2047 = 23 &times; 89, for instance &mdash; but when it does work out, the result has a special structure that makes it unusually easy to <i>test</i> for primality compared to an arbitrary number of the same size, even though finding candidates in the first place is still a massive computation.</p>
 

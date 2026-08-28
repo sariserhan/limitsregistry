@@ -7,12 +7,12 @@ const post = getBlogPost("what-is-the-chromatic-number-of-the-plane")!;
 export const metadata: Metadata = {
   title: `${post.title} — Limits Registry`,
   description: post.dek,
-  alternates: { canonical: `/blog/${post.slug}` },
-  openGraph: { title: `${post.title} — Limits Registry`, description: post.dek, url: `/blog/${post.slug}`, type: "article" },
+  alternates: { canonical: `/articles/${post.slug}` },
+  openGraph: { title: `${post.title} — Limits Registry`, description: post.dek, url: `/articles/${post.slug}`, type: "article" },
   twitter: { card: "summary_large_image", title: `${post.title} — Limits Registry`, description: post.dek },
 };
 
-export default function Page() { return <InfoPage kicker="Blog · Mathematics" title={post.title} intro={post.dek}>
+export default function Page() { return <InfoPage kicker="Articles · Mathematics" title={post.title} intro={post.dek}>
 
 <p>Take every point in the infinite flat plane. Color each point so that no two points exactly one unit apart share the same color. How few colors do you need?</p>
 

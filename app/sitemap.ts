@@ -18,7 +18,7 @@ const STATIC_PAGES: Array<[string, number, MetadataRoute.Sitemap[number]["change
   ["bounties", 0.5, "weekly"],
   ["activity", 0.5, "daily"],
   ["compare", 0.3, "monthly"],
-  ["blog", 0.6, "weekly"],
+  ["articles", 0.6, "weekly"],
   ["methodology", 0.5, "monthly"],
   ["developers", 0.4, "monthly"],
   ["about", 0.3, "yearly"],
@@ -43,6 +43,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${BASE}/categories/all`, lastModified: now, changeFrequency: "daily" as const, priority: 0.6 },
     ...categories.map((category) => ({ url: `${BASE}/categories/${categorySlug(category)}`, lastModified: now, changeFrequency: "weekly" as const, priority: 0.5 })),
     ...limits.map((limit) => ({ url: `${BASE}/limits/${limit.registryNumber}`, lastModified: new Date(limit.updatedAt), changeFrequency: "weekly" as const, priority: 0.8 })),
-    ...blogPosts.map((post) => ({ url: `${BASE}/blog/${post.slug}`, lastModified: new Date(post.publishedAt), changeFrequency: "monthly" as const, priority: 0.6 })),
+    ...blogPosts.map((post) => ({ url: `${BASE}/articles/${post.slug}`, lastModified: new Date(post.publishedAt), changeFrequency: "monthly" as const, priority: 0.6 })),
   ];
 }
