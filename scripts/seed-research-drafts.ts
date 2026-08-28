@@ -13,10 +13,15 @@ const db = drizzle(sql, { schema });
 const evidenceType = (type: string): "PAPER" | "EXPERIMENT" | "REPRODUCTION" | "OTHER" => type === "EXPERIMENT" || type === "OBSERVATION" ? "EXPERIMENT" : type === "REPRODUCTION" ? "REPRODUCTION" : type === "PAPER" ? "PAPER" : "OTHER";
 
 async function run() {
-  let imported = 0;
+  let imported = 0, updated = 0;
   for (const packet of [...researchedDraftPackets, ...aiScalingResearchPackets]) {
     const existing = await db.select({ id: schema.limits.id }).from(schema.limits).where(eq(schema.limits.registryNumber, packet.limit.id)).limit(1);
-    if (existing[0]) continue;
+    if (existing[0]) {
+      await db.update(schema.limits).set({ summary: packet.limit.summary, updatedAt: new Date() }).where(eq(schema.limits.id, existing[0].id));
+      await db.update(schema.specificationVersions).set({ formalStatement: packet.specification.formalStatement, updatedAt: new Date() }).where(eq(schema.specificationVersions.limitId, existing[0].id));
+      updated++;
+      continue;
+    }
     const [limit] = await db.insert(schema.limits).values({ registryNumber: packet.limit.id, slug: packet.limit.id.toLowerCase(), title: packet.limit.title, summary: packet.limit.summary, category: packet.limit.category, direction: packet.limit.direction, metricName: "specified quantity", status: "DRAFT" }).returning();
     if (!limit) throw new Error(`Could not create ${packet.limit.id}`);
     const [spec] = await db.insert(schema.specificationVersions).values({ limitId: limit.id, versionNumber: packet.specification.version, formalStatement: packet.specification.formalStatement, constraints: packet.specification.constraints, assumptions: {}, asymptotic: packet.specification.asymptotic, probabilistic: packet.specification.probabilistic }).returning();
@@ -35,7 +40,7 @@ async function run() {
     imported++;
     console.log(`seeded ${packet.limit.id} — ${packet.limit.title}`);
   }
-  console.log(`done — ${imported} draft research records imported; existing records skipped.`);
+  console.log(`done — ${imported} draft research records imported, ${updated} existing records updated.`);
   await sql.end();
 }
 run().catch((error) => { console.error(error); process.exit(1); });
