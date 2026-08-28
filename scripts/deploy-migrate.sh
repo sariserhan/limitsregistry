@@ -45,7 +45,7 @@ else
   VERCEL=(npx --yes vercel)
 fi
 
-if [[ ! -f ".vercel/project.json" ]]; then
+if [[ ! -f ".vercel/project.json" && ! -d ".vercel" && ! -f ".env.local" ]] || { ! grep -q "^VERCEL_OIDC_TOKEN=" ".env.local" 2>/dev/null && [[ ! -f ".vercel/project.json" ]]; }; then
   echo "No linked Vercel project found. Run: npx vercel link" >&2
   exit 1
 fi
