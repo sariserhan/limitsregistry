@@ -4,7 +4,7 @@ import postgres from "postgres";
 
 const connectionString=process.env.DATABASE_URL;if(!connectionString)throw new Error("DATABASE_URL is required.");
 const sql=postgres(connectionString,{prepare:false,max:2});
-const proven=new Set(["LR-DRAFT-C","LR-DRAFT-CARNOT","LR-DRAFT-COVERING","LR-DRAFT-E8","LR-DRAFT-KISSING4","LR-DRAFT-NO-CLONING","LR-DRAFT-RAMSEY33"]);
+const proven=new Set(["LR-DRAFT-C","LR-DRAFT-CARNOT","LR-DRAFT-COVERING","LR-DRAFT-E8","LR-DRAFT-KISSING4","LR-DRAFT-NO-CLONING","LR-DRAFT-RAMSEY33","LR-DRAFT-ALG-01","LR-DRAFT-ALG-02","LR-DRAFT-ALG-03","LR-DRAFT-ALG-05","LR-DRAFT-ALG-10","LR-DRAFT-ALG-21"]);
 
 async function main(){try{
   // Scoped to the LR-DRAFT-* research packets (src/domain/research-packets.ts) only — this is the
@@ -13,7 +13,7 @@ async function main(){try{
   // reviewer publish path (recordCodataBatchReview/publishReviewedCodataBatch); sweeping either of
   // those into a blanket status flip here would bypass that review gate or publish a stub with no
   // real evidence.
-  const candidates=await sql`select l.id,l.registry_number,l.status,count(c.id)::int claim_count,count(ce.evidence_id)::int evidence_count from limits l join limit_spec_versions v on v.limit_id=l.id join claims c on c.specification_version_id=v.id left join claim_evidence ce on ce.claim_id=c.id where l.status=${"DRAFT"} and l.registry_number like ${"LR-DRAFT-%"} group by l.id,l.registry_number,l.status order by l.registry_number`;
+  const candidates=await sql`select l.id,l.registry_number,l.status,count(c.id)::int claim_count,count(ce.evidence_id)::int evidence_count from limits l join limit_spec_versions v on v.limit_id=l.id join claims c on c.specification_version_id=v.id left join claim_evidence ce on ce.claim_id=c.id where (l.status=${"DRAFT"} and l.registry_number like ${"LR-DRAFT-%"}) or l.registry_number in ${sql([...proven])} group by l.id,l.registry_number,l.status order by l.registry_number`;
   const queue=candidates.filter(row=>row.claim_count>0&&row.evidence_count>=row.claim_count);
   const skipped=candidates.filter(row=>!(row.claim_count>0&&row.evidence_count>=row.claim_count));
   if(skipped.length)console.log(JSON.stringify({skipped:skipped.map(row=>row.registry_number)}));

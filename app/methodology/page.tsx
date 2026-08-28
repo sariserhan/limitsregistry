@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import InfoPage from "../_components/InfoPage";
+import { StatusGuide } from "../../src/components/status-guide";
 
 export const metadata: Metadata = { title: "How a record earns its place. — Limits Registry", description: "How to propose a result, how Claims get accepted, what verification tiers mean, and how a Claim earns a signed certificate." };
 
@@ -7,6 +8,8 @@ export default function Page() { return <InfoPage kicker="Methodology" title="Ho
 
 <h2>What belongs in the Registry</h2>
 <p>A Limit is a permanent Registry ID attached to a versioned specification — the exact formal question, its constraints, and whether the goal is a maximum or a minimum. A Claim asserts something against that specification: an upper bound, a lower bound, an exact value, a construction, a counterexample, or an asymptotic or computational bound. Nothing is published as a Claim until it names a specific relation (&lt;, &le;, =, &ge;, &gt;) and a value.</p>
+
+<StatusGuide />
 
 <h2>Evidence and verification tiers</h2>
 <p>Every Claim needs Evidence — a paper, a formal proof, source code, an exhaustive computation, an experiment, a reproduction, a dataset, or a direct observation. Evidence carries one of four verification levels, and a Claim is only as strong as its weakest linked Evidence:</p>

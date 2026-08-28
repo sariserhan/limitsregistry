@@ -19,6 +19,30 @@ export default async function BreakthroughsPage() {
       <p>Every accepted Claim that tightened a bound or closed a frontier, across the whole Registry. Nothing here is AI-generated — these fire only after an editor accepts a Claim.</p>
       <a href="/api/breakthroughs/rss">Subscribe to the site-wide feed ↗</a>
     </section>
+    <section className="breakthrough-explanation" aria-labelledby="breakthrough-explanation-title">
+      <div className="breakthrough-explanation-copy">
+        <p className="section-kicker">How to read it</p>
+        <h2 id="breakthrough-explanation-title">A record of what moved.</h2>
+        <p>Each item marks a published Limit whose accepted Claim changed the recorded frontier. This is a timeline of meaningful updates, not a ranking of researchers or papers.</p>
+      </div>
+      <div className="breakthrough-explanation-grid">
+        <article>
+          <span className="breakthrough-explanation-number">01</span>
+          <strong>Stronger bound accepted</strong>
+          <p>A new Claim improves the best known lower bound, upper bound, or achievable construction.</p>
+        </article>
+        <article>
+          <span className="breakthrough-explanation-number">02</span>
+          <strong>Frontier closed</strong>
+          <p>Matching evidence closes the gap under the current specification, establishing an exact result.</p>
+        </article>
+        <article>
+          <span className="breakthrough-explanation-number">03</span>
+          <strong>Why it appears</strong>
+          <p>Only accepted Claims with evidence on public Limits appear in this feed. Draft and rejected work stays out.</p>
+        </article>
+      </div>
+    </section>
     <section className="breakthroughs-list">
       {events.length ? events.map(({ event, claimNumber, relation, valueExact, limit }) => <article className="breakthrough-item" key={event.id}>
         <div className="breakthrough-item-copy">
