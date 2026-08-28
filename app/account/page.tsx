@@ -2,6 +2,7 @@ import Link from "next/link";
 import { PublicHeader } from "../../src/components/public-header";
 import { SiteFooter } from "../../src/components/site-footer";
 import { AccountTabs } from "./AccountTabs";
+import { SignOutButton } from "../../src/components/sign-out-button";
 import { requireRole } from "../../src/auth/session";
 import { hasRole, type Role } from "../../src/auth/permissions";
 import { listSubmissionsByUser } from "../../src/db/repository.submissions";
@@ -26,6 +27,7 @@ export default async function AccountPage() {
     <div className="submit-content">
       <h1>Your account</h1>
       <p className="lede">{session.user.email} · {role}</p>
+      <SignOutButton />
       <AccountTabs />
 
       <section>
