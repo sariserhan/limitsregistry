@@ -49,7 +49,7 @@ export async function POST(request: Request) {
 
     const existingBounty = await db.execute<{ id: string }>(sql`select id from research_bounties where limit_id = ${limitId} and sponsor = ${b.sponsor} limit 1`);
     if (existingBounty.length) {
-      await db.execute(sql`update research_bounties set title = ${b.bountyTitle}, updated_at = now() where id = ${existingBounty[0].id}`);
+      await db.execute(sql`update research_bounties set title = ${b.bountyTitle}, description = ${b.description}, source_url = ${b.sourceUrl}, amount = ${b.amount}, currency = ${b.currency}, expires_at = ${b.expiresAt}, updated_at = now() where id = ${existingBounty[0].id}`);
       bountiesSkipped++;
       continue;
     }
