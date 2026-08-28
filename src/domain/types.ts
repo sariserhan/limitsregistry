@@ -14,7 +14,7 @@ export type EpistemicStatus = "LITERATURE_ASSERTED" | "SOURCE_CONFIRMED" | "REPR
 export type ExactValue = { kind: "integer"; value: bigint } | { kind: "rational"; numerator: bigint; denominator: bigint } | { kind: "text"; value: string };
 
 export type Limit = { id: string; title: string; category: string; status: LimitStatus; direction: Direction; summary: string; limitKind?: LimitKind; canonicalStatus?: CanonicalLimitStatus };
-export type SpecificationVersion = { id: string; limitId: string; version: number; formalStatement: string; constraints: Record<string, string>; asymptotic: boolean; probabilistic: boolean };
+export type SpecificationVersion = { id: string; limitId: string; version: number; formalStatement: string; constraints: Record<string, string>; assumptions?: Record<string, string>; recordKind?: string; asymptotic: boolean; probabilistic: boolean };
 export type Claim = { id: string; specificationVersionId: string; claimType: ClaimType; relation: ClaimRelation; value: ExactValue; status: ClaimStatus; epistemicStatus: EpistemicStatus; scientificStatus?: ScientificStatus; registryReviewStatus?: RegistryReviewStatus; evidenceBasis?: EvidenceBasis[]; evidenceIds: string[]; methodSummary?: string; author: string; year: number; source: string };
 export type EvidenceType = "CONSTRUCTION" | "MATHEMATICAL_PROOF" | "COMPUTATIONAL_PROOF" | "THEORETICAL_DERIVATION" | "FORMAL_PROOF" | "EXPERIMENT" | "REPRODUCTION" | "DATASET" | "OBSERVATION" | "COUNTEREXAMPLE" | "PAPER";
 export type Evidence = { id: string; type: EvidenceType; label: string; method?: string; verificationLevel?: VerificationLevel; location?: string; sourceUrl?: string; attribution?: Record<string, string> };

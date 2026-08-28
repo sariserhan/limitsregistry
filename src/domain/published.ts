@@ -1,8 +1,9 @@
 import { deriveFrontier, type Frontier } from "./frontier";
 import { browseLimits, type BrowseLimit } from "./registry";
 import type { Claim, ExactValue, SpecificationVersion } from "./types";
+import type { FrontierPresentation } from "./frontier-presentation";
 
-export type PublishedLimit = BrowseLimit & { publishedAt?: string; timelineData?: Array<{ id: string; title: string; description: string | null; occurredAt: string }>; specification: SpecificationVersion; claimsData: Claim[]; frontier: Frontier };
+export type PublishedLimit = BrowseLimit & { publishedAt?: string; timelineData?: Array<{ id: string; title: string; description: string | null; occurredAt: string }>; specification: SpecificationVersion; claimsData: Claim[]; frontier: Frontier; frontierPresentation?: FrontierPresentation };
 
 const numeric = (value: string): bigint | null => /^\d+$/.test(value) ? BigInt(value) : null;
 

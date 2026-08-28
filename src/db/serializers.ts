@@ -7,7 +7,7 @@ type ClaimRow = typeof claims.$inferSelect;
 type EvidenceRow = typeof evidence.$inferSelect;
 
 export function serializeLimit(row: LimitRow): Limit { return { id: row.registryNumber, title: row.title, category: row.category, status: row.status, direction: row.direction, summary: row.summary }; }
-export function serializeSpecification(row: SpecRow): SpecificationVersion { return { id: row.id, limitId: row.limitId, version: row.versionNumber, formalStatement: row.formalStatement, constraints: Object.fromEntries(Object.entries(row.constraints).map(([key, value]) => [key, String(value)])), asymptotic: row.asymptotic, probabilistic: row.probabilistic }; }
+export function serializeSpecification(row: SpecRow): SpecificationVersion { const assumptions = Object.fromEntries(Object.entries(row.assumptions).map(([key, value]) => [key, String(value)])); return { id: row.id, limitId: row.limitId, version: row.versionNumber, formalStatement: row.formalStatement, constraints: Object.fromEntries(Object.entries(row.constraints).map(([key, value]) => [key, String(value)])), assumptions, recordKind: assumptions.kind, asymptotic: row.asymptotic, probabilistic: row.probabilistic }; }
 export function parseExact(value: string): Claim["value"] {
   const rational = value.match(/^(-?\d+)\/(-?\d+)$/);
   if (rational) return { kind: "rational", numerator: BigInt(rational[1]), denominator: BigInt(rational[2]) };

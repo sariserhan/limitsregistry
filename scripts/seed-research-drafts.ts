@@ -24,7 +24,7 @@ async function run() {
     }
     const [limit] = await db.insert(schema.limits).values({ registryNumber: packet.limit.id, slug: packet.limit.id.toLowerCase(), title: packet.limit.title, summary: packet.limit.summary, category: packet.limit.category, direction: packet.limit.direction, metricName: "specified quantity", status: "DRAFT" }).returning();
     if (!limit) throw new Error(`Could not create ${packet.limit.id}`);
-    const [spec] = await db.insert(schema.specificationVersions).values({ limitId: limit.id, versionNumber: packet.specification.version, formalStatement: packet.specification.formalStatement, constraints: packet.specification.constraints, assumptions: {}, asymptotic: packet.specification.asymptotic, probabilistic: packet.specification.probabilistic }).returning();
+    const [spec] = await db.insert(schema.specificationVersions).values({ limitId: limit.id, versionNumber: packet.specification.version, formalStatement: packet.specification.formalStatement, constraints: packet.specification.constraints, assumptions: { kind: packet.limit.limitKind ?? "THEORETICAL_BOUND" }, asymptotic: packet.specification.asymptotic, probabilistic: packet.specification.probabilistic }).returning();
     if (!spec) throw new Error(`Could not create specification for ${packet.limit.id}`);
     const evidenceRows = new Map<string, { id: string }>();
     for (const item of packet.evidence) {

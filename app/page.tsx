@@ -2,6 +2,7 @@ import BrowseClient from "./browse-client";
 import { listPublishedLimitsWithFrontiers } from "../src/db/repository";
 import { formatExact, publishedLimits, type PublishedLimit } from "../src/domain/published";
 import type { ExactValue } from "../src/domain/types";
+import { deriveFrontierPresentation } from "../src/domain/frontier-presentation";
 
 export const dynamic = "force-dynamic";
 const displayValue = (value: Parameters<typeof formatExact>[0]): ExactValue | null => value ? { kind: "text", value: formatExact(value) } : null;
@@ -12,7 +13,7 @@ export default async function Home() {
   const limits: PublishedLimit[] = databaseRows.length ? databaseRows.map(({ limit, specification, claims, timeline, frontier }) => {
     const fallback = publishedLimits.find((item) => item.id === limit.registryNumber) ?? publishedLimits[0];
     const safeFrontier = { ...frontier, lowerBound: displayValue(frontier.lowerBound), upperBound: displayValue(frontier.upperBound), achievable: displayValue(frontier.achievable) };
-    return { ...fallback, publishedAt: limit.publishedAt?.toISOString(), id: limit.registryNumber, title: limit.title, category: limit.category, summary: limit.summary, direction: limit.direction, status: limit.status === "DRAFT" ? "OPEN" : limit.status, achievable: formatExact(frontier.lowerBound), bound: formatExact(frontier.upperBound), gap: frontier.gap, claims: claims.length, papers: 0, specification, claimsData: claims, timelineData: timeline.map((event) => ({ ...event, occurredAt: event.occurredAt.toISOString() })), frontier: safeFrontier };
+    return { ...fallback, publishedAt: limit.publishedAt?.toISOString(), id: limit.registryNumber, title: limit.title, category: limit.category, summary: limit.summary, direction: limit.direction, status: limit.status === "DRAFT" ? "OPEN" : limit.status, achievable: formatExact(frontier.lowerBound), bound: formatExact(frontier.upperBound), gap: frontier.gap, claims: claims.length, papers: 0, specification, claimsData: claims, timelineData: timeline.map((event) => ({ ...event, occurredAt: event.occurredAt.toISOString() })), frontier: safeFrontier, frontierPresentation: deriveFrontierPresentation(specification.recordKind, claims, frontier) };
   }) : publishedLimits;
   return <BrowseClient initialLimits={limits} />;
 }

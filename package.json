@@ -30,7 +30,8 @@
     "db:seed:sorting-networks": "tsx scripts/seed-sorting-networks.ts",
     "db:seed:rsa": "tsx scripts/seed-rsa-numbers.ts",
     "db:seed:supercomputers": "tsx scripts/seed-supercomputers.ts",
-    "db:publish:founding-queue": "tsx scripts/publish-founding-queue.ts"
+    "db:publish:founding-queue": "tsx scripts/publish-founding-queue.ts",
+    "db:backfill:record-kinds": "tsx scripts/backfill-record-kinds.ts"
   },
   "dependencies": {
     "@modelcontextprotocol/server": "^2.0.0",
