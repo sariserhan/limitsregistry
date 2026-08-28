@@ -87,6 +87,44 @@ export async function createEditorialSpec(input: { limitId: string; formalStatem
   const [row] = await db.insert(specificationVersions).values({ ...input, assumptions: input.assumptions ?? {}, versionNumber: 1 }).returning();
   return row;
 }
+export async function listDistinctCategories() {
+  const rows = await db.selectDistinct({ category: limits.category }).from(limits).orderBy(asc(limits.category));
+  return rows.map((row) => row.category);
+}
+function slugifyTitle(title: string) {
+  return title.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "") || "record";
+}
+// One atomic transaction for the full Limit -> SpecificationVersion -> Claim (-> Evidence) chain
+// a brand-new record needs, unlike editorial-workspace.tsx's four separate un-transacted
+// /api/editorial calls — a failure partway through here can't leave an orphaned Limit with no
+// spec or claim. Always lands in DRAFT, same as the existing manual flow: it still has to go
+// through the normal editorial review queue before it can be accepted/published.
+export async function createRecordDraft(input: { title: string; category: string; summary: string; formalStatement: string; metricName: string; unit?: string; boundType: "UPPER_BOUND" | "LOWER_BOUND"; valueExact: string; evidenceUrl?: string; createdByUserId: string }) {
+  const direction = input.boundType === "UPPER_BOUND" ? "MINIMIZE" : "MAXIMIZE";
+  const relation = input.boundType === "UPPER_BOUND" ? "<=" : ">=";
+  return db.transaction(async (tx) => {
+    // ponytail: max+1 is fine for a low-traffic admin console, not a distributed sequence —
+    // the registry_number unique constraint still catches a rare concurrent-insert race.
+    const [{ maxNumber }] = await tx.execute<{ maxNumber: number }>(sql`select coalesce(max(substring(registry_number from 4)::int), 0) as "maxNumber" from limits where registry_number ~ '^LR-[0-9]{6}$'`);
+    const registryNumber = `LR-${String(maxNumber + 1).padStart(6, "0")}`;
+    const baseSlug = slugifyTitle(input.title);
+    const existingSlugs = await tx.select({ slug: limits.slug }).from(limits).where(sql`${limits.slug} = ${baseSlug} or ${limits.slug} ~ ${`^${baseSlug}-[0-9]+$`}`);
+    const slugSet = new Set(existingSlugs.map((row) => row.slug));
+    let slug = baseSlug; let suffix = 2;
+    while (slugSet.has(slug)) slug = `${baseSlug}-${suffix++}`;
+
+    const [limit] = await tx.insert(limits).values({ registryNumber, slug, title: input.title, summary: input.summary, category: input.category, direction, metricName: input.metricName, unit: input.unit || null }).returning();
+    const [spec] = await tx.insert(specificationVersions).values({ limitId: limit.id, versionNumber: 1, formalStatement: input.formalStatement, constraints: {}, assumptions: {} }).returning();
+    const claimNumber = `CLM-${registryNumber.slice(3)}`;
+    const [claim] = await tx.insert(claims).values({ claimNumber, specificationVersionId: spec.id, claimType: input.boundType, relation, valueExact: input.valueExact, unit: input.unit || null, scopeParameters: {}, epistemicStatus: "LITERATURE_ASSERTED", status: "DRAFT" }).returning();
+    if (input.evidenceUrl) {
+      const [evidenceRow] = await tx.insert(evidence).values({ type: "PAPER", label: input.title, url: input.evidenceUrl, limitId: limit.id, metadata: {} }).returning();
+      await tx.insert(claimEvidence).values({ claimId: claim.id, evidenceId: evidenceRow.id });
+    }
+    await tx.insert(auditLogs).values({ actorUserId: input.createdByUserId, action: "RECORD_DRAFT_CREATED", entityType: "LIMIT", entityId: limit.id, after: { registryNumber, title: input.title, category: input.category } });
+    return { limit, spec, claim };
+  });
+}
 // Only a genuine transition INTO accepted can generate events — re-saving an already-ACCEPTED
 // claim as ACCEPTED again (or accepting a claim on a still-DRAFT, unpublished Limit) must not
 // fire notifications or a breakthrough a second time.

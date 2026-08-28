@@ -9,6 +9,7 @@ const TABS = [
   { href: "/console/research/graph", label: "Graph", description: "Connect related Limits" },
   { href: "/console/research/artifacts", label: "Artifacts", description: "Verify Claims with evidence" },
   { href: "/console/research/bounties", label: "Bounties", description: "Review research incentives" },
+  { href: "/console/create-record", label: "New record", description: "Create a draft Limit" },
 ];
 
 export function ConsoleNav() {
