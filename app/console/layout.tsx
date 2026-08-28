@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { BrandIcon } from "../../src/components/brand-icon";
+import { PublicHeader } from "../../src/components/public-header";
+import { SiteFooter } from "../../src/components/site-footer";
 import { requireRole } from "../../src/auth/session";
 import { ConsoleNav } from "./ConsoleNav";
 import "./console.css";
@@ -12,14 +13,15 @@ export default async function ConsoleLayout({ children }: Readonly<{ children: R
   const session = await requireRole("RESEARCHER");
 
   return <main className="console-page">
-    <header className="console-header">
-      <Link className="brand" href="/"><BrandIcon className="brand-mark" /><span>Limits Registry</span></Link>
-      <div className="console-header-meta">
+    <PublicHeader />
+    <div className="console-content">
+      <header className="console-header">
         <span className="console-session">Signed in as {session.user.email} · {session.user.role}</span>
         <Link className="console-exit" href="/">Public Registry ↗</Link>
-      </div>
-    </header>
-    <ConsoleNav />
-    {children}
+      </header>
+      <ConsoleNav />
+      {children}
+    </div>
+    <SiteFooter />
   </main>;
 }

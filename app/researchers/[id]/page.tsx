@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { PublicHeader } from "../../../src/components/public-header";
+import { SiteFooter } from "../../../src/components/site-footer";
 import { getClaimsForPerson, getInstitutionsForPerson, getPerson } from "../../../src/db/repository.entities";
 
 type PageProps = { params: Promise<{ id: string }> };
@@ -38,6 +39,6 @@ export default async function ResearcherPage({ params }: PageProps) {
         {claims.length === 0 && <p>No linked Claims yet.</p>}
       </div>
     </div></section>
-    <footer><span>LR / 2026</span><span>Evidence before assertion.</span><Link href="/">Back to Browse ↗</Link></footer>
+    <SiteFooter />
   </main>;
 }

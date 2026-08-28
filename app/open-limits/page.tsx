@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { PublicHeader } from "../../src/components/public-header";
+import { SiteFooter } from "../../src/components/site-footer";
 import { listPublishedLimits } from "../../src/db/repository";
 
 export const revalidate = 60;
@@ -14,5 +15,6 @@ export default async function OpenLimitsPage() {
     <PublicHeader />
     <section className="directory-intro"><p className="section-kicker">Unresolved frontiers</p><h1>Open Limits.</h1><p>Problems where accepted Claims establish part of the frontier, but the current specification still contains a genuine unknown gap.</p><div className="directory-stats"><span><strong>{rows.length}</strong> published open records</span><span><strong>{categories}</strong> fields represented</span></div></section>
     <section className="directory-list" aria-label="Open Limits">{rows.length ? rows.map((limit) => <Link className="directory-row" href={`/limits/${limit.registryNumber}`} key={limit.id}><span>{limit.registryNumber}</span><div><strong>{limit.title}</strong><p>{limit.summary}</p></div><small>{limit.category} · {limit.direction.toLowerCase()}</small><b aria-hidden="true">→</b></Link>) : <div className="directory-empty"><strong>No open Limits are published yet.</strong><p>Draft records remain private until their Claims, evidence, and independent reviews are accepted.</p><Link href="/about">How publication works →</Link></div>}</section>
+    <SiteFooter />
   </main>;
 }

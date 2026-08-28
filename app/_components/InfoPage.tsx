@@ -1,6 +1,6 @@
-import Link from "next/link";
 import type { ReactNode } from "react";
 import { PublicHeader } from "../../src/components/public-header";
+import { SiteFooter } from "../../src/components/site-footer";
 
 export default function InfoPage({ kicker, title, intro, children }: { kicker: string; title: string; intro: string; children: ReactNode }) {
   return (
@@ -17,11 +17,7 @@ export default function InfoPage({ kicker, title, intro, children }: { kicker: s
           <div className="info-body">{children}</div>
         </article>
       </main>
-      <footer>
-        <span>LR / 2026</span>
-        <span>Evidence before assertion.</span>
-        <Link href="/support">Support ↗</Link>
-      </footer>
+      <SiteFooter />
     </div>
   );
 }

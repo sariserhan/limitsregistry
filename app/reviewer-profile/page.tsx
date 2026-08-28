@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { PublicHeader } from "../../src/components/public-header";
+import { SiteFooter } from "../../src/components/site-footer";
 import { requireRole } from "../../src/auth/session";
 import { getReviewerProfile } from "../../src/db/repository.reviewers";
 import { saveReviewerProfile } from "./actions";
@@ -9,7 +11,9 @@ export default async function ReviewerProfilePage() {
   const profile = await getReviewerProfile(session.user.id);
 
   return <main className="submit-page">
-    <Link href="/console">&larr; Back to Research Console</Link>
+    <PublicHeader />
+    <div className="submit-content">
+    <Link className="submit-back" href="/console">&larr; Back to Research Console</Link>
     <h1>Reviewer profile</h1>
     <p className="lede">Self-reported expertise and credentials, shown to editors assigning review work. This is not independently verified — treat it as a declaration, not a credential check.</p>
 
@@ -30,5 +34,7 @@ export default async function ReviewerProfilePage() {
         <button className="submit-submit" type="submit">Save profile</button>
       </form>
     </section>
+    </div>
+    <SiteFooter />
   </main>;
 }
