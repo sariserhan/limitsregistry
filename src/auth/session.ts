@@ -13,17 +13,18 @@ export async function getSession() {
   return getAuth().api.getSession({ headers: requestHeaders });
 }
 
-/** Secure server-side check. Redirects to /login when unauthenticated or under-privileged. */
+/** Secure server-side check. Unauthenticated users sign in; under-privileged users get an access explanation. */
 export async function requireRole(minimum: Role) {
   const session = await getSession();
-  if (!session || !hasRole(session.user.role as Role, minimum)) {
-    // proxy.ts stamps x-pathname on every request — reuse it here instead of hardcoding "/", so
-    // signing in from a role-gated redirect actually returns to the page that was requested
-    // (this previously always bounced back to the homepage, even from deep links like
-    // /watchlists or /reviewer-profile).
+  if (!session) {
     const requestHeaders = await headers();
     const next = requestHeaders.get("x-pathname") || "/";
     redirect(`/login?next=${encodeURIComponent(next)}`);
+  }
+  if (!hasRole(session.user.role as Role, minimum)) {
+    const requestHeaders = await headers();
+    const next = requestHeaders.get("x-pathname") || "/";
+    redirect(`/access-required?next=${encodeURIComponent(next)}&required=${minimum}`);
   }
   return session;
 }
