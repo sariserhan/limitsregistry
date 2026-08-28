@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { PublicHeader } from "../../src/components/public-header";
 import { SiteFooter } from "../../src/components/site-footer";
+import { AccountTabs } from "./AccountTabs";
 import { requireRole } from "../../src/auth/session";
 import { hasRole, type Role } from "../../src/auth/permissions";
 import { listSubmissionsByUser } from "../../src/db/repository.submissions";
@@ -25,6 +26,7 @@ export default async function AccountPage() {
     <div className="submit-content">
       <h1>Your account</h1>
       <p className="lede">{session.user.email} · {role}</p>
+      <AccountTabs />
 
       <section>
         <h2>Quick links</h2>
@@ -74,3 +76,5 @@ export default async function AccountPage() {
     <SiteFooter />
   </main>;
 }
+
+import "../admin/admin.css";

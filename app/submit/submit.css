@@ -39,3 +39,5 @@
 .challenge-history strong { font:600 13px "Space Grotesk",sans-serif; }
 .challenge-history span { color:var(--blue); font:10px "DM Mono",monospace; text-transform:uppercase; }
 .challenge-history small { grid-column:1 / -1; color:var(--faint); font:10px "DM Mono",monospace; }
+
+.submit-check{display:flex;gap:9px;align-items:flex-start;color:var(--muted);font-size:12px;line-height:1.45}.submit-check input{margin-top:2px;flex:none}.form-error{color:var(--red)}.form-success{color:var(--green)}

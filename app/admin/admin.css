@@ -61,3 +61,5 @@
   .admin-shell h1 { font-size:30px; }
   .admin-status-row { flex-direction:column; align-items:flex-start; }
 }
+
+.admin-application-head{display:flex;justify-content:space-between;gap:16px;align-items:start;border-bottom:1px solid var(--line);padding-bottom:12px;margin-bottom:14px}.admin-application-head strong{display:block;font:600 16px Space Grotesk,sans-serif}.admin-application-head small{display:block;color:var(--faint);font:10px DM Mono,monospace;margin-top:5px}.admin-panel>p{color:var(--muted);font-size:13px;line-height:1.5}.admin-application-actions{display:grid;gap:10px;margin-top:18px}.admin-application-actions textarea{border:1px solid var(--line);background:var(--paper);padding:10px;font:13px/1.4 inherit;resize:vertical}.admin-application-actions button{border:0;background:var(--blue);color:#fff;padding:9px 14px;font-size:12px;justify-self:start}.admin-application-actions button[value=REJECTED]{background:transparent;color:var(--red);border:1px solid var(--red)}
