@@ -9,7 +9,6 @@ const TABS = [
   { href: "/console/research/graph", label: "Graph" },
   { href: "/console/research/artifacts", label: "Artifacts" },
   { href: "/console/research/bounties", label: "Bounties" },
-  { href: "/console/codata-review", label: "CODATA review" },
 ];
 
 export function ConsoleNav() {
