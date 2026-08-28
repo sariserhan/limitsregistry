@@ -17,6 +17,7 @@
     "db:seed:codata": "tsx scripts/seed-codata-2022.ts",
     "db:seed:miplib": "tsx scripts/seed-miplib-2017.ts",
     "db:seed:networking": "tsx scripts/seed-networking-rfcs.ts",
+    "db:seed:mathematics": "tsx scripts/seed-mathematics-foundations.ts",
     "db:publish:founding-queue": "tsx scripts/publish-founding-queue.ts"
   },
   "dependencies": {
