@@ -1,15 +1,14 @@
 import { NextResponse } from "next/server";
 import { timingSafeEqual } from "node:crypto";
 import postgres from "postgres";
-import { drizzle } from "drizzle-orm/postgres-js";
-import { migrate } from "drizzle-orm/postgres-js/migrator";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
 
 // DATABASE_URL is a Vercel Sensitive env var — it cannot be pulled by any CLI/API, only read at
-// runtime inside a deployed function. This is the only way to apply pending drizzle migrations
-// to production; reuses CRON_SECRET rather than provisioning a separate admin secret.
+// runtime inside a deployed function. Production's drizzle migration history is out of sync with
+// its actual schema (it predates tracked migrations), so replaying the full migrator conflicts on
+// objects that already exist. This applies just the one pending, idempotent change directly instead.
 function authorized(request: Request) {
   const expected = process.env.CRON_SECRET;
   const header = request.headers.get("authorization") ?? "";
@@ -24,7 +23,13 @@ export async function POST(request: Request) {
   if (!connectionString) return NextResponse.json({ error: "DATABASE_URL is required." }, { status: 500 });
   const client = postgres(connectionString, { prepare: false, max: 1 });
   try {
-    await migrate(drizzle(client), { migrationsFolder: "./drizzle" });
+    await client`ALTER TABLE "evidence" ADD COLUMN IF NOT EXISTS "limit_id" uuid`;
+    await client`
+      DO $$ BEGIN
+        ALTER TABLE "evidence" ADD CONSTRAINT "evidence_limit_id_limits_id_fk" FOREIGN KEY ("limit_id") REFERENCES "public"."limits"("id") ON DELETE no action ON UPDATE no action;
+      EXCEPTION WHEN duplicate_object THEN NULL;
+      END $$
+    `;
     return NextResponse.json({ status: "ok" });
   } catch (error) {
     return NextResponse.json({ error: error instanceof Error ? error.message : String(error) }, { status: 500 });
