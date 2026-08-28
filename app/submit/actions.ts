@@ -6,8 +6,11 @@ import { allowRequest } from "../../src/ops/rate-limit";
 import { getSubmissionNotification, insertProofAttachment, insertSubmission, type NewSubmission } from "../../src/db/repository.submissions";
 import { sendSubmissionReceivedEmail } from "../../src/lib/email/submission-emails";
 
-const SUBMISSION_TYPES = ["BETTER_ACHIEVABLE_RESULT", "STRONGER_BOUND", "PROOF", "REPRODUCTION", "CORRECTION"] as const;
+const SUBMISSION_TYPES = ["BETTER_ACHIEVABLE_RESULT", "STRONGER_BOUND", "PROOF", "REPRODUCTION", "CORRECTION", "SCOPE_CHALLENGE"] as const;
 const RELATIONS = ["<", "<=", "=", ">=", ">"] as const;
+// A scope challenge disputes whether the record's stated scope/assumptions are correct — there's
+// no proposed bound value to argue with, so it's the one type that skips the relation/value fields.
+const REQUIRES_PROPOSED_VALUE = (type: string) => type !== "SCOPE_CHALLENGE";
 
 // `type="url"` is a client-side hint only — a direct POST can send anything, including a
 // javascript: URL that would execute in the reviewing editor's session when clicked.
@@ -42,10 +45,13 @@ export async function createSubmission(formData: FormData) {
   if (!SUBMISSION_TYPES.includes(submissionType as (typeof SUBMISSION_TYPES)[number])) throw new Error("Invalid submission type.");
   if (title.length < 4) throw new Error("Title is too short.");
   if (description.length < 10) throw new Error("Description is too short.");
-  if (!RELATIONS.includes(proposedRelation as (typeof RELATIONS)[number])) throw new Error("Choose a proposed lower or upper bound.");
-  if (!proposedValueExact) throw new Error("Provide the proposed bound value.");
+  if (REQUIRES_PROPOSED_VALUE(submissionType)) {
+    if (!RELATIONS.includes(proposedRelation as (typeof RELATIONS)[number])) throw new Error("Choose a proposed lower or upper bound.");
+    if (!proposedValueExact) throw new Error("Provide the proposed bound value.");
+  }
   if (!evidenceUrl && !uploadedProof) throw new Error("Provide an evidence URL or upload proof.");
-  for (const field of ["scopeConfirmed", "boundConfirmed", "evidenceConfirmed", "reviewConfirmed"]) {
+  const requiredChecklistFields = REQUIRES_PROPOSED_VALUE(submissionType) ? ["scopeConfirmed", "boundConfirmed", "evidenceConfirmed", "reviewConfirmed"] : ["scopeConfirmed", "evidenceConfirmed", "reviewConfirmed"];
+  for (const field of requiredChecklistFields) {
     if (formData.get(field) !== "on") throw new Error("Complete every evidence checklist item before submitting.");
   }
   if (uploadedProof && uploadedProof.size > 10 * 1024 * 1024) throw new Error("Proof files must be 10 MB or smaller.");
@@ -60,8 +66,10 @@ export async function createSubmission(formData: FormData) {
     description,
     evidenceUrl: safeEvidenceUrl(evidenceUrl),
   };
-  input.proposedRelation = proposedRelation as NewSubmission["proposedRelation"];
-  input.proposedValueExact = proposedValueExact;
+  if (REQUIRES_PROPOSED_VALUE(submissionType)) {
+    input.proposedRelation = proposedRelation as NewSubmission["proposedRelation"];
+    input.proposedValueExact = proposedValueExact;
+  }
 
   const submission = await insertSubmission(input);
   if (uploadedProof) await insertProofAttachment({ submissionId: submission.id, filename: uploadedProof.name.slice(0, 180), mimeType: uploadedProof.type, sizeBytes: uploadedProof.size, contents: Buffer.from(await uploadedProof.arrayBuffer()) });

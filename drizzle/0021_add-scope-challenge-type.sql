@@ -1,0 +1,1 @@
+ALTER TYPE "public"."submission_type" ADD VALUE 'SCOPE_CHALLENGE';
