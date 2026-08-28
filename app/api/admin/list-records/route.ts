@@ -26,6 +26,19 @@ export async function GET(request: Request) {
     const rows = await db.execute(sql`select id, name, email, role from "user" where email = ${email} limit 1`);
     return NextResponse.json({ user: rows[0] ?? null });
   }
+  const timelineFor = searchParams.get("timelineFor");
+  if (timelineFor) {
+    const registryNumbers = timelineFor.split(",");
+    const condition = sql.join(registryNumbers.map((n) => sql`${n}`), sql` , `);
+    const rows = await db.execute(sql`
+      select l.registry_number as "registryNumber", te.title, te.description
+      from limits l
+      join timeline_events te on te.limit_id = l.id
+      where l.registry_number in (${condition})
+      order by l.registry_number, te.occurred_at
+    `);
+    return NextResponse.json({ events: rows });
+  }
   const status = searchParams.get("status") ?? "OPEN";
   const limit = Math.min(Number(searchParams.get("limit") ?? "50"), 200);
   const rows = await db.execute(sql`
