@@ -4,6 +4,7 @@ import { requireRole } from "../../src/auth/session";
 import { listPublishedLimits } from "../../src/db/repository";
 import { listSubmissionsByUser } from "../../src/db/repository.submissions";
 import { createSubmission } from "./actions";
+import { SubmissionPreviewButton } from "./submission-preview-button";
 import "./submit.css";
 
 const SUBMISSION_TYPE_LABELS: Record<string, string> = {
@@ -32,7 +33,7 @@ export default async function SubmitPage({ searchParams }: Props) {
     <section>
       <h2>New submission</h2>
       <div className="submit-identity"><span>Proposed by</span><strong>{session.user.name}</strong><small>This name comes from your account and is shown to reviewers with your proposal.</small></div>
-      <form className="submit-form" action={createSubmission}>
+      <form className="submit-form" action={createSubmission} encType="multipart/form-data">
         <div className="submit-row">
           <div className="submit-field">
             <label htmlFor="limitId">Limit</label>
@@ -55,19 +56,21 @@ export default async function SubmitPage({ searchParams }: Props) {
           <div className="submit-field"><label htmlFor="proposedRelation">Proposed bound (required)</label><select id="proposedRelation" name="proposedRelation" required defaultValue=""><option value="" disabled>Select ≥ or ≤</option><option value="<=">&le; — upper bound</option><option value=">=">&ge; — lower bound</option></select></div>
           <div className="submit-field"><label htmlFor="proposedValueExact">Proposed value (required)</label><input id="proposedValueExact" name="proposedValueExact" required placeholder="e.g. 7 or O(n log n)" /></div>
         </div>
-        <p className="submit-help">Use ≥ for a stronger achievable result or ≤ for a tighter impossibility result. Include enough detail that someone else can verify the claim. Proof uploads are not enabled yet, so provide a stable HTTPS link to the paper, proof, code, or reproduction.</p>
-        <div className="submit-field"><label htmlFor="evidenceUrl">Evidence URL (required)</label><input id="evidenceUrl" name="evidenceUrl" type="url" required placeholder="https://doi.org/… or proof/repository link" /></div>
+        <p className="submit-help">Use ≥ for a stronger achievable result or ≤ for a tighter impossibility result. Include enough detail that someone else can verify the claim. Provide a stable HTTPS evidence URL or upload a PDF, text, Markdown, or ZIP proof (max 10 MB).</p>
+        <div className="submit-field"><label htmlFor="evidenceUrl">Evidence URL or proof upload (one required)</label><input id="evidenceUrl" name="evidenceUrl" type="url" placeholder="https://doi.org/… or proof/repository link" /><input id="proofFile" name="proofFile" type="file" accept=".pdf,.txt,.md,.zip,application/pdf,text/plain,text/markdown,application/zip" /></div>
+        <fieldset className="submit-checklist"><legend>Evidence checklist (all required)</legend><label><input name="scopeConfirmed" type="checkbox" required /> My result applies to the exact scope and assumptions of this Limit.</label><label><input name="boundConfirmed" type="checkbox" required /> I have stated whether this is a lower bound (≥) or upper bound (≤).</label><label><input name="evidenceConfirmed" type="checkbox" required /> The attached evidence actually supports the proposed value.</label><label><input name="reviewConfirmed" type="checkbox" required /> I understand an editor will verify this before publication.</label></fieldset>
+        <SubmissionPreviewButton />
         <button className="submit-submit" type="submit">Submit for review</button>
       </form>
     </section>
 
     <section>
       <h2>Your submissions ({own.length})</h2>
-      {own.map(({ submission, limit }) => <div className="own-submission" key={submission.id}>
+      {own.map(({ submission, limit, proof }) => <div className="own-submission" key={submission.id}>
         <div>
           <strong>{submission.title}</strong>
           <small>{limit.registryNumber} — {limit.title} · {SUBMISSION_TYPE_LABELS[submission.submissionType]}</small>
-          {submission.reviewerNotes && <p style={{ marginTop: 6, fontSize: 12, color: "var(--muted)" }}>Reviewer note: {submission.reviewerNotes}</p>}
+          {submission.reviewerNotes && <p style={{ marginTop: 6, fontSize: 12, color: "var(--muted)" }}>Reviewer note: {submission.reviewerNotes}</p>}{proof?.id ? <a href={`/api/submissions/proof/${proof.id}`} target="_blank" rel="noreferrer">Proof file: {proof.filename} ↗</a> : null}
         </div>
         <span className={`submission-status ${submission.status.toLowerCase()}`}>{submission.status.replaceAll("_", " ")}</span>
       </div>)}

@@ -129,14 +129,14 @@ export default async function ConsolePage({ searchParams }: Props) {
         id: "submissions", label: `3 · Public submissions (${pendingSubmissions.length})`, content: <section>
           <div className="section-heading"><div><span className="step-badge">—</span><h2>Public submissions awaiting review ({pendingSubmissions.length})</h2></div></div>
           <p className="section-help">Researchers and visitors can submit proposed improvements from the public site. Review these separately from machine-extracted Claims.</p>
-          {pendingSubmissions.map(({ submission, submitter, limit }) => <article className="candidate-card" key={submission.id}>
+          {pendingSubmissions.map(({ submission, submitter, limit, proof }) => <article className="candidate-card" key={submission.id}>
             <header><span>{submitter.name} ({submitter.email})</span><span>{new Date(submission.createdAt).toLocaleString()}</span></header>
             <div className="candidate-item">
               <strong>{SUBMISSION_TYPE_LABELS[submission.submissionType]} — {submission.title}</strong>
               <div>{limit.registryNumber} — {limit.title}</div>
               <div>{submission.description}</div>
               {submission.proposedRelation && submission.proposedValueExact && <div>Proposed: {submission.proposedRelation} {submission.proposedValueExact}</div>}
-              {submission.evidenceUrl && (submission.evidenceUrl.startsWith("http://") || submission.evidenceUrl.startsWith("https://")) && <div><a href={submission.evidenceUrl} target="_blank" rel="noreferrer">Evidence ↗</a></div>}
+              {submission.evidenceUrl && (submission.evidenceUrl.startsWith("http://") || submission.evidenceUrl.startsWith("https://")) && <div><a href={submission.evidenceUrl} target="_blank" rel="noreferrer">Evidence link ↗</a></div>}{proof?.id ? <div><a href={`/api/submissions/proof/${proof.id}`} target="_blank" rel="noreferrer">Uploaded proof: {proof.filename} ↗</a></div> : null}
             </div>
             {canDecide && <form className="candidate-actions" action={decideSubmission} style={{ flexDirection: "column", alignItems: "stretch", gap: 8 }}>
               <input type="hidden" name="id" value={submission.id} />
