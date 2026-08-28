@@ -7,7 +7,14 @@ import * as schema from "../db/schema";
 import { sendResetPasswordEmail, sendVerificationEmail, sendWelcomeEmail } from "../lib/email/auth-emails";
 
 function createAuth() {
+  // Vercel can retain an old or missing BETTER_AUTH_URL across deployments. In production,
+  // pin the session origin to the canonical site so auth cookies and redirects never target
+  // localhost (which creates a successful-login-then-bounce loop).
+  const baseURL = process.env.VERCEL_ENV === "production"
+    ? "https://www.limitsregistry.com"
+    : process.env.BETTER_AUTH_URL;
   return betterAuth({
+    baseURL,
     database: drizzleAdapter(db, { provider: "pg", schema }),
     emailAndPassword: {
       enabled: true,
