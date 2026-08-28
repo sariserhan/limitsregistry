@@ -84,9 +84,13 @@ async function main() { try {
       published++;
     }
 
+    const bountyTitle = `${p.title} — Millennium Prize`;
     const existingBounty = await sql`select id from research_bounties where limit_id=${limitId} and sponsor=${SPONSOR} limit 1`;
-    if (existingBounty.length) { bountiesSkipped++; continue; }
-    await sql`insert into research_bounties (limit_id,title,sponsor,description,source_url,status,amount,currency,moderation_note,verified_at) values (${limitId},${"Millennium Prize"},${SPONSOR},${`A $1,000,000 prize for a correct solution to the ${p.title} problem, funded and administered by the Clay Mathematics Institute as one of its seven Millennium Prize Problems (announced 2000). Still unclaimed.`},${p.sourceUrl},${"VERIFIED"},${"1000000.00"},${"USD"},${"Verified against the Clay Mathematics Institute's own Millennium Problems program page."},${sql`now()`})`;
+    if (existingBounty.length) {
+      await sql`update research_bounties set title=${bountyTitle},updated_at=now() where id=${existingBounty[0].id}`;
+      bountiesSkipped++; continue;
+    }
+    await sql`insert into research_bounties (limit_id,title,sponsor,description,source_url,status,amount,currency,moderation_note,verified_at) values (${limitId},${bountyTitle},${SPONSOR},${`A $1,000,000 prize for a correct solution to the ${p.title} problem, funded and administered by the Clay Mathematics Institute as one of its seven Millennium Prize Problems (announced 2000). Still unclaimed.`},${p.sourceUrl},${"VERIFIED"},${"1000000.00"},${"USD"},${"Verified against the Clay Mathematics Institute's own Millennium Problems program page."},${sql`now()`})`;
     bountiesPublished++;
   }
   const [{ verifiedBountyCount }] = await sql`select count(*)::int as "verifiedBountyCount" from research_bounties where status='VERIFIED'`;

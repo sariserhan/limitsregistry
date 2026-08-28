@@ -107,12 +107,16 @@ export async function POST(request: Request) {
       published++;
     }
 
+    const bountyTitle = `${p.title} — Millennium Prize`;
     const existingBounty = await db.execute<{ id: string }>(sql`select id from research_bounties where limit_id = ${limitId} and sponsor = ${SPONSOR} limit 1`);
-    if (existingBounty.length) { bountiesSkipped++; continue; }
+    if (existingBounty.length) {
+      await db.execute(sql`update research_bounties set title = ${bountyTitle}, updated_at = now() where id = ${existingBounty[0].id}`);
+      bountiesSkipped++; continue;
+    }
     await db.execute(sql`
       insert into research_bounties (limit_id, title, sponsor, description, source_url, status, amount, currency, moderation_note, verified_at)
       values (
-        ${limitId}, ${"Millennium Prize"}, ${SPONSOR},
+        ${limitId}, ${bountyTitle}, ${SPONSOR},
         ${`A $1,000,000 prize for a correct solution to the ${p.title} problem, funded and administered by the Clay Mathematics Institute as one of its seven Millennium Prize Problems (announced 2000). Still unclaimed.`},
         ${p.sourceUrl}, ${"VERIFIED"}, ${"1000000.00"}, ${"USD"},
         ${"Verified against the Clay Mathematics Institute's own Millennium Problems program page."},
