@@ -29,3 +29,5 @@
 }
 
 .challenge-context{border-left:3px solid var(--blue);background:var(--paper);padding:14px 16px;color:var(--muted);font-size:13px;line-height:1.5}.challenge-context strong{color:var(--ink)}.submit-help{margin:0;color:var(--muted);font-size:12px;line-height:1.5}
+
+.submit-identity{display:grid;gap:5px;border-left:3px solid var(--ink);padding:12px 15px;margin-bottom:20px;background:var(--paper)}.submit-identity span{font:10px 'DM Mono',monospace;text-transform:uppercase;letter-spacing:.08em;color:var(--faint)}.submit-identity strong{font:600 15px 'Space Grotesk',sans-serif}.submit-identity small{color:var(--muted);font-size:11px}

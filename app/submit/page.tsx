@@ -31,6 +31,7 @@ export default async function SubmitPage({ searchParams }: Props) {
 
     <section>
       <h2>New submission</h2>
+      <div className="submit-identity"><span>Proposed by</span><strong>{session.user.name}</strong><small>This name comes from your account and is shown to reviewers with your proposal.</small></div>
       <form className="submit-form" action={createSubmission}>
         <div className="submit-row">
           <div className="submit-field">
