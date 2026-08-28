@@ -17,7 +17,7 @@ export default async function ResearcherPage({ params }: PageProps) {
     <section className="canonical-intro">
       <div className="canonical-category">{person.profileStatus.replaceAll("_", " ")}</div>
       <h1>{person.displayName}</h1>
-      <div className="intro-foot">
+      <div className="researcher-reputation"><div><strong>{claims.filter(({ claim }) => claim.status === "ACCEPTED").length}</strong><span>accepted Claims</span></div><div><strong>{claims.length}</strong><span>linked Claims</span></div><div><strong>{affiliations.length}</strong><span>institutions</span></div></div><div className="intro-foot">
         {person.orcid && <span>ORCID: {person.orcid}</span>}
         {person.website && <a href={person.website} target="_blank" rel="noreferrer">Website ↗</a>}
         {affiliations.map(({ institution }) => <Link key={institution.id} href={`/institutions/${institution.id}`}>{institution.name}</Link>)}
