@@ -42,25 +42,29 @@ const RECORDS: Array<{ rank: number; p: number; year: number; discoverer: string
   { rank: 30, p: 132049, year: 1983, discoverer: "David Slowinski et al." },
 ];
 
-let inserted = 0, skipped = 0;
+const ordinal = (n: number) => `${n}${n === 1 ? "st" : n === 2 ? "nd" : n === 3 ? "rd" : "th"}`;
+const summaryFor = (item: (typeof RECORDS)[number]) => `A Mersenne prime is a prime number of the form 2^p − 1 where the exponent p is itself prime — named for Marin Mersenne, who studied them in 1644. This is the ${ordinal(item.rank)} known one: 2^${item.p} − 1.`;
+
+let inserted = 0, updated = 0;
 async function main() { try {
   let [paper] = await sql`select id from papers where title=${PAPER_TITLE} limit 1`;
   if (!paper) [paper] = await sql`insert into papers (title,abstract,venue,publisher_url) values (${PAPER_TITLE},${"The authoritative sequence of exponents p for which the Mersenne number 2^p - 1 is prime."},${"The On-Line Encyclopedia of Integer Sequences"},${SOURCE_URL}) returning id`;
   for (const item of RECORDS) {
     const registryNumber = `LR-MERSENNE-${item.p}`, slug = `mersenne-prime-2-${item.p}-minus-1`;
-    if ((await sql`select id from limits where registry_number=${registryNumber} limit 1`).length) { skipped++; continue; }
+    const existing = await sql`select id from limits where registry_number=${registryNumber} limit 1`;
+    if (existing.length) { await sql`update limits set summary=${summaryFor(item)},updated_at=now() where id=${existing[0].id}`; updated++; continue; }
     const occurredAt = new Date(Date.UTC(item.year, 0, 1));
     await sql.begin(async (tx) => {
-      const [limit] = await tx`insert into limits (registry_number,slug,title,summary,category,subcategory,direction,metric_name,status,published_at) values (${registryNumber},${slug},${`Mersenne prime 2^${item.p} − 1`},${`The ${item.rank}${item.rank === 1 ? "st" : item.rank === 2 ? "nd" : item.rank === 3 ? "rd" : "th"} known Mersenne prime — the number 2^${item.p} − 1, verified prime.`},${"Number Theory"},${"Mersenne primes"},${"MAXIMIZE"},${"2^p − 1"},${"PROVEN"},${occurredAt}) returning id`;
+      const [limit] = await tx`insert into limits (registry_number,slug,title,summary,category,subcategory,direction,metric_name,status,published_at) values (${registryNumber},${slug},${`Mersenne prime 2^${item.p} − 1`},${summaryFor(item)},${"Number Theory"},${"Mersenne primes"},${"MAXIMIZE"},${"2^p − 1"},${"PROVEN"},${occurredAt}) returning id`;
       const [spec] = await tx`insert into limit_spec_versions (limit_id,version_number,formal_statement,constraints,assumptions) values (${limit.id},1,${`Is 2^${item.p} − 1 prime?`},${tx.json({exponent:item.p,form:"2^p - 1"})},${tx.json({publicationProcess:"FOUNDING_CATALOG_IMPORT"})}) returning id`;
       const [claim] = await tx`insert into claims (claim_number,specification_version_id,claim_type,relation,value_exact,value_text,scope_parameters,epistemic_status,status,method_summary) values (${`CLM-MERSENNE-${item.p}`},${spec.id},${"EXACT_VALUE"},${"="},${`2^${item.p} − 1`},${`2^${item.p} − 1`},${tx.json({exponent:item.p,rank:item.rank})},${"PROVEN"},${"ACCEPTED"},${`Verified prime by ${item.discoverer}, ${item.year < 0 ? "antiquity" : item.year}.`}) returning id`;
       const [evidence] = await tx`insert into evidence (type,label,url,location,metadata) values (${"PAPER"},${`Mersenne prime exponent ${item.p} — rank ${item.rank}`},${SOURCE_URL},${`A000043, term ${item.rank}`},${tx.json({exponent:item.p,rank:item.rank,discoverer:item.discoverer,year:item.year})}) returning id`;
       await tx`insert into claim_evidence (claim_id,evidence_id) values (${claim.id},${evidence.id})`;
       await tx`insert into claim_papers (claim_id,paper_id) values (${claim.id},${paper.id})`;
-      await tx`insert into timeline_events (limit_id,claim_id,event_type,title,description,occurred_at,metadata) values (${limit.id},${claim.id},${"SOURCE_RECOMMENDATION"},${`Verified prime by ${item.discoverer}`},${`2^${item.p} − 1 confirmed prime, the ${item.rank}${item.rank === 1 ? "st" : item.rank === 2 ? "nd" : item.rank === 3 ? "rd" : "th"} known Mersenne prime.`},${occurredAt},${tx.json({batch:"MERSENNE_PRIMES",publicationProcess:"FOUNDING_CATALOG_IMPORT",source:SOURCE_URL})})`;
+      await tx`insert into timeline_events (limit_id,claim_id,event_type,title,description,occurred_at,metadata) values (${limit.id},${claim.id},${"SOURCE_RECOMMENDATION"},${`Verified prime by ${item.discoverer}`},${`2^${item.p} − 1 confirmed prime, the ${ordinal(item.rank)} known Mersenne prime.`},${occurredAt},${tx.json({batch:"MERSENNE_PRIMES",publicationProcess:"FOUNDING_CATALOG_IMPORT",source:SOURCE_URL})})`;
     }); inserted++;
   }
   const [{ publicCount }] = await sql`select count(*)::int as "publicCount" from limits where status in ('OPEN','PROVEN')`;
-  console.log(JSON.stringify({ inserted, skipped, publicCount }));
+  console.log(JSON.stringify({ inserted, updated, publicCount }));
 } finally { await sql.end(); } }
 void main().catch((error) => { console.error(error); process.exitCode = 1; });

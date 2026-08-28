@@ -41,17 +41,20 @@ const RECORDS: Array<{ name: string; digits: number; factored: { year: number; b
   { name: "RSA-2048", digits: 617, factored: null },
 ];
 
-let inserted = 0, skipped = 0;
+const summaryFor = (item: (typeof RECORDS)[number]) => `RSA public-key encryption relies on a modulus that is the product of two large secret primes — factoring it back into those primes would break the key. ${item.name} is a ${item.digits}-decimal-digit challenge modulus published by RSA Laboratories to track how large a semiprime is practical to factor with current methods.`;
+
+let inserted = 0, updated = 0;
 async function main() { try {
   let [paper] = await sql`select id from papers where title=${PAPER_TITLE} limit 1`;
   if (!paper) [paper] = await sql`insert into papers (title,abstract,venue,publisher_url) values (${PAPER_TITLE},${"The semiprime moduli published by RSA Laboratories in 1991 and 2001 to track the practical difficulty of integer factorization, with a running record of which have been publicly factored."},${"RSA Laboratories / community factoring efforts"},${SOURCE_URL}) returning id`;
   for (const item of RECORDS) {
     const registryNumber = `LR-${item.name}`, slug = item.name.toLowerCase();
-    if ((await sql`select id from limits where registry_number=${registryNumber} limit 1`).length) { skipped++; continue; }
+    const existing = await sql`select id from limits where registry_number=${registryNumber} limit 1`;
+    if (existing.length) { await sql`update limits set summary=${summaryFor(item)},updated_at=now() where id=${existing[0].id}`; updated++; continue; }
     const status = item.factored ? "PROVEN" : "OPEN";
     const publishedAt = item.factored ? new Date(Date.UTC(item.factored.year, 0, 1)) : null;
     await sql.begin(async (tx) => {
-      const [limit] = await tx`insert into limits (registry_number,slug,title,summary,category,subcategory,direction,metric_name,status,published_at) values (${registryNumber},${slug},${`${item.name} factoring challenge`},${`Whether the ${item.digits}-decimal-digit semiprime modulus ${item.name} has been publicly factored into its two prime factors.`},${"Cryptography"},${"RSA Factoring Challenge"},${"MAXIMIZE"},${"Factorization status"},${status},${publishedAt}) returning id`;
+      const [limit] = await tx`insert into limits (registry_number,slug,title,summary,category,subcategory,direction,metric_name,status,published_at) values (${registryNumber},${slug},${`${item.name} factoring challenge`},${summaryFor(item)},${"Cryptography"},${"RSA Factoring Challenge"},${"MAXIMIZE"},${"Factorization status"},${status},${publishedAt}) returning id`;
       const [spec] = await tx`insert into limit_spec_versions (limit_id,version_number,formal_statement,constraints,assumptions) values (${limit.id},1,${`Is the ${item.name} modulus factored into its two prime factors?`},${tx.json({modulus:item.name,digits:item.digits})},${tx.json({publicationProcess:"FOUNDING_CATALOG_IMPORT"})}) returning id`;
       const [evidence] = await tx`insert into evidence (type,label,url,location,metadata) values (${"PAPER"},${`RSA Factoring Challenge — ${item.name}`},${SOURCE_URL},${item.name},${tx.json({modulus:item.name,digits:item.digits,factored:item.factored})}) returning id`;
       if (item.factored) {
@@ -63,6 +66,6 @@ async function main() { try {
     }); inserted++;
   }
   const [{ publicCount }] = await sql`select count(*)::int as "publicCount" from limits where status in ('OPEN','PROVEN')`;
-  console.log(JSON.stringify({ inserted, skipped, publicCount }));
+  console.log(JSON.stringify({ inserted, updated, publicCount }));
 } finally { await sql.end(); } }
 void main().catch((error) => { console.error(error); process.exitCode = 1; });
