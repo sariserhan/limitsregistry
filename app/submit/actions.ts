@@ -39,6 +39,9 @@ export async function createSubmission(formData: FormData) {
   if (!SUBMISSION_TYPES.includes(submissionType as (typeof SUBMISSION_TYPES)[number])) throw new Error("Invalid submission type.");
   if (title.length < 4) throw new Error("Title is too short.");
   if (description.length < 10) throw new Error("Description is too short.");
+  if (!RELATIONS.includes(proposedRelation as (typeof RELATIONS)[number])) throw new Error("Choose a proposed lower or upper bound.");
+  if (!proposedValueExact) throw new Error("Provide the proposed bound value.");
+  if (!evidenceUrl) throw new Error("Provide an evidence URL or proof link.");
 
   const input: NewSubmission = {
     submitterUserId: session.user.id,
@@ -48,10 +51,8 @@ export async function createSubmission(formData: FormData) {
     description,
     evidenceUrl: safeEvidenceUrl(evidenceUrl),
   };
-  if (proposedRelation && RELATIONS.includes(proposedRelation as (typeof RELATIONS)[number]) && proposedValueExact) {
-    input.proposedRelation = proposedRelation as NewSubmission["proposedRelation"];
-    input.proposedValueExact = proposedValueExact;
-  }
+  input.proposedRelation = proposedRelation as NewSubmission["proposedRelation"];
+  input.proposedValueExact = proposedValueExact;
 
   await insertSubmission(input);
   revalidatePath("/submit");

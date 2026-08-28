@@ -51,11 +51,11 @@ export default async function SubmitPage({ searchParams }: Props) {
         <div className="submit-field"><label htmlFor="title">Title</label><input id="title" name="title" required minLength={4} placeholder="Short summary of the proposal" /></div>
         <div className="submit-field"><label htmlFor="description">Description</label><textarea id="description" name="description" required minLength={10} rows={5} placeholder="What are you proposing, and why?" /></div>
         <div className="submit-row">
-          <div className="submit-field"><label htmlFor="proposedRelation">Proposed bound (optional)</label><select id="proposedRelation" name="proposedRelation" defaultValue=""><option value="">—</option><option value="<">&lt;</option><option value="<=">&le;</option><option value="=">=</option><option value=">=">&ge;</option><option value=">">&gt;</option></select></div>
-          <div className="submit-field"><label htmlFor="proposedValueExact">Proposed value (optional)</label><input id="proposedValueExact" name="proposedValueExact" placeholder="e.g. 7 or O(n log n)" /></div>
+          <div className="submit-field"><label htmlFor="proposedRelation">Proposed bound (required)</label><select id="proposedRelation" name="proposedRelation" required defaultValue=""><option value="" disabled>Select ≥ or ≤</option><option value="<">&lt;</option><option value="<=">&le;</option><option value="=">=</option><option value=">=">&ge;</option><option value=">">&gt;</option></select></div>
+          <div className="submit-field"><label htmlFor="proposedValueExact">Proposed value (required)</label><input id="proposedValueExact" name="proposedValueExact" required placeholder="e.g. 7 or O(n log n)" /></div>
         </div>
-        <p className="submit-help">Use ≥ for a stronger achievable result or ≤ for a tighter impossibility result. Include enough detail that someone else can verify the claim.</p>
-        <div className="submit-field"><label htmlFor="evidenceUrl">Evidence URL (optional)</label><input id="evidenceUrl" name="evidenceUrl" type="url" placeholder="Link to a paper, proof, or repository" /></div>
+        <p className="submit-help">Use ≥ for a stronger achievable result or ≤ for a tighter impossibility result. Include enough detail that someone else can verify the claim. Proof uploads are not enabled yet, so provide a stable HTTPS link to the paper, proof, code, or reproduction.</p>
+        <div className="submit-field"><label htmlFor="evidenceUrl">Evidence URL (required)</label><input id="evidenceUrl" name="evidenceUrl" type="url" required placeholder="https://doi.org/… or proof/repository link" /></div>
         <button className="submit-submit" type="submit">Submit for review</button>
       </form>
     </section>
