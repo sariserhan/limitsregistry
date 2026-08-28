@@ -36,3 +36,40 @@ export function buildRecordJsonLd(input: {
     isAccessibleForFree: true,
   };
 }
+
+/** WebSite + Organization markup for the homepage — establishes the site's identity for Google
+ * (sitelinks search box eligibility via the SearchAction) once per site, not once per page. */
+export function buildSiteJsonLd() {
+  return {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Organization",
+        "@id": `${SITE_URL}/#organization`,
+        name: "Limits Registry",
+        url: SITE_URL,
+        logo: `${SITE_URL}/icon.png`,
+      },
+      {
+        "@type": "WebSite",
+        "@id": `${SITE_URL}/#website`,
+        url: SITE_URL,
+        name: "Limits Registry",
+        description: "A curated public record of the verified boundaries of what is possible.",
+        publisher: { "@id": `${SITE_URL}/#organization` },
+        potentialAction: {
+          "@type": "SearchAction",
+          target: { "@type": "EntryPoint", urlTemplate: `${SITE_URL}/search?q={search_term_string}` },
+          "query-input": "required name=search_term_string",
+        },
+      },
+    ],
+  };
+}
+
+/** JSON.stringify doesn't escape "</script>" — a value containing that literal substring could
+ * otherwise close the script tag early and inject markup. < keeps it inert. Use for every
+ * JSON-LD script tag, not just record pages. */
+export function jsonLdScript(data: unknown) {
+  return JSON.stringify(data).replace(/</g, "\\u003c");
+}

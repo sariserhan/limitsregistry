@@ -14,7 +14,7 @@ import { ScopeCalculator } from "./scope-calculator";
 import { EmbedSnippet } from "./embed-snippet";
 import { followClaimAction } from "./claim-follow-actions";
 import { deriveFrontierPresentation, type FrontierPresentation } from "../../../src/domain/frontier-presentation";
-import { buildRecordJsonLd } from "../../../src/domain/structured-data";
+import { buildRecordJsonLd, jsonLdScript } from "../../../src/domain/structured-data";
 
 type PageProps = { params: Promise<{ id: string }> };
 
@@ -92,9 +92,7 @@ export default async function LimitPage({ params }: PageProps) {
   const scopeConstraintValues = Object.fromEntries(specificationConstraints.map(([key, value]) => [key, String(value)]));
   const challengeHref = database ? `/submit?limitId=${encodeURIComponent(database.limit.id)}` : "/submit";
   return <main className="canonical-page">
-    {/* JSON.stringify doesn't escape "</script>" — a title/summary containing that literal
-       substring could otherwise close this tag early and inject markup. < keeps it inert. */}
-    <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }} />
+    <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdScript(jsonLd) }} />
     <PublicHeader />
     <section className="canonical-intro"><div className="canonical-category">{record.category}</div><div className="canonical-id-row"><span className="canonical-id">{record.id}</span><span className="canonical-status">{displayStatus.replaceAll("_", " ")} LIMIT</span></div><h1>{record.title}</h1><p>{record.summary}</p><div className="intro-foot"><span>Specification version {research?.specification?.version ?? 2}</span><span>{database ? `Published ${database.limit.publishedAt ? new Date(database.limit.publishedAt).toISOString().slice(0, 10) : undefined ?? "—"}` : "Last updated May 12, 2025"}</span><span>{research ? `${research.evidence.length} evidence records` : "19 cited papers"}</span></div></section>
     <section className="problem-section" aria-labelledby="about-problem"><div className="section-title"><span>01</span><h2 id="about-problem">About this problem</h2><p>The question, scope, and sources behind this Registry record.</p></div><div className="problem-content"><div className="problem-description"><span className="problem-label">Formal question</span><p>{formalQuestion}</p></div><div className="problem-metadata"><div><span className="problem-label">Scope &amp; constraints</span>{specificationConstraints.length ? <dl>{specificationConstraints.map(([key, value]) => <div key={key}><dt>{key.replaceAll("_", " ")}</dt><dd>{value}</dd></div>)}</dl> : <p>Current published specification applies.</p>}</div><div><span className="problem-label">Primary sources</span>{primarySources.length ? <ul>{primarySources.map((source) => <li key={source.id}><a href={source.sourceUrl} target="_blank" rel="noreferrer">{source.label} <span aria-hidden="true">↗</span></a>{source.location ? <small>{source.location}</small> : null}</li>)}</ul> : <p>No external source link is recorded for this legacy fixture.</p>}</div></div>{primarySources.some((source) => source.abstract) ? <div className="problem-abstracts">{primarySources.filter((source) => source.abstract).map((source) => <div key={source.id} className="problem-abstract"><span className="problem-label">Abstract</span><p>{source.abstract}</p><small>{source.label}</small></div>)}</div> : null}<ScopeCalculator constraints={scopeConstraintValues} /></div></section>
