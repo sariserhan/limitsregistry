@@ -2,6 +2,8 @@
 
 This inventory contains 21 candidate records for each requested field (231 total). It is a research queue, not an assertion that every row is ready for publication. Exact theorems and protocol constants may proceed through source confirmation; empirical records require a frozen benchmark/specimen/protocol; parameterized bounds require assumptions in the specification.
 
+Publication progress: **Networking complete (21/21)** as `LR-003000`–`LR-003020`, sourced from RFC 768, 791, 1035, 2675, 8085, 8200, 9000, and 9293. The remaining 210 candidates stay in the research queue until their values, specifications, and primary evidence pass the same ingestion gate.
+
 ## AI (21)
 
 1. Chinchilla compute-optimal parameter/token frontier
