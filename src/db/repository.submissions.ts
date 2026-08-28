@@ -59,3 +59,5 @@ export async function getSubmissionNotification(id: string) {
   const rows = await db.select({ submission: submissions, submitter: { name: user.name, email: user.email }, limit: { registryNumber: limits.registryNumber, title: limits.title } }).from(submissions).innerJoin(user, eq(user.id, submissions.submitterUserId)).innerJoin(limits, eq(limits.id, submissions.limitId)).where(eq(submissions.id, id)).limit(1);
   return rows[0] ?? null;
 }
+
+export async function listPublicSubmissionLedger() { return db.select({ submission: { id: submissions.id, title: submissions.title, proposedRelation: submissions.proposedRelation, proposedValueExact: submissions.proposedValueExact, status: submissions.status, createdAt: submissions.createdAt }, submitter: { name: user.name }, limit: { registryNumber: limits.registryNumber, title: limits.title } }).from(submissions).innerJoin(user, eq(user.id, submissions.submitterUserId)).innerJoin(limits, eq(limits.id, submissions.limitId)).orderBy(desc(submissions.createdAt)); }
