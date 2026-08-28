@@ -1,4 +1,4 @@
-.blog-page{min-height:100vh;padding:0 var(--page-pad) 90px;background:var(--paper)}
+.blog-page{min-height:100vh;padding:0 var(--page-pad);background:var(--paper)}
 .blog-intro{padding:80px 0 40px;max-width:790px}
 .blog-intro h1{font:600 clamp(45px,6vw,76px)/.98 'Space Grotesk',sans-serif;letter-spacing:-.07em;margin:0 0 24px}
 .blog-intro>p{color:var(--muted);line-height:1.6;max-width:620px;margin:0 0 18px}
@@ -8,4 +8,4 @@
 .blog-item strong{display:block;font:600 20px 'Space Grotesk',sans-serif;letter-spacing:-.02em;margin-bottom:6px}
 .blog-item p{color:var(--muted);font-size:14px;margin:0 0 8px}
 .blog-item small{color:var(--faint);font:10px 'DM Mono',monospace;text-transform:uppercase;letter-spacing:.05em}
-@media(max-width:600px){.blog-page{padding:0 24px 60px}.blog-intro{padding:55px 0 30px}}
+@media(max-width:600px){.blog-page{padding:0 24px}.blog-intro{padding:55px 0 30px}}
