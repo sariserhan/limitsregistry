@@ -6,8 +6,19 @@ import Link from "next/link";
 import { signIn } from "../../src/auth/client";
 
 function safeNext(raw: string | null) {
-  if (!raw || !raw.startsWith("/") || raw.startsWith("//") || raw.startsWith("/\\")) return "/";
-  return raw;
+  // Prefix checks alone don't catch every open-redirect trick (e.g. a leading control
+  // character before "//" that browsers strip during URL normalization, like "/\t//evil.com").
+  // Parsing with the WHATWG URL algorithm and checking the resolved origin matches what the
+  // browser will actually navigate to, so it can't be fooled by encoding/whitespace tricks.
+  // A fixed dummy base (not window.location.origin) so this also works during SSR — we only
+  // care whether resolving `raw` against ANY base stays on that same base, not the real origin.
+  if (!raw || !raw.startsWith("/")) return "/";
+  try {
+    const url = new URL(raw, "http://localhost");
+    return url.origin === "http://localhost" ? url.pathname + url.search + url.hash : "/";
+  } catch {
+    return "/";
+  }
 }
 
 export default function LoginForm() {
