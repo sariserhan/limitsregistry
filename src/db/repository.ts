@@ -24,6 +24,24 @@ export async function getSpecificationVersionHistory(limitId: string) {
   return db.select({ id: specificationVersions.id, version: specificationVersions.versionNumber, createdAt: specificationVersions.createdAt }).from(specificationVersions).where(eq(specificationVersions.limitId, limitId)).orderBy(asc(specificationVersions.versionNumber));
 }
 
+// Site-wide "what's new" feed — every timeline event on a public Limit (first publication, spec
+// changes, breakthroughs), broader than listRecentBreakthroughEvents which only covers the
+// STRONGER_BOUND/FRONTIER_CLOSED subset fired by detectAndRecordBreakthroughs.
+export async function listRecentTimelineEvents(resultLimit = 50) {
+  const read = unstable_cache(async () => {
+    const rows = await db.select({ event: timelineEvents, limit: { registryNumber: limits.registryNumber, title: limits.title } })
+      .from(timelineEvents)
+      .innerJoin(limits, eq(limits.id, timelineEvents.limitId))
+      .where(inArray(limits.status, ["OPEN", "PROVEN", "DISPUTED", "RETIRED"]))
+      .orderBy(sql`${timelineEvents.occurredAt} desc`)
+      .limit(resultLimit);
+    return rows;
+  }, ["recent-timeline-events", String(resultLimit)], { revalidate: 60, tags: ["published-limits"] });
+  const rows = await read();
+  // occurredAt round-trips through unstable_cache's JSON cache as a string despite its Date type.
+  return rows.map((row) => ({ ...row, event: { ...row.event, occurredAt: new Date(row.event.occurredAt) } }));
+}
+
 
 export async function listPublishedDomainLimits() {
   const rows = await listPublishedLimits();
@@ -91,6 +109,13 @@ export async function listDistinctCategories() {
   const rows = await db.selectDistinct({ category: limits.category }).from(limits).orderBy(asc(limits.category));
   return rows.map((row) => row.category);
 }
+// Unlike listDistinctCategories (used by the editor-only create-record form, where seeing a
+// category from a DRAFT/RETIRED record is fine), this is exposed on the public API — it must
+// only surface categories that actually have a publicly visible record behind them.
+export const listPublicCategories = unstable_cache(async () => {
+  const rows = await db.selectDistinct({ category: limits.category }).from(limits).where(inArray(limits.status, ["OPEN", "PROVEN", "DISPUTED", "RETIRED"])).orderBy(asc(limits.category));
+  return rows.map((row) => row.category);
+}, ["public-categories"], { revalidate: 300, tags: ["published-limits"] });
 function slugifyTitle(title: string) {
   return title.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "") || "record";
 }
@@ -158,6 +183,15 @@ export async function updateClaimEditorialStatus(claimId: string, status: "ACCEP
 export async function createEditorialClaim(input: { claimNumber: string; specificationVersionId: string; claimType: "UPPER_BOUND" | "LOWER_BOUND" | "EXACT_VALUE" | "CONSTRUCTION" | "COUNTEREXAMPLE" | "ASYMPTOTIC_BOUND" | "COMPUTATIONAL_BOUND"; relation: "<" | "<=" | "=" | ">=" | ">"; valueExact: string; epistemicStatus: "LITERATURE_ASSERTED" | "SOURCE_CONFIRMED" | "REPRODUCED" | "PROVEN" | "FORMALLY_PROVEN" | "EMPIRICALLY_SUPPORTED" | "DISPUTED" | "INVALIDATED"; methodSummary?: string }) { const [row] = await db.insert(claims).values({ ...input, scopeParameters: {}, status: "DRAFT" }).returning(); return row; }
 export async function createEditorialEvidence(input: { type: "PAPER" | "FORMAL_PROOF" | "SOURCE_CODE" | "DATASET" | "EXHAUSTIVE_COMPUTATION" | "EXPERIMENT" | "REPRODUCTION" | "OTHER"; label: string; url?: string; location?: string }) { const [row] = await db.insert(evidence).values({ ...input, metadata: {} }).returning(); return row; }
 export async function recordEditorialReview(input: { claimId: string; reviewerUserId: string; decision: string; rationale: string; conflictDisclosed: boolean }) { const [row] = await db.insert(reviews).values(input).returning(); return row; }
+export async function listReviewsByUser(userId: string) {
+  return db.select({ review: reviews, claim: { claimNumber: claims.claimNumber, relation: claims.relation, valueExact: claims.valueExact }, limit: { registryNumber: limits.registryNumber, title: limits.title } })
+    .from(reviews)
+    .innerJoin(claims, eq(claims.id, reviews.claimId))
+    .innerJoin(specificationVersions, eq(specificationVersions.id, claims.specificationVersionId))
+    .innerJoin(limits, eq(limits.id, specificationVersions.limitId))
+    .where(eq(reviews.reviewerUserId, userId))
+    .orderBy(sql`${reviews.createdAt} desc`);
+}
 export async function listAuditLog() { return db.select().from(auditLogs).orderBy(sql`${auditLogs.createdAt} desc`).limit(50); }
 
 

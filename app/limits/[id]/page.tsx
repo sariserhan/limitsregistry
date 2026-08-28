@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { PublicHeader } from "../../../src/components/public-header";
 import { SiteFooter } from "../../../src/components/site-footer";
@@ -13,6 +14,7 @@ import { ScopeCalculator } from "./scope-calculator";
 import { EmbedSnippet } from "./embed-snippet";
 import { followClaimAction } from "./claim-follow-actions";
 import { deriveFrontierPresentation, type FrontierPresentation } from "../../../src/domain/frontier-presentation";
+import { buildRecordJsonLd, jsonLdScript } from "../../../src/domain/structured-data";
 
 type PageProps = { params: Promise<{ id: string }> };
 
@@ -30,6 +32,29 @@ function CanonicalFrontier({ presentation, isMinimization, isAsymptotic, status,
   if (presentation.mode === "SINGLE_VALUE") return <div className="frontier-single"><span>{presentation.label}</span><strong>{exactDisplay(presentation.value)}</strong><p>{presentation.note}</p></div>;
   if (presentation.mode === "ONE_SIDED") return <div className={"frontier " + (isAsymptotic ? "asymptotic" : "integer")}><div className="frontier-labels"><span>KNOWN LOWER BOUND</span><span>KNOWN UPPER BOUND</span></div><div className="frontier-values"><strong>{lower === "?" ? "Unknown" : lower}</strong><div className="frontier-line"><i /><span>OPEN FRONTIER</span><i /></div><strong>{upper === "?" ? "Unknown" : upper}</strong></div><div className="frontier-foot"><span>Lower bound</span><span>Gap: Unknown</span><span>Upper bound</span></div></div>;
   return <div className={"frontier " + (isAsymptotic ? "asymptotic" : "integer")}><div className="frontier-labels"><span>{isMinimization ? "PROVEN LOWER BOUND" : "BEST KNOWN LOWER BOUND"}</span><span>{isMinimization ? "BEST KNOWN UPPER BOUND" : "PROVEN UPPER BOUND"}</span></div><div className="frontier-values"><strong>{lower}</strong><div className="frontier-line"><i /><span>{status === "PROVEN" ? "CLOSED FRONTIER" : "UNKNOWN GAP"}</span><i /></div><strong>{upper}</strong></div><div className="frontier-foot"><span>{isMinimization ? "Proven lower bound" : "Best known lower bound"}</span><span>Gap: {gap}</span><span>{isMinimization ? "Best known upper bound" : "Proven upper bound"}</span></div></div>;
+}
+
+// Runs separately from the page component (Next.js convention — see opengraph-image.tsx too),
+// so this re-fetches rather than sharing state with LimitPage below; both calls are cheap reads
+// through the same 60s data cache.
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { id } = await params;
+  const launch = getPublishedLimit(id);
+  const database = await getPublishedLimitWithFrontier(id).catch(() => null);
+  const fallback = launch ?? getCanonicalRecord(id);
+  if (!database && !fallback) return { title: "Record not found — Limits Registry" };
+  const record = database
+    ? { id: database.limit.registryNumber, title: database.limit.title, summary: database.limit.summary }
+    : { id: fallback!.id, title: fallback!.title, summary: fallback!.summary };
+  const title = `${record.title} (${record.id}) — Limits Registry`;
+  const path = `/limits/${record.id}`;
+  return {
+    title,
+    description: record.summary,
+    alternates: { canonical: path },
+    openGraph: { title, description: record.summary, url: path, type: "article" },
+    twitter: { card: "summary_large_image", title, description: record.summary },
+  };
 }
 
 export default async function LimitPage({ params }: PageProps) {
@@ -63,9 +88,11 @@ export default async function LimitPage({ params }: PageProps) {
   const primarySources = [...new Map((research?.evidence ?? []).filter((item) => item.sourceUrl).map((item) => [item.sourceUrl!, item])).values()];
   const formalQuestion = research?.specification?.formalStatement ?? record.summary;
   const specificationConstraints = Object.entries(research?.specification?.constraints ?? {});
+  const jsonLd = buildRecordJsonLd({ registryNumber: record.id, title: record.title, summary: record.summary, category: record.category, metricName: database?.limit.metricName, unit: database?.limit.unit, publishedAt: database?.limit.publishedAt, sourceUrls: primarySources.map((source) => source.sourceUrl!) });
   const scopeConstraintValues = Object.fromEntries(specificationConstraints.map(([key, value]) => [key, String(value)]));
   const challengeHref = database ? `/submit?limitId=${encodeURIComponent(database.limit.id)}` : "/submit";
   return <main className="canonical-page">
+    <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdScript(jsonLd) }} />
     <PublicHeader />
     <section className="canonical-intro"><div className="canonical-category">{record.category}</div><div className="canonical-id-row"><span className="canonical-id">{record.id}</span><span className="canonical-status">{displayStatus.replaceAll("_", " ")} LIMIT</span></div><h1>{record.title}</h1><p>{record.summary}</p><div className="intro-foot"><span>Specification version {research?.specification?.version ?? 2}</span><span>{database ? `Published ${database.limit.publishedAt ? new Date(database.limit.publishedAt).toISOString().slice(0, 10) : undefined ?? "—"}` : "Last updated May 12, 2025"}</span><span>{research ? `${research.evidence.length} evidence records` : "19 cited papers"}</span></div></section>
     <section className="problem-section" aria-labelledby="about-problem"><div className="section-title"><span>01</span><h2 id="about-problem">About this problem</h2><p>The question, scope, and sources behind this Registry record.</p></div><div className="problem-content"><div className="problem-description"><span className="problem-label">Formal question</span><p>{formalQuestion}</p></div><div className="problem-metadata"><div><span className="problem-label">Scope &amp; constraints</span>{specificationConstraints.length ? <dl>{specificationConstraints.map(([key, value]) => <div key={key}><dt>{key.replaceAll("_", " ")}</dt><dd>{value}</dd></div>)}</dl> : <p>Current published specification applies.</p>}</div><div><span className="problem-label">Primary sources</span>{primarySources.length ? <ul>{primarySources.map((source) => <li key={source.id}><a href={source.sourceUrl} target="_blank" rel="noreferrer">{source.label} <span aria-hidden="true">↗</span></a>{source.location ? <small>{source.location}</small> : null}</li>)}</ul> : <p>No external source link is recorded for this legacy fixture.</p>}</div></div>{primarySources.some((source) => source.abstract) ? <div className="problem-abstracts">{primarySources.filter((source) => source.abstract).map((source) => <div key={source.id} className="problem-abstract"><span className="problem-label">Abstract</span><p>{source.abstract}</p><small>{source.label}</small></div>)}</div> : null}<ScopeCalculator constraints={scopeConstraintValues} /></div></section>

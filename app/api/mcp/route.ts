@@ -4,7 +4,7 @@ import { getPublishedLimitWithFrontier, searchPublishedLimits, listPublishedDoma
 import { parseExact } from "../../../src/db/serializers";
 import { evaluateHypothesis } from "../../../src/domain/hypothesis";
 
-const SITE_URL = "https://limitsregistry.com";
+const SITE_URL = "https://www.limitsregistry.com";
 
 function textResult(data: unknown) {
   return { content: [{ type: "text" as const, text: JSON.stringify(data) }] };

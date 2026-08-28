@@ -7,7 +7,25 @@ import { getCertificate } from "../../../src/db/repository";
 import PrintButton from "./PrintButton";
 
 type PageProps = { params: Promise<{ certificateNumber: string }> };
-export const metadata: Metadata = { title: "Certificate — Limits Registry", description: "An integrity certificate for a Limits Registry Claim." };
+
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { certificateNumber } = await params;
+  const certificate = await getCertificate(certificateNumber).catch(() => null);
+  if (!certificate) return { title: "Certificate not found — Limits Registry" };
+  const snapshot = certificate.snapshot;
+  const registryNumber = String(snapshot.registryNumber ?? "Unknown record");
+  const value = `${String(snapshot.relation ?? "")} ${String(snapshot.valueExact ?? "")}`.trim();
+  const title = `Certificate ${certificate.certificateNumber} (${registryNumber}) — Limits Registry`;
+  const description = `Integrity certificate for ${registryNumber}: ${value}. SHA-256 hash and, where signed, an Ed25519 signature verifying this result hasn't changed since certification.`;
+  const path = `/certificates/${certificate.certificateNumber}`;
+  return {
+    title,
+    description,
+    alternates: { canonical: path },
+    openGraph: { title, description, url: path, type: "article" },
+    twitter: { card: "summary_large_image", title, description },
+  };
+}
 
 export default async function CertificatePage({ params }: PageProps) {
   const { certificateNumber } = await params;
