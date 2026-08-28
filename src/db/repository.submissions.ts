@@ -50,3 +50,12 @@ export async function getProofAttachment(id: string) {
 export async function setSubmissionStatus(id: string, status: "UNDER_REVIEW" | "ACCEPTED" | "REJECTED" | "NEEDS_REVISION", reviewedByUserId: string, reviewerNotes: string) {
   await db.update(submissions).set({ status, reviewedByUserId, reviewerNotes, updatedAt: new Date() }).where(eq(submissions.id, id));
 }
+
+export async function listPublicSubmissionHistory(limitId: string) {
+  return db.select({ submission: { id: submissions.id, title: submissions.title, proposedRelation: submissions.proposedRelation, proposedValueExact: submissions.proposedValueExact, status: submissions.status, createdAt: submissions.createdAt, reviewerNotes: submissions.reviewerNotes }, submitter: { name: user.name } }).from(submissions).innerJoin(user, eq(user.id, submissions.submitterUserId)).where(eq(submissions.limitId, limitId)).orderBy(desc(submissions.createdAt));
+}
+
+export async function getSubmissionNotification(id: string) {
+  const rows = await db.select({ submission: submissions, submitter: { name: user.name, email: user.email }, limit: { registryNumber: limits.registryNumber, title: limits.title } }).from(submissions).innerJoin(user, eq(user.id, submissions.submitterUserId)).innerJoin(limits, eq(limits.id, submissions.limitId)).where(eq(submissions.id, id)).limit(1);
+  return rows[0] ?? null;
+}

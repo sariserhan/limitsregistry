@@ -3,7 +3,8 @@
 import { revalidatePath } from "next/cache";
 import { requireRole } from "../../src/auth/session";
 import { allowRequest } from "../../src/ops/rate-limit";
-import { insertProofAttachment, insertSubmission, type NewSubmission } from "../../src/db/repository.submissions";
+import { getSubmissionNotification, insertProofAttachment, insertSubmission, type NewSubmission } from "../../src/db/repository.submissions";
+import { sendSubmissionReceivedEmail } from "../../src/lib/email/submission-emails";
 
 const SUBMISSION_TYPES = ["BETTER_ACHIEVABLE_RESULT", "STRONGER_BOUND", "PROOF", "REPRODUCTION", "CORRECTION"] as const;
 const RELATIONS = ["<", "<=", "=", ">=", ">"] as const;
@@ -64,5 +65,7 @@ export async function createSubmission(formData: FormData) {
 
   const submission = await insertSubmission(input);
   if (uploadedProof) await insertProofAttachment({ submissionId: submission.id, filename: uploadedProof.name.slice(0, 180), mimeType: uploadedProof.type, sizeBytes: uploadedProof.size, contents: Buffer.from(await uploadedProof.arrayBuffer()) });
+  const record = await getSubmissionNotification(submission.id);
+  if (record) void sendSubmissionReceivedEmail(record.submitter.email, record.submitter.name, record.limit.registryNumber, title, submission.id).catch((error) => console.error("[submission] receipt email failed", error));
   revalidatePath("/submit");
 }

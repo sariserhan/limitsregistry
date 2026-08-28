@@ -9,7 +9,8 @@ import { getPaper } from "../../src/db/repository.entities";
 import { findDuplicatePaper } from "../../src/domain/duplicate-detection";
 import { extractCandidateClaims, EXTRACTION_MODEL, EXTRACTION_PROMPT_VERSION } from "../../src/lib/ai/extract-claims";
 import { insertCandidateClaim, insertPaper, listPapers, setCandidateClaimStatus } from "../../src/db/repository.console";
-import { setSubmissionStatus } from "../../src/db/repository.submissions";
+import { getSubmissionNotification, setSubmissionStatus } from "../../src/db/repository.submissions";
+import { sendSubmissionDecisionEmail } from "../../src/lib/email/submission-emails";
 import { refreshPublicSearchIndex } from "../../src/db/repository.search";
 
 // Every action here used to plain `throw new Error(...)` on a validation failure — with no local
@@ -113,6 +114,8 @@ export async function decideSubmission(formData: FormData) {
   if (!notes) done("Add a note explaining the decision.", true);
   try {
     await setSubmissionStatus(id, decision as (typeof SUBMISSION_DECISIONS)[number], session.user.id, notes);
+    const record = await getSubmissionNotification(id);
+    if (record) void sendSubmissionDecisionEmail(record.submitter.email, record.submitter.name, record.limit.registryNumber, record.submission.title, decision, notes, id).catch((error) => console.error("[submission] decision email failed", error));
     revalidatePath("/console");
   } catch (error) { done(error instanceof Error ? error.message : "Decision could not be saved.", true); }
   done(`Submission ${decision.toLowerCase()}.`);

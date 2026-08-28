@@ -31,3 +31,11 @@
 .challenge-context{border-left:3px solid var(--blue);background:var(--paper);padding:14px 16px;color:var(--muted);font-size:13px;line-height:1.5}.challenge-context strong{color:var(--ink)}.submit-help{margin:0;color:var(--muted);font-size:12px;line-height:1.5}.submit-checklist{display:grid;gap:10px;border:1px solid var(--line);padding:16px;margin:0}.submit-checklist legend{padding:0 6px;font:10px 'DM Mono',monospace;text-transform:uppercase;letter-spacing:.08em;color:var(--faint)}.submit-checklist label{display:flex;gap:9px;align-items:flex-start;color:var(--muted);font-size:12px;line-height:1.45}.submit-checklist input{margin-top:2px;flex:none}.submission-preview-button{border:1px solid var(--line);background:transparent;color:var(--blue);padding:10px 14px;font-size:12px;align-self:flex-start}.submission-preview{border-left:3px solid var(--blue);background:var(--paper);padding:14px 16px;font-size:12px;line-height:1.5}.submission-preview strong{display:block;margin-bottom:5px;color:var(--ink)}
 
 .submit-identity{display:grid;gap:5px;border-left:3px solid var(--ink);padding:12px 15px;margin-bottom:20px;background:var(--paper)}.submit-identity span{font:10px 'DM Mono',monospace;text-transform:uppercase;letter-spacing:.08em;color:var(--faint)}.submit-identity strong{font:600 15px 'Space Grotesk',sans-serif}.submit-identity small{color:var(--muted);font-size:11px}
+
+.submission-status { display:flex; flex-direction:column; align-items:flex-end; gap:4px; }
+.submission-status small { color:var(--faint); font:10px/1.4 "DM Mono",monospace; max-width:220px; text-align:right; }
+.challenge-history { margin:16px 0; border-top:1px solid var(--line); }
+.challenge-history div { display:grid; grid-template-columns:1fr auto; gap:3px 10px; padding:12px 0; border-bottom:1px solid var(--line); }
+.challenge-history strong { font:600 13px "Space Grotesk",sans-serif; }
+.challenge-history span { color:var(--blue); font:10px "DM Mono",monospace; text-transform:uppercase; }
+.challenge-history small { grid-column:1 / -1; color:var(--faint); font:10px "DM Mono",monospace; }

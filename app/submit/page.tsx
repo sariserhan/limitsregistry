@@ -14,6 +14,7 @@ const SUBMISSION_TYPE_LABELS: Record<string, string> = {
   REPRODUCTION: "An independent reproduction",
   CORRECTION: "A correction to an existing record",
 };
+const SUBMISSION_STATUS_HELP: Record<string, string> = { SUBMITTED: "Received — waiting for an editor to open it.", UNDER_REVIEW: "An editor is checking the scope and evidence.", ACCEPTED: "Accepted by an editor; publication is a separate editorial step.", REJECTED: "Not accepted for the current record. Read the reviewer note for context.", NEEDS_REVISION: "The editor asked for clarification or stronger evidence." };
 
 type Props = { searchParams: Promise<{ limitId?: string }> };
 
@@ -66,13 +67,13 @@ export default async function SubmitPage({ searchParams }: Props) {
 
     <section>
       <h2>Your submissions ({own.length})</h2>
-      {own.map(({ submission, limit, proof }) => <div className="own-submission" key={submission.id}>
+      {own.map(({ submission, limit, proof }) => <div className="own-submission" id={`submission-${submission.id}`} key={submission.id}>
         <div>
           <strong>{submission.title}</strong>
           <small>{limit.registryNumber} — {limit.title} · {SUBMISSION_TYPE_LABELS[submission.submissionType]}</small>
           {submission.reviewerNotes && <p style={{ marginTop: 6, fontSize: 12, color: "var(--muted)" }}>Reviewer note: {submission.reviewerNotes}</p>}{proof?.id ? <a href={`/api/submissions/proof/${proof.id}`} target="_blank" rel="noreferrer">Proof file: {proof.filename} ↗</a> : null}
         </div>
-        <span className={`submission-status ${submission.status.toLowerCase()}`}>{submission.status.replaceAll("_", " ")}</span>
+        <span className={`submission-status ${submission.status.toLowerCase()}`} title={SUBMISSION_STATUS_HELP[submission.status]}>{submission.status.replaceAll("_", " ")}<small>{SUBMISSION_STATUS_HELP[submission.status]}</small></span>
       </div>)}
       {own.length === 0 && <p>You haven&rsquo;t submitted anything yet.</p>}
     </section>
