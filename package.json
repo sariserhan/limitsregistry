@@ -22,6 +22,12 @@
     "db:seed:quantum-information": "tsx scripts/seed-quantum-information.ts",
     "db:seed:signal-processing": "tsx scripts/seed-signal-processing.ts",
     "db:seed:astrophysics": "tsx scripts/seed-astrophysics.ts",
+    "db:seed:ramsey": "tsx scripts/seed-ramsey-numbers.ts",
+    "db:seed:kissing": "tsx scripts/seed-kissing-numbers.ts",
+    "db:seed:mersenne": "tsx scripts/seed-mersenne-primes.ts",
+    "db:seed:sorting-networks": "tsx scripts/seed-sorting-networks.ts",
+    "db:seed:rsa": "tsx scripts/seed-rsa-numbers.ts",
+    "db:seed:supercomputers": "tsx scripts/seed-supercomputers.ts",
     "db:publish:founding-queue": "tsx scripts/publish-founding-queue.ts"
   },
   "dependencies": {

@@ -55,6 +55,10 @@ export function deriveFrontier(direction: Direction, specification: Specificatio
   for (const claim of active) {
     if (claim.relation === ">=" || claim.relation === ">") lowerBound = betterLower(lowerBound, claim.value);
     if (claim.relation === "<=" || claim.relation === "<") upperBound = betterUpper(upperBound, claim.value);
+    // An exact-value claim ("=") is simultaneously its own tightest lower and upper bound — without
+    // this, a limit whose only claim is EXACT_VALUE never closes its frontier and displays "?" for
+    // both bounds despite genuinely being a proven, exact record.
+    if (claim.relation === "=") { lowerBound = betterLower(lowerBound, claim.value); upperBound = betterUpper(upperBound, claim.value); }
     if (claim.claimType === "CONSTRUCTION" || claim.claimType === "EXACT_VALUE") achievable = direction === "MAXIMIZE" ? betterLower(achievable, claim.value) : betterUpper(achievable, claim.value);
   }
 
