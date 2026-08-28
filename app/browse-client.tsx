@@ -128,8 +128,8 @@ export default function Home({ initialLimits, stats, recentBreakthroughs, featur
           <Link className="home-cta-secondary" href="/bounties/propose">Propose a prize pool <ArrowIcon /></Link>
         </div>
       </section>
-      <section className="watchlist-cta"><div className="watchlist-cta-copy"><p className="section-kicker">Follow the frontier</p><h2>Get an email the moment a bound tightens.</h2><p>Watch any record and we&apos;ll notify you when a stronger Claim is accepted or a frontier closes.</p></div><Link className="primary-button" href="/watchlists">Start a watchlist <ArrowIcon /></Link></section>
       <section className="home-faq" id="faq"><p className="section-kicker">Frequently asked</p><h2>How the Registry works</h2><div className="home-faq-list">{faq.map((item) => <details className="home-faq-item" key={item.question}><summary>{item.question}<ChevronIcon /></summary><p>{item.answer}</p></details>)}</div></section>
+      <section className="watchlist-cta"><div className="watchlist-cta-copy"><p className="section-kicker">Follow the frontier</p><h2>Get an email the moment a bound tightens.</h2><p>Watch any record and we&apos;ll notify you when a stronger Claim is accepted or a frontier closes.</p></div><Link className="primary-button" href="/watchlists">Start a watchlist <ArrowIcon /></Link></section>
     </>}
     <SiteFooter />
   </main>;
