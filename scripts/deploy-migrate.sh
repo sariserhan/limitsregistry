@@ -49,7 +49,7 @@ ENV_FILE="$(mktemp -t "vercel-env-${TARGET}.XXXXXX")"
 trap 'rm -f "$ENV_FILE"' EXIT
 
 echo "==> Pulling ${TARGET} environment variables from Vercel"
-vercel env pull --environment="$TARGET" --yes "$ENV_FILE"
+"${VERCEL[@]}" env pull --environment="$TARGET" --yes "$ENV_FILE"
 
 DB_URL="$(grep '^DATABASE_URL=' "$ENV_FILE" | head -1 | cut -d= -f2- | sed -e 's/^"//' -e 's/"$//')"
 if [[ -z "$DB_URL" || "$DB_URL" == "[SENSITIVE]" ]]; then
