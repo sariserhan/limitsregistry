@@ -1,3 +1,5 @@
+import Script from "next/script";
+
 import type { Metadata } from "next";
 import { headers } from "next/headers";
 import "./globals.css";
@@ -29,5 +31,10 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
     {isAdmin && <AdminModeBanner />}
     {!showMaintenance && settings.announcementEnabled && <AnnouncementBanner message={settings.announcementMessage} level={settings.announcementLevel} />}
     {showMaintenance ? <MaintenanceScreen message={settings.maintenanceMessage} /> : children}
+    <Script
+      src="https://cdn.visitorping.com/site/vp_PBTR9YAZ.js"
+      strategy="afterInteractive"
+      crossOrigin="anonymous"
+    />
   </body></html>;
 }
