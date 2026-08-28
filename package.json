@@ -23,6 +23,7 @@
     "db:seed:signal-processing": "tsx scripts/seed-signal-processing.ts",
     "db:seed:astrophysics": "tsx scripts/seed-astrophysics.ts",
     "db:seed:ai-limits": "tsx scripts/seed-ai-limits.ts",
+    "db:seed:data-storage": "tsx scripts/seed-data-storage.ts",
     "db:seed:ramsey": "tsx scripts/seed-ramsey-numbers.ts",
     "db:seed:kissing": "tsx scripts/seed-kissing-numbers.ts",
     "db:seed:mersenne": "tsx scripts/seed-mersenne-primes.ts",
