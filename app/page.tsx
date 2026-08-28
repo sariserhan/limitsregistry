@@ -6,6 +6,7 @@ import { formatExact, publishedLimits, type PublishedLimit } from "../src/domain
 import type { ExactValue } from "../src/domain/types";
 import { deriveFrontierPresentation } from "../src/domain/frontier-presentation";
 import { buildSiteJsonLd, jsonLdScript } from "../src/domain/structured-data";
+import { blogPosts } from "../src/domain/blog-posts";
 
 export const revalidate = 60;
 const displayValue = (value: Parameters<typeof formatExact>[0]): ExactValue | null => value ? { kind: "text", value: formatExact(value) } : null;
@@ -18,6 +19,7 @@ export default async function Home() {
   const featuredBounties = (await listPublicBounties().catch(() => []))
     .slice().sort((a, b) => Number(b.bounty.amount ?? 0) - Number(a.bounty.amount ?? 0)).slice(0, 3)
     .map(({ bounty, limit }) => ({ id: bounty.id, title: bounty.title, sponsor: bounty.sponsor, amount: bounty.amount, currency: bounty.currency, registryNumber: limit.registryNumber }));
+  const featuredArticles = blogPosts.slice(0, 3).map((post) => ({ slug: post.slug, title: post.title, dek: post.dek }));
   const limits: PublishedLimit[] = databaseRows.length ? databaseRows.map(({ limit, specification, claims, timeline, frontier }) => {
     const fallback = publishedLimits.find((item) => item.id === limit.registryNumber) ?? publishedLimits[0];
     const safeFrontier = { ...frontier, lowerBound: displayValue(frontier.lowerBound), upperBound: displayValue(frontier.upperBound), achievable: displayValue(frontier.achievable) };
@@ -25,6 +27,6 @@ export default async function Home() {
   }) : publishedLimits;
   return <>
     <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdScript(buildSiteJsonLd()) }} />
-    <BrowseClient initialLimits={limits} stats={stats} recentBreakthroughs={recentBreakthroughs} featuredBounties={featuredBounties} />
+    <BrowseClient initialLimits={limits} stats={stats} recentBreakthroughs={recentBreakthroughs} featuredBounties={featuredBounties} featuredArticles={featuredArticles} />
   </>;
 }
