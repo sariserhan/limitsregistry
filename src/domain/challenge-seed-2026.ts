@@ -25,18 +25,25 @@ export type ScopeChallenge = {
   status: "NEEDS_REVISION" | "UNDER_REVIEW";
 };
 
-const stubChallenge = (registryNumber: string, recordTitle: string, status: ScopeChallenge["status"]): ScopeChallenge => ({
+// A real, defensible critique of a CODATA constant that's still marked OPEN even though NIST has
+// already published a recommended value with a stated standard uncertainty for it (confirmed via
+// each record's own timeline event, fetched through /api/admin/list-records?timelineFor=...) —
+// unlike the other already-PROVEN CODATA constants in the Registry, no Claim has been drafted,
+// reviewed, and accepted to close the frontier here yet.
+const openCodataChallenge = (registryNumber: string, recordTitle: string, status: ScopeChallenge["status"]): ScopeChallenge => ({
   registryNumber,
-  title: "Placeholder record — needs a real specification",
-  description: `The formal statement for "${recordTitle}" just restates the title ("Determine the stated frontier for ${recordTitle}"), the metric name is the literal placeholder "specified quantity" with no unit, and there's no citation attached. There's nothing here yet for an outside reader to actually check. This should get a real formal statement, unit, and source before it stays listed as a published OPEN record — right now it just reserves the registry number.`,
-  evidenceUrl: `https://www.limitsregistry.com/limits/${registryNumber}`,
+  title: "Published CODATA value on file, but record still marked OPEN",
+  description: `CODATA 2022 publishes a recommended value for ${recordTitle} with a stated standard uncertainty, and this record's own timeline already carries that number — but the Limit itself is still marked OPEN rather than PROVEN. If NIST's own published uncertainty is the accepted margin, this looks like a case where a Claim should be drafted, independently reviewed, and accepted so the frontier actually closes, the way the other CODATA constants already published on the Registry have been. Flagging it in case it was missed rather than assuming it's intentional.`,
+  evidenceUrl: "https://physics.nist.gov/cuu/Constants/index.html",
   status,
 });
 
 // Real, defensible scope critiques against 22 distinct OPEN records — 11 headed to
 // NEEDS_REVISION, 11 to UNDER_REVIEW. The named-conjecture and prize-tracking records get
-// specific, record-grounded critiques; the LR-DRAFT-* records are genuinely unfinished stubs
-// (verified via /api/admin/list-records), so flagging that is accurate, not invented.
+// specific, record-grounded critiques about their spec structure; the CODATA constants get a
+// real process critique grounded in their own timeline data (verified via
+// /api/admin/list-records) — every one of them already has a published recommended value on
+// file yet sits at OPEN instead of PROVEN.
 export const SCOPE_CHALLENGES: ScopeChallenge[] = [
   {
     registryNumber: "LR-BEAL",
@@ -45,16 +52,16 @@ export const SCOPE_CHALLENGES: ScopeChallenge[] = [
     evidenceUrl: "https://www.ams.org/profession/prizes-awards/ams-supported/beal-prize",
     status: "NEEDS_REVISION",
   },
-  stubChallenge("LR-DRAFT-ALG-04", "Randomized minimum-cut complexity", "NEEDS_REVISION"),
-  stubChallenge("LR-DRAFT-ALG-06", "Global minimum-cut approximation", "NEEDS_REVISION"),
-  stubChallenge("LR-DRAFT-ALG-07", "Edit-distance fine-grained barrier", "NEEDS_REVISION"),
-  stubChallenge("LR-DRAFT-ALG-08", "Fast matrix multiplication exponent", "NEEDS_REVISION"),
-  stubChallenge("LR-DRAFT-ALG-09", "Linear programming in fixed dimension", "NEEDS_REVISION"),
-  stubChallenge("LR-DRAFT-ALG-11", "Dijkstra shortest-path complexity", "NEEDS_REVISION"),
-  stubChallenge("LR-DRAFT-ALG-12", "Bellman-Ford shortest-path complexity", "NEEDS_REVISION"),
-  stubChallenge("LR-DRAFT-BIO-01", "Smallest free-living bacterial genome", "NEEDS_REVISION"),
-  stubChallenge("LR-DRAFT-BIO-02", "Fastest Escherichia coli doubling", "NEEDS_REVISION"),
-  stubChallenge("LR-DRAFT-BIO-03", "Carbonic-anhydrase catalytic turnover", "NEEDS_REVISION"),
+  openCodataChallenge("LR-001009", "Angstrom star", "NEEDS_REVISION"),
+  openCodataChallenge("LR-001010", "atomic mass constant", "NEEDS_REVISION"),
+  openCodataChallenge("LR-001032", "atomic unit of energy", "NEEDS_REVISION"),
+  openCodataChallenge("LR-001034", "atomic unit of length", "NEEDS_REVISION"),
+  openCodataChallenge("LR-001038", "atomic unit of mass", "NEEDS_REVISION"),
+  openCodataChallenge("LR-001041", "atomic unit of time", "NEEDS_REVISION"),
+  openCodataChallenge("LR-001044", "Bohr magneton", "NEEDS_REVISION"),
+  openCodataChallenge("LR-001049", "Bohr radius", "NEEDS_REVISION"),
+  openCodataChallenge("LR-001055", "classical electron radius", "NEEDS_REVISION"),
+  openCodataChallenge("LR-001056", "Compton wavelength", "NEEDS_REVISION"),
   {
     registryNumber: "LR-BSD",
     title: "Formal statement is an equality, not a bound — direction field unclear",
@@ -76,14 +83,14 @@ export const SCOPE_CHALLENGES: ScopeChallenge[] = [
     evidenceUrl: "https://aimoprize.com/about",
     status: "UNDER_REVIEW",
   },
-  stubChallenge("LR-DRAFT-ALG-13", "Floyd-Warshall all-pairs complexity", "UNDER_REVIEW"),
-  stubChallenge("LR-DRAFT-ALG-14", "Union-find inverse-Ackermann bound", "UNDER_REVIEW"),
-  stubChallenge("LR-DRAFT-ALG-15", "Maximum-flow push-relabel complexity", "UNDER_REVIEW"),
-  stubChallenge("LR-DRAFT-BIO-04", "Bacteriorhodopsin quantum yield", "UNDER_REVIEW"),
-  stubChallenge("LR-DRAFT-BIO-05", "Human telomere shortening rate", "UNDER_REVIEW"),
-  stubChallenge("LR-DRAFT-BIO-06", "Human mitochondrial genome size", "UNDER_REVIEW"),
-  stubChallenge("LR-DRAFT-BIO-07", "Maximum antibody affinity", "UNDER_REVIEW"),
-  stubChallenge("LR-DRAFT-BIO-08", "Bacterial ribosome translation rate", "UNDER_REVIEW"),
+  openCodataChallenge("LR-001069", "deuteron-electron mass ratio", "UNDER_REVIEW"),
+  openCodataChallenge("LR-001074", "deuteron mass", "UNDER_REVIEW"),
+  openCodataChallenge("LR-001087", "electron g factor", "UNDER_REVIEW"),
+  openCodataChallenge("LR-001091", "electron mag. mom.", "UNDER_REVIEW"),
+  openCodataChallenge("LR-001092", "electron mag. mom. anomaly", "UNDER_REVIEW"),
+  openCodataChallenge("LR-001095", "electron mass", "UNDER_REVIEW"),
+  openCodataChallenge("LR-001123", "Fermi coupling constant", "UNDER_REVIEW"),
+  openCodataChallenge("LR-001124", "fine-structure constant", "UNDER_REVIEW"),
 ];
 
 export type Reproduction = {

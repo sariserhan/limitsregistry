@@ -35,6 +35,11 @@ export async function POST(request: Request) {
   const [owner] = await db.execute<{ id: string }>(sql`select id from "user" where email = 'serhan.sari83@gmail.com' limit 1`);
   if (!owner) return NextResponse.json({ error: "Owner account not found." }, { status: 500 });
 
+  // Replaces the first pass's generic "Placeholder record" filler on the LR-DRAFT-* stubs with
+  // real, substantive critiques of actual published CODATA records — remove the old rows first
+  // so the swap is clean rather than additive.
+  const removed = await db.execute(sql`delete from submissions where title = 'Placeholder record — needs a real specification' returning id`);
+
   let scopeInserted = 0, scopeSkipped = 0, reproInserted = 0, reproSkipped = 0;
   const missingLimits: string[] = [];
 
@@ -67,5 +72,5 @@ export async function POST(request: Request) {
     reproInserted++;
   }
 
-  return NextResponse.json({ accounts: accountIds.length, scopeInserted, scopeSkipped, reproInserted, reproSkipped, missingLimits });
+  return NextResponse.json({ accounts: accountIds.length, removedPlaceholders: removed.length, scopeInserted, scopeSkipped, reproInserted, reproSkipped, missingLimits });
 }
