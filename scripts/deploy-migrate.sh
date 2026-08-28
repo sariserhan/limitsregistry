@@ -38,6 +38,13 @@ if git status --porcelain drizzle/ | grep -q .; then
   exit 1
 fi
 
+if command -v vercel >/dev/null 2>&1; then
+  VERCEL=(vercel)
+else
+  echo "==> Vercel CLI not installed globally; using npx vercel"
+  VERCEL=(npx --yes vercel)
+fi
+
 ENV_FILE="$(mktemp -t "vercel-env-${TARGET}.XXXXXX")"
 trap 'rm -f "$ENV_FILE"' EXIT
 
