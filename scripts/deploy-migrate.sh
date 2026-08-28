@@ -45,6 +45,11 @@ else
   VERCEL=(npx --yes vercel)
 fi
 
+if [[ ! -f ".vercel/project.json" ]]; then
+  echo "No linked Vercel project found. Run: npx vercel link" >&2
+  exit 1
+fi
+
 echo "==> Applying forward migrations against ${TARGET}"
 "${VERCEL[@]}" env run --environment="${TARGET}" -- npm run db:migrate
 
