@@ -136,5 +136,12 @@ export async function listPublicBounties(limitId?: string) {
   // expiresAt/verifiedAt round-trip through unstable_cache's JSON cache as strings despite their Date type.
   return rows.map((row) => ({ ...row, bounty: { ...row.bounty, expiresAt: row.bounty.expiresAt ? new Date(row.bounty.expiresAt) : null, verifiedAt: row.bounty.verifiedAt ? new Date(row.bounty.verifiedAt) : null } }));
 }
+export async function listPublicBountyArchive() {
+  const rows = await db.select({ bounty: researchBounties, limit: { id: limits.id, registryNumber: limits.registryNumber, title: limits.title } })
+    .from(researchBounties).innerJoin(limits, eq(limits.id, researchBounties.limitId))
+    .where(and(eq(researchBounties.status, "VERIFIED"), inArray(limits.status, ["OPEN", "PROVEN", "DISPUTED", "RETIRED"])))
+    .orderBy(desc(researchBounties.createdAt));
+  return rows;
+}
 export const listBreakthroughEvents = (limitId: string) => db.select().from(breakthroughEvents).where(eq(breakthroughEvents.limitId, limitId)).orderBy(desc(breakthroughEvents.occurredAt));
 export const listWatchlistEvents = (limitId: string) => db.select().from(watchlistEvents).where(and(eq(watchlistEvents.limitId, limitId), isNotNull(watchlistEvents.publishedAt))).orderBy(desc(watchlistEvents.createdAt));
