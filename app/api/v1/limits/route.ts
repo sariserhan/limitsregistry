@@ -1,11 +1,13 @@
 import { NextResponse } from "next/server";
 import { listPublishedLimits } from "../../../../src/db/repository";
+import { API_V1_PAUSED, pausedApiResponse } from "../../../../src/api/v1-paused";
 
 export const runtime = "nodejs";
 
 // Read-only public API — same published data the site itself renders (listPublishedLimits is
 // already OPEN/PROVEN/DISPUTED/RETIRED only), just as JSON for programmatic use. See /developers.
 export async function GET(request: Request) {
+  if (API_V1_PAUSED) return pausedApiResponse();
   const params = new URL(request.url).searchParams;
   const category = params.get("category");
   const pageSize = Math.min(Math.max(parseInt(params.get("pageSize") ?? "50", 10) || 50, 1), 100);
