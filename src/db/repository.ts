@@ -25,11 +25,18 @@ export async function getLimitResearchData(limitId: string) {
   const read = unstable_cache(async () => {
     const specs = await db.select().from(specificationVersions).where(eq(specificationVersions.limitId, limitId)).orderBy(sql`${specificationVersions.versionNumber} desc`);
     const spec = specs[0];
-    if (!spec) return { specification: null, claims: [], evidence: [] };
+    if (!spec) return { specification: null, claimRows: [], evidence: [] };
     const rows = await db.select({ claim: claims, evidence }).from(claims).leftJoin(claimEvidence, eq(claimEvidence.claimId, claims.id)).leftJoin(evidence, eq(evidence.id, claimEvidence.evidenceId)).where(eq(claims.specificationVersionId, spec.id)).orderBy(asc(claims.createdAt));
-    return { specification: serializeSpecification(spec), claims: rows.map(({ claim }) => serializeClaim(claim)), evidence: rows.flatMap(({ evidence: item }) => item ? [serializeEvidence(item)] : []) };
+    // Claim rows are kept raw here (not run through serializeClaim) — parseExact() can produce a
+    // BigInt for integer-valued claims, and unstable_cache JSON-serializes its return value to store
+    // it; BigInt isn't JSON-serializable and throws "Do not know how to serialize a BigInt" before the
+    // cache write even completes. BigInt conversion happens after the cache boundary instead, below.
+    return { specification: serializeSpecification(spec), claimRows: rows.map(({ claim }) => claim), evidence: rows.flatMap(({ evidence: item }) => item ? [serializeEvidence(item)] : []) };
   }, ["limit-research", limitId], { revalidate: 60, tags: [`limit-research-${limitId}`] });
-  return read();
+  const { specification, claimRows, evidence: evidenceList } = await read();
+  // createdAt round-trips through unstable_cache's JSON cache as a string despite its Date type.
+  const claimsData = claimRows.map((row) => serializeClaim({ ...row, createdAt: new Date(row.createdAt) }));
+  return { specification, claims: claimsData, evidence: evidenceList };
 }
 
 // getPublishedDomainLimit's serialized shape overwrites `.id` with the registry number
