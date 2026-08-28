@@ -109,6 +109,21 @@ main>.public-header{width:100vw;margin-left:calc(50% - 50vw);box-sizing:border-b
 .public-header-console:focus-visible {
   color: var(--blue);
 }
+.public-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+.public-header-account {
+  color: var(--muted);
+  text-decoration: none;
+  font-size: 12px;
+  white-space: nowrap;
+}
+.public-header-account:hover,
+.public-header-account:focus-visible {
+  color: var(--blue);
+}
 .site-footer {
   width: 100vw;
   margin-left: calc(50% - 50vw);
@@ -148,6 +163,9 @@ main>.public-header{width:100vw;margin-left:calc(50% - 50vw);box-sizing:border-b
     padding: 12px 0;
     border-top: 1px solid var(--line);
     scrollbar-width: none;
+  }
+  .public-header-actions {
+    justify-self: end;
   }
 }
 @media (max-width: 600px) {
