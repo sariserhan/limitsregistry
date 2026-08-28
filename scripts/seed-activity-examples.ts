@@ -10,6 +10,8 @@ const examples = [
 ] as const;
 
 const sql = postgres(url, { prepare: false, max: 1 });
+
+async function main() {
 try {
   await sql.begin(async (tx) => {
     const [submitter] = await tx`insert into "user" (id, name, email, email_verified, role) values ('registry-editorial-examples', 'Limits Registry editorial desk', 'editorial-examples@limitsregistry.com', true, 'USER') on conflict (email) do update set name = excluded.name returning id`;
@@ -25,3 +27,6 @@ try {
 } finally {
   await sql.end();
 }
+}
+
+main().catch((error) => { console.error(error); process.exit(1); });
