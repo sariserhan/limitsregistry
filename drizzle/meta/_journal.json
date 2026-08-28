@@ -120,6 +120,13 @@
       "when": 1787935529652,
       "tag": "0016_submission-proof-attachments",
       "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1787935899413,
+      "tag": "0017_user-author-profile",
+      "breakpoints": true
     }
   ]
 }
