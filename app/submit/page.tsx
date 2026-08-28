@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { PublicHeader } from "../../src/components/public-header";
 import { SiteFooter } from "../../src/components/site-footer";
 import { requireRole } from "../../src/auth/session";
@@ -27,6 +28,7 @@ export default async function SubmitPage({ searchParams }: Props) {
   return <main className="submit-page">
     <PublicHeader />
     <div className="submit-content">
+    <Link className="submit-back" href="/account">Your account &rarr;</Link>
     <h1>Submit a proposal</h1>
     <p className="lede">Think a published record is wrong? Bring evidence. Propose a better result, a stronger bound, a proof, a reproduction, or a correction. Nothing changes automatically: an editor checks the scope and source first.</p>
     {selectedLimit ? <p className="challenge-context"><strong>You are challenging {selectedLimit.registryNumber} — {selectedLimit.title}.</strong> A lower bound raises what is known to be achievable; an upper bound lowers what is still possible.</p> : null}
