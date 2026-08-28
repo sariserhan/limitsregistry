@@ -20,7 +20,6 @@ const STATIC_PAGES: Array<[string, number, MetadataRoute.Sitemap[number]["change
   ["compare", 0.3, "monthly"],
   ["articles", 0.6, "weekly"],
   ["methodology", 0.5, "monthly"],
-  ["developers", 0.4, "monthly"],
   ["about", 0.3, "yearly"],
   ["editorial-policy", 0.3, "yearly"],
   ["support", 0.2, "yearly"],

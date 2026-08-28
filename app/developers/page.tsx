@@ -1,9 +1,13 @@
 import type { Metadata } from "next";
+import { notFound } from "next/navigation";
 import InfoPage from "../_components/InfoPage";
+import { API_V1_PAUSED } from "../../src/api/v1-paused";
 
 export const metadata: Metadata = { title: "API — Limits Registry", description: "A read-only public JSON API for every published record in Limits Registry." };
 
-export default function Page() { return <InfoPage kicker="Developers" title="API." intro="Read-only, no key required. The same published data the site itself renders, as JSON. Every published record here is also citable — see the record page for citation formats.">
+export default function Page() {
+  if (API_V1_PAUSED) notFound();
+  return <InfoPage kicker="Developers" title="API." intro="Read-only, no key required. The same published data the site itself renders, as JSON. Every published record here is also citable — see the record page for citation formats.">
 
 <h2>Base URL</h2>
 <p><code>https://www.limitsregistry.com/api/v1</code></p>

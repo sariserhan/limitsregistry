@@ -8,7 +8,7 @@ export function SiteFooter() {
       <Link href="/about">About</Link>
       <Link href="/articles">Articles</Link>
       <Link href="/methodology">Methodology</Link>
-      <Link href="/developers">API</Link>
+      <Link href="/compare">Compare</Link>
       <Link href="/certificates/preview">Certificate preview</Link>
       <Link href="/editorial-policy">Editorial policy</Link>
       <Link href="/support">Support</Link>

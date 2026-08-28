@@ -1,4 +1,5 @@
 import { getLimitResearchData, getPublishedLimit } from "../../../../../src/db/repository";
+import { API_V1_PAUSED, pausedApiResponse } from "../../../../../src/api/v1-paused";
 
 export const runtime = "nodejs";
 
@@ -11,6 +12,7 @@ function jsonResponse(body: unknown, status = 200) {
 }
 
 export async function GET(_request: Request, { params }: { params: Promise<{ registryNumber: string }> }) {
+  if (API_V1_PAUSED) return pausedApiResponse();
   const { registryNumber } = await params;
   const limit = await getPublishedLimit(registryNumber);
   if (!limit) return jsonResponse({ error: "Not found." }, 404);
