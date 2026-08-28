@@ -45,20 +45,8 @@ else
   VERCEL=(npx --yes vercel)
 fi
 
-ENV_FILE="$(mktemp -t "vercel-env-${TARGET}.XXXXXX")"
-trap 'rm -f "$ENV_FILE"' EXIT
-
-echo "==> Pulling ${TARGET} environment variables from Vercel"
-"${VERCEL[@]}" env pull --environment="$TARGET" --yes "$ENV_FILE"
-
-DB_URL="$(grep '^DATABASE_URL=' "$ENV_FILE" | head -1 | cut -d= -f2- | sed -e 's/^"//' -e 's/"$//')"
-if [[ -z "$DB_URL" || "$DB_URL" == "[SENSITIVE]" ]]; then
-  echo "DATABASE_URL for ${TARGET} was not resolvable (masked or missing). Aborting without migrating." >&2
-  exit 1
-fi
-
 echo "==> Applying forward migrations against ${TARGET}"
-DATABASE_URL="$DB_URL" npm run db:migrate
+"${VERCEL[@]}" env run --environment="${TARGET}" -- npm run db:migrate
 
 HEALTH_URL="https://www.limitsregistry.com/api/health/db"
 if [[ "$TARGET" == "preview" ]]; then
