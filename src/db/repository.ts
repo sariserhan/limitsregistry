@@ -11,6 +11,18 @@ export const listPublishedLimits = unstable_cache(async () => db.select().from(l
 export async function getPublishedLimit(registryNumber: string) { const read = unstable_cache(async () => { const rows = await db.select().from(limits).where(and(inArray(limits.status, ["OPEN", "PROVEN", "DISPUTED", "RETIRED"]), eq(limits.registryNumber, registryNumber))).limit(1); return rows[0] ?? null; }, ["published-limit", registryNumber], { revalidate: 60, tags: ["published-limits", `published-limit-${registryNumber}`] }); return read(); }
 export async function getLimitClaims(limitId: string) { const specs = await db.select({ id: specificationVersions.id }).from(specificationVersions).where(eq(specificationVersions.limitId, limitId)); if (specs.length === 0) return []; return db.select({ claim: claims, evidence: evidence }).from(claims).innerJoin(claimEvidence, eq(claimEvidence.claimId, claims.id)).innerJoin(evidence, eq(evidence.id, claimEvidence.evidenceId)).where(eq(claims.specificationVersionId, specs[0].id)).orderBy(asc(claims.createdAt)); }
 export async function getDatabaseHealth() { const result = await db.execute<{ ok: number }>(sql`select 1 as ok`); return result[0]?.ok === 1; }
+export const getRegistryStats = unstable_cache(async () => {
+  const [[{ n: limitCount }], [{ n: evidenceCount }], [{ n: categoryCount }], [{ n: sourceCount }]] = await Promise.all([
+    db.execute<{ n: number }>(sql`select count(*)::int as n from limits where status in ('OPEN','PROVEN','DISPUTED','RETIRED')`),
+    db.execute<{ n: number }>(sql`select count(*)::int as n from evidence`),
+    db.execute<{ n: number }>(sql`select count(distinct category)::int as n from limits where status in ('OPEN','PROVEN','DISPUTED','RETIRED')`),
+    db.execute<{ n: number }>(sql`select count(distinct url)::int as n from evidence where url is not null`),
+  ]);
+  return { limitCount, evidenceCount, categoryCount, sourceCount };
+}, ["registry-stats"], { revalidate: 300, tags: ["registry-stats"] });
+export async function getSpecificationVersionHistory(limitId: string) {
+  return db.select({ id: specificationVersions.id, version: specificationVersions.versionNumber, createdAt: specificationVersions.createdAt }).from(specificationVersions).where(eq(specificationVersions.limitId, limitId)).orderBy(asc(specificationVersions.versionNumber));
+}
 
 
 export async function listPublishedDomainLimits() {

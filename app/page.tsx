@@ -1,5 +1,5 @@
 import BrowseClient from "./browse-client";
-import { listPublishedLimitsWithFrontiers } from "../src/db/repository";
+import { listPublishedLimitsWithFrontiers, getRegistryStats } from "../src/db/repository";
 import { formatExact, publishedLimits, type PublishedLimit } from "../src/domain/published";
 import type { ExactValue } from "../src/domain/types";
 import { deriveFrontierPresentation } from "../src/domain/frontier-presentation";
@@ -10,10 +10,11 @@ const displayValue = (value: Parameters<typeof formatExact>[0]): ExactValue | nu
 export default async function Home() {
   let databaseRows: Awaited<ReturnType<typeof listPublishedLimitsWithFrontiers>> = [];
   try { databaseRows = await listPublishedLimitsWithFrontiers(); } catch { databaseRows = []; }
+  const stats = await getRegistryStats().catch(() => null);
   const limits: PublishedLimit[] = databaseRows.length ? databaseRows.map(({ limit, specification, claims, timeline, frontier }) => {
     const fallback = publishedLimits.find((item) => item.id === limit.registryNumber) ?? publishedLimits[0];
     const safeFrontier = { ...frontier, lowerBound: displayValue(frontier.lowerBound), upperBound: displayValue(frontier.upperBound), achievable: displayValue(frontier.achievable) };
     return { ...fallback, publishedAt: limit.publishedAt?.toISOString(), id: limit.registryNumber, title: limit.title, category: limit.category, summary: limit.summary, direction: limit.direction, status: limit.status === "DRAFT" ? "OPEN" : limit.status, achievable: formatExact(frontier.lowerBound), bound: formatExact(frontier.upperBound), gap: frontier.gap, claims: claims.length, papers: 0, specification, claimsData: claims, timelineData: timeline.map((event) => ({ ...event, occurredAt: event.occurredAt.toISOString() })), frontier: safeFrontier, frontierPresentation: deriveFrontierPresentation(specification.recordKind, claims, frontier) };
   }) : publishedLimits;
-  return <BrowseClient initialLimits={limits} />;
+  return <BrowseClient initialLimits={limits} stats={stats} />;
 }
