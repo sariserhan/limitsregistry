@@ -1,0 +1,11 @@
+import type { Metadata } from "next";
+import Image from "next/image";
+import { PublicHeader } from "../../../src/components/public-header";
+import { SiteFooter } from "../../../src/components/site-footer";
+import "../../globals.css";
+
+export const metadata: Metadata = { title: "Certificate Preview — Limits Registry", description: "Display-only preview of a Limits Registry certificate." };
+
+export default function CertificatePreviewPage() {
+  return <main className="certificate-page certificate-preview-page"><PublicHeader /><section className="certificate-sheet"><div className="certificate-preview-banner">DISPLAY-ONLY PREVIEW · NOT AN ISSUED CERTIFICATE</div><div className="certificate-topline"><span>LIMITS REGISTRY</span><span>VERIFICATION DOCUMENT</span><span>PREVIEW-CERT-0001</span></div><div className="certificate-seal" aria-label="Limits Registry seal"><Image className="certificate-seal-image" src="/icon-no-bg.png" width={96} height={96} alt="Limits Registry seal" priority /></div><p className="section-kicker">CLAIM ACCEPTED</p><h1>Certificate of<br /><em>verified record</em></h1><p className="certificate-lede">This display shows the document an approved Claim can receive after evidence and independent review requirements are satisfied.</p><div className="certificate-result"><span>Certified result</span><strong>&ge; 42</strong><small>LR-ALG-EXAMPLE · CLM-EXAMPLE</small></div><div className="certificate-grid"><div><span>Specification</span><strong>Version 1</strong></div><div><span>Evidence</span><strong>3 linked items</strong></div><div><span>Independent reviews</span><strong>2 accepted</strong></div><div><span>Issued</span><strong>2026-08-28</strong></div></div><div className="certificate-integrity"><div><span>Record fingerprint · SHA-256</span><code>9f2c6a4b7d8e1f003a5b6c7d8e9f00112233445566778899aabbccddeeff0011</code></div><div><span>Signature status</span><strong className="unsigned">Preview only · no certificate issued</strong></div></div><div className="certificate-footer"><span>Example layout · immutable snapshot shown for illustration</span><div className="certificate-footer-actions"><span className="certificate-preview-note">Actual certificates include verification and PDF actions.</span></div></div></section><SiteFooter /></main>;
+}
