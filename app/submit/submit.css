@@ -6,7 +6,7 @@
 .submit-form { display:flex; flex-direction:column; gap:16px; }
 .submit-field { display:flex; flex-direction:column; gap:6px; }
 .submit-field label { font:10px 'DM Mono',monospace; text-transform:uppercase; letter-spacing:.08em; color:var(--faint); }
-.submit-field input, .submit-field select, .submit-field textarea { border:1px solid var(--line); padding:11px 12px; font-size:14px; font-family:inherit; background:#fff; }
+.submit-field input, .submit-field select, .submit-field textarea { border:1px solid var(--line); padding:11px 12px; font-size:14px; font-family:inherit; background:var(--paper); }
 .submit-row { display:flex; gap:16px; }
 .submit-row .submit-field { flex:1; }
 .submit-submit { align-self:flex-start; border:0; background:var(--blue); color:#fff; padding:12px 24px; font-size:13px; margin-top:8px; }

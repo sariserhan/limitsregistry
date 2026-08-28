@@ -5,7 +5,7 @@
 .auth-shell > p { color:var(--muted); font-size:14px; margin:0 0 34px; }
 .auth-field { display:flex; flex-direction:column; gap:6px; margin-bottom:18px; }
 .auth-field label { font:10px 'DM Mono',monospace; text-transform:uppercase; letter-spacing:.08em; color:var(--faint); }
-.auth-field input { border:1px solid var(--line); padding:11px 12px; font-size:14px; background:#fff; color:var(--ink); }
+.auth-field input { border:1px solid var(--line); padding:11px 12px; font-size:14px; background:var(--paper); color:var(--ink); }
 .auth-field input:focus { outline:2px solid var(--blue); outline-offset:-1px; }
 .auth-error { color:#b3261e; font-size:12px; margin:-6px 0 18px; }
 .auth-submit { width:100%; color:#fff; border:0; background:var(--blue); padding:14px; font-size:13px; margin-top:6px; }

@@ -5,7 +5,7 @@
 .admin-table { width:100%; min-width:520px; border-collapse:collapse; }
 .admin-table th { text-align:left; font:10px 'DM Mono',monospace; text-transform:uppercase; letter-spacing:.08em; color:var(--faint); padding:12px 10px; white-space:nowrap; }
 .admin-table td { padding:14px 10px; border-bottom:1px solid var(--line); font-size:13px; vertical-align:middle; white-space:nowrap; }
-.admin-table select { font-size:12px; padding:6px 8px; border:1px solid var(--line); background:#fff; }
+.admin-table select { font-size:12px; padding:6px 8px; border:1px solid var(--line); background:var(--paper); }
 .admin-table button { border:0; background:var(--blue); color:#fff; padding:7px 12px; font-size:12px; margin-left:8px; }
 
 .admin-tabs { display:flex; flex-wrap:wrap; gap:2px; border-bottom:1px solid var(--line); margin-bottom:36px; }
@@ -16,11 +16,11 @@
 .admin-section { margin-bottom:52px; }
 .admin-section h2 { font:600 18px 'Space Grotesk',sans-serif; border-bottom:1px solid var(--ink); padding-bottom:10px; margin:0 0 8px; }
 .admin-section > p { color:var(--muted); font-size:13px; margin:0 0 20px; }
-.admin-panel { background:#fff; border:1px solid var(--line); padding:24px; margin-bottom:16px; }
+.admin-panel { background:var(--paper); border:1px solid var(--line); padding:24px; margin-bottom:16px; }
 
 .admin-form { display:grid; gap:15px; max-width:520px; }
 .admin-form label { display:grid; gap:7px; color:var(--muted); font:10px 'DM Mono',monospace; text-transform:uppercase; }
-.admin-form input:not([type="checkbox"]):not([type="radio"]), .admin-form textarea, .admin-form select { border:1px solid var(--line); background:#fff; padding:11px; font:13px/1.4 'DM Mono',monospace; color:var(--ink); }
+.admin-form input:not([type="checkbox"]):not([type="radio"]), .admin-form textarea, .admin-form select { border:1px solid var(--line); background:var(--paper); padding:11px; font:13px/1.4 'DM Mono',monospace; color:var(--ink); }
 .admin-form textarea { min-height:110px; resize:vertical; }
 .admin-form .admin-form-row { display:flex; align-items:center; gap:10px; font-size:13px; color:var(--ink); text-transform:none; font-family:'DM Sans',sans-serif; }
 .admin-form-row input[type="checkbox"] { width:16px; height:16px; flex-shrink:0; accent-color:var(--blue); }
@@ -32,16 +32,16 @@
 .status-badge.down { color:var(--red); border-color:var(--red); }
 .status-badge.unconfigured { color:var(--faint); }
 .admin-status-list { display:grid; gap:10px; }
-.admin-status-row { display:flex; justify-content:space-between; align-items:center; gap:16px; padding:14px 16px; border:1px solid var(--line); background:#fff; }
+.admin-status-row { display:flex; justify-content:space-between; align-items:center; gap:16px; padding:14px 16px; border:1px solid var(--line); background:var(--paper); }
 .admin-status-row strong { font:600 13px 'Space Grotesk',sans-serif; display:block; }
 .admin-status-row small { color:var(--faint); font-size:12px; }
 
 .admin-stat-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(180px,1fr)); gap:12px; }
-.admin-stat-card { border:1px solid var(--line); background:#fff; padding:18px; }
+.admin-stat-card { border:1px solid var(--line); background:var(--paper); padding:18px; }
 .admin-stat-card span { display:block; color:var(--faint); font:10px 'DM Mono',monospace; text-transform:uppercase; letter-spacing:.06em; margin-bottom:8px; }
 .admin-stat-card strong { font:600 26px 'DM Mono',monospace; color:var(--ink); }
 
-.admin-inbox-item { border:1px solid var(--line); padding:18px; margin-bottom:14px; background:#fff; }
+.admin-inbox-item { border:1px solid var(--line); padding:18px; margin-bottom:14px; background:var(--paper); }
 .admin-inbox-item header { display:flex; justify-content:space-between; gap:12px; margin-bottom:10px; }
 .admin-inbox-item header strong { font:600 14px 'Space Grotesk',sans-serif; }
 .admin-inbox-item header small { color:var(--faint); font:10px 'DM Mono',monospace; text-transform:uppercase; }
@@ -49,7 +49,7 @@
 .admin-inbox-reply { background:var(--surface); border-top:1px solid var(--line); padding-top:14px; margin-top:6px; }
 .admin-inbox-reply p { color:var(--muted); }
 
-.admin-gallery-frame { border:1px solid var(--line); background:#fff; }
+.admin-gallery-frame { border:1px solid var(--line); background:var(--paper); }
 .admin-gallery-item summary { cursor:pointer; font:600 15px 'Space Grotesk',sans-serif; list-style:none; }
 .admin-gallery-item summary::-webkit-details-marker { display:none; }
 .admin-gallery-item summary::before { content:"+ "; color:var(--faint); font:12px 'DM Mono',monospace; }
