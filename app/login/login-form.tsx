@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { signIn } from "../../src/auth/client";
 
@@ -11,7 +11,6 @@ function safeNext(raw: string | null) {
 }
 
 export default function LoginForm() {
-  const router = useRouter();
   const next = safeNext(useSearchParams().get("next"));
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -25,8 +24,10 @@ export default function LoginForm() {
     const { error: signInError } = await signIn.email({ email, password });
     setPending(false);
     if (signInError) { setError(signInError.message ?? "Could not sign in."); return; }
-    router.push(next);
-    router.refresh();
+    // A client-side router.push() here can race the session cookie that signIn.email() just set
+    // (or serve a prefetched pre-login copy of the destination) and silently no-op. A hard
+    // navigation guarantees proxy.ts and the root layout see the fresh cookie on a real request.
+    window.location.assign(next);
   }
 
   return <>
