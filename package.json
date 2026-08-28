@@ -21,6 +21,7 @@
     "db:seed:information-theory": "tsx scripts/seed-information-theory.ts",
     "db:seed:quantum-information": "tsx scripts/seed-quantum-information.ts",
     "db:seed:signal-processing": "tsx scripts/seed-signal-processing.ts",
+    "db:seed:astrophysics": "tsx scripts/seed-astrophysics.ts",
     "db:publish:founding-queue": "tsx scripts/publish-founding-queue.ts"
   },
   "dependencies": {
