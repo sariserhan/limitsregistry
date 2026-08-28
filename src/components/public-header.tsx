@@ -9,6 +9,7 @@ const links = [
   ["Breakthroughs", "/breakthroughs"],
   ["Bounties", "/bounties"],
   ["About", "/about"],
+  ["Methodology", "/methodology"],
 ] as const;
 
 export function PublicHeader({ large = false }: { large?: boolean } = {}) {
