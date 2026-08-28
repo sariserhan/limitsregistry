@@ -25,9 +25,14 @@ export async function getLimitResearchData(limitId: string) {
   const read = unstable_cache(async () => {
     const specs = await db.select().from(specificationVersions).where(eq(specificationVersions.limitId, limitId)).orderBy(sql`${specificationVersions.versionNumber} desc`);
     const spec = specs[0];
-    if (!spec) return { specification: null, claimRows: [], evidence: [], claimEvidenceIds: {} as Record<string, string[]> };
-    const rows = await db.select({ claim: claims, evidence }).from(claims).leftJoin(claimEvidence, eq(claimEvidence.claimId, claims.id)).leftJoin(evidence, eq(evidence.id, claimEvidence.evidenceId)).where(eq(claims.specificationVersionId, spec.id)).orderBy(asc(claims.createdAt));
+    // evidence.limitId is a general citation not tied to any specific claim — the only way an OPEN
+    // record with no accepted claim yet (e.g. an unfactored RSA challenge number) still has a real,
+    // visible source instead of one that exists in the DB but is unreachable through the claim join.
+    const directEvidence = await db.select().from(evidence).where(eq(evidence.limitId, limitId));
     const evidenceById = new Map<string, ReturnType<typeof serializeEvidence>>();
+    for (const item of directEvidence) evidenceById.set(item.id, serializeEvidence(item));
+    if (!spec) return { specification: null, claimRows: [], evidence: [...evidenceById.values()], claimEvidenceIds: {} as Record<string, string[]> };
+    const rows = await db.select({ claim: claims, evidence }).from(claims).leftJoin(claimEvidence, eq(claimEvidence.claimId, claims.id)).leftJoin(evidence, eq(evidence.id, claimEvidence.evidenceId)).where(eq(claims.specificationVersionId, spec.id)).orderBy(asc(claims.createdAt));
     const claimEvidenceIds: Record<string, string[]> = {};
     for (const row of rows) { if (!row.evidence) continue; evidenceById.set(row.evidence.id, serializeEvidence(row.evidence)); (claimEvidenceIds[row.claim.id] ??= []).push(row.evidence.id); }
     // Claim rows are kept raw here (not run through serializeClaim) — parseExact() can produce a

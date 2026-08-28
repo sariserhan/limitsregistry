@@ -50,13 +50,19 @@ async function main() { try {
   for (const item of RECORDS) {
     const registryNumber = `LR-${item.name}`, slug = item.name.toLowerCase();
     const existing = await sql`select id from limits where registry_number=${registryNumber} limit 1`;
-    if (existing.length) { await sql`update limits set summary=${summaryFor(item)},updated_at=now() where id=${existing[0].id}`; updated++; continue; }
+    if (existing.length) {
+      await sql`update limits set summary=${summaryFor(item)},updated_at=now() where id=${existing[0].id}`;
+      // Backfill: evidence.limit_id didn't exist when these rows were first inserted, so their
+      // citation was orphaned for OPEN records with no accepted claim to link it through.
+      await sql`update evidence set limit_id=${existing[0].id} where metadata->>'modulus'=${item.name} and limit_id is null`;
+      updated++; continue;
+    }
     const status = item.factored ? "PROVEN" : "OPEN";
     const publishedAt = item.factored ? new Date(Date.UTC(item.factored.year, 0, 1)) : null;
     await sql.begin(async (tx) => {
       const [limit] = await tx`insert into limits (registry_number,slug,title,summary,category,subcategory,direction,metric_name,status,published_at) values (${registryNumber},${slug},${`${item.name} factoring challenge`},${summaryFor(item)},${"Cryptography"},${"RSA Factoring Challenge"},${"MAXIMIZE"},${"Factorization status"},${status},${publishedAt}) returning id`;
       const [spec] = await tx`insert into limit_spec_versions (limit_id,version_number,formal_statement,constraints,assumptions) values (${limit.id},1,${`Is the ${item.name} modulus factored into its two prime factors?`},${tx.json({modulus:item.name,digits:item.digits})},${tx.json({publicationProcess:"FOUNDING_CATALOG_IMPORT"})}) returning id`;
-      const [evidence] = await tx`insert into evidence (type,label,url,location,metadata) values (${"PAPER"},${`RSA Factoring Challenge — ${item.name}`},${SOURCE_URL},${item.name},${tx.json({modulus:item.name,digits:item.digits,factored:item.factored})}) returning id`;
+      const [evidence] = await tx`insert into evidence (type,label,url,location,limit_id,metadata) values (${"PAPER"},${`RSA Factoring Challenge — ${item.name}`},${SOURCE_URL},${item.name},${limit.id},${tx.json({modulus:item.name,digits:item.digits,factored:item.factored})}) returning id`;
       if (item.factored) {
         const [claim] = await tx`insert into claims (claim_number,specification_version_id,claim_type,relation,value_exact,value_text,scope_parameters,epistemic_status,status,method_summary) values (${`CLM-${item.name}`},${spec.id},${"CONSTRUCTION"},${"="},${"Factored"},${`Factored by ${item.factored.by}, ${item.factored.year}.`},${tx.json({modulus:item.name})},${"PROVEN"},${"ACCEPTED"},${`Publicly factored into its two prime factors by ${item.factored.by} (${item.factored.year}), via the general number field sieve.`}) returning id`;
         await tx`insert into claim_evidence (claim_id,evidence_id) values (${claim.id},${evidence.id})`;

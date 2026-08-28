@@ -1,0 +1,2 @@
+ALTER TABLE "evidence" ADD COLUMN "limit_id" uuid;--> statement-breakpoint
+ALTER TABLE "evidence" ADD CONSTRAINT "evidence_limit_id_limits_id_fk" FOREIGN KEY ("limit_id") REFERENCES "public"."limits"("id") ON DELETE no action ON UPDATE no action;
