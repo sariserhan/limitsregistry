@@ -33,7 +33,8 @@
     "db:publish:founding-queue": "tsx scripts/publish-founding-queue.ts",
     "db:backfill:record-kinds": "tsx scripts/backfill-record-kinds.ts",
     "db:seed:dependencies": "tsx scripts/seed-dependencies.ts",
-    "db:seed:breakthroughs": "tsx scripts/seed-breakthroughs.ts"
+    "db:seed:breakthroughs": "tsx scripts/seed-breakthroughs.ts",
+    "db:seed:researched-bounties": "tsx scripts/seed-researched-bounties.ts"
   },
   "dependencies": {
     "@modelcontextprotocol/server": "^2.0.0",

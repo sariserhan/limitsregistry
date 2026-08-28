@@ -69,3 +69,87 @@ main>.public-header{width:100vw;margin-left:calc(50% - 50vw);box-sizing:border-b
 .certificate-seal-image{width:112px;height:112px;mix-blend-mode:multiply;filter:contrast(1.08);object-fit:contain}.certificate-seal{width:112px;height:112px;top:114px}@media(max-width:700px){.certificate-seal-image{width:88px;height:88px}.certificate-seal{width:88px;height:88px;top:102px}}
 
 .hero{display:grid;grid-template-columns:minmax(0,1fr) minmax(260px,330px);grid-template-rows:1fr auto;column-gap:7vw;align-items:center}.hero-copy{grid-column:1;grid-row:1}.hero-certificate{grid-column:2;grid-row:1;align-self:center;display:block;color:var(--ink);text-decoration:none;border:1px solid #b8954a;background:#fffdf8;padding:16px;box-shadow:10px 12px 0 #b8954a18;transform:rotate(1.2deg);transition:transform .2s ease,box-shadow .2s ease}.hero-certificate:hover,.hero-certificate:focus-visible{transform:rotate(0) translateY(-3px);box-shadow:12px 16px 0 #b8954a22}.hero-certificate:focus-visible{outline:2px solid var(--blue);outline-offset:4px}.hero-certificate-mark{min-height:150px;display:grid;place-items:center;border:1px solid #d8c28b;background:#fff8e6}.hero-certificate-mark img{width:150px;height:136px;object-fit:contain;mix-blend-mode:multiply}.hero-certificate-copy{display:grid;gap:7px;padding:18px 4px 4px}.hero-certificate-copy>span{color:#9a762c;font:10px DM Mono,monospace;letter-spacing:.12em;text-transform:uppercase}.hero-certificate-copy strong{font:600 22px Georgia,serif}.hero-certificate-copy small{display:flex;align-items:center;gap:6px;color:var(--muted);font:11px DM Mono,monospace}.hero-certificate-copy svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:1.5}.hero-rule{grid-column:1/-1;grid-row:2}.hero-certificate+ .hero-rule{margin-top:18px}@media(max-width:800px){.hero{display:flex;min-height:0;gap:36px}.hero-certificate{width:min(330px,100%);align-self:flex-start}.hero-rule{margin-top:4px}.hero-certificate+ .hero-rule{margin-top:0}}
+
+
+/* Canonical public shell: match the Registry page on every public route. */
+.public-header {
+  width: 100vw;
+  margin-left: calc(50% - 50vw);
+  height: 78px;
+  display: flex;
+  align-items: center;
+  gap: clamp(24px, 4vw, 56px);
+  justify-content: flex-start !important;
+  padding: 0 var(--page-pad);
+  background: var(--paper);
+  border-bottom: 1px solid var(--line);
+  box-sizing: border-box;
+}
+.public-header nav {
+  display: flex;
+  align-items: center;
+  gap: clamp(14px, 2vw, 30px);
+  margin-right: auto;
+  min-width: 0;
+}
+.public-header nav a,
+.public-header-console {
+  color: var(--muted);
+  text-decoration: none;
+  font-size: 12px;
+  white-space: nowrap;
+}
+.public-header nav a:hover,
+.public-header nav a:focus-visible,
+.public-header-console:hover,
+.public-header-console:focus-visible {
+  color: var(--blue);
+}
+.site-footer {
+  width: 100vw;
+  margin-left: calc(50% - 50vw);
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  border-top: 1px solid var(--line);
+  color: var(--faint);
+  padding: 20px var(--page-pad) 27px;
+  font: 10px 'DM Mono', monospace;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  box-sizing: border-box;
+}
+.search-page {
+  max-width: 1440px;
+}
+.search-page > .public-header {
+  margin-bottom: 0;
+}
+@media (max-width: 1000px) {
+  .public-header {
+    height: auto;
+    min-height: 78px;
+    display: grid;
+    grid-template-columns: auto auto;
+    justify-content: space-between;
+    gap: 0;
+    padding-top: 18px;
+    padding-bottom: 0;
+  }
+  .public-header nav {
+    grid-row: 2;
+    grid-column: 1 / -1;
+    overflow-x: auto;
+    margin-right: 0;
+    padding: 12px 0;
+    border-top: 1px solid var(--line);
+    scrollbar-width: none;
+  }
+}
+@media (max-width: 600px) {
+  .site-footer {
+    gap: 10px;
+    flex-wrap: wrap;
+    font-size: 9px;
+  }
+}
