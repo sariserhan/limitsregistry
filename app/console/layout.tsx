@@ -17,6 +17,7 @@ export default async function ConsoleLayout({ children }: Readonly<{ children: R
     <div className="console-content">
       <header className="console-header">
         <span className="console-session">Signed in as {session.user.email} · {session.user.role}</span>
+        <Link className="console-exit" href="/account">Your account</Link>
         <Link className="console-exit" href="/">Public Registry ↗</Link>
       </header>
       <ConsoleNav />

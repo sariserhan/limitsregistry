@@ -17,7 +17,7 @@ export default async function BreakthroughsPage() {
     <section className="breakthroughs-intro">
       <p className="section-kicker">Recent activity</p>
       <h1>What just moved.</h1>
-      <p>Every accepted Claim that tightened a bound or closed a frontier, across the whole Registry. Nothing here is AI-generated — these fire only after an editor accepts a Claim.</p>
+      <p>Every accepted Claim that tightened a bound or closed a frontier, across the whole Registry. Nothing here is AI-generated — these fire only after an editor accepts a Claim. For every kind of update, not just bound improvements, see <Link href="/recent">recently updated</Link>.</p>
       <a href="/api/breakthroughs/rss">Subscribe to the site-wide feed ↗</a>
     </section>
     <section className="breakthrough-explanation" aria-labelledby="breakthrough-explanation-title">
