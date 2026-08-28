@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { categorySlug } from "../src/domain/category";
@@ -37,6 +37,19 @@ export default function Home({ initialLimits, stats, recentBreakthroughs, featur
   const limits = initialLimits;
   const [selectedId, setSelectedId] = useState(limits[4]?.id ?? limits[0]?.id);
   const [query, setQuery] = useState("");
+  const searchInputRef = useRef<HTMLInputElement>(null);
+  // The visible "⌘ K" hint next to the search box did nothing without this — Cmd+K (or Ctrl+K on
+  // non-Mac) focuses the search input, matching the shortcut every other site with this hint uses.
+  useEffect(() => {
+    function onKeyDown(event: KeyboardEvent) {
+      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
+        event.preventDefault();
+        searchInputRef.current?.focus();
+      }
+    }
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, []);
   const consoleMode = false;
   const [category, setCategory] = useState("All categories");
   const [status, setStatus] = useState<"ALL" | PublishedLimit["status"]>("ALL");
@@ -66,7 +79,7 @@ export default function Home({ initialLimits, stats, recentBreakthroughs, featur
       <div className="console-heading"><div><p className="section-kicker">Editorial workspace</p><h1>Research Console</h1><p>Turn source material into reviewable, evidence-backed Claims.</p></div><button className="primary-button">Add a source <ArrowIcon /></button></div>
       <div className="console-grid"><aside className="console-nav"><div className="console-nav-title">Workspace</div><button className="console-nav-item active"><GridIcon /> Review queue <span>08</span></button><button className="console-nav-item"><BookIcon /> Sources <span>142</span></button><button className="console-nav-item"><span className="tiny-icon">⌁</span> Claims <span>317</span></button><button className="console-nav-item"><span className="tiny-icon">◌</span> Entity resolution</button></aside><div className="queue-panel"><div className="panel-head"><div><h2>Claims awaiting review</h2><p>Prioritized by source quality and frontier impact.</p></div><span className="quiet-count">8 open</span></div>{["Maximum independent set in a planar graph", "Synchronizing word length under reset constraints", "Cap sets in the ternary grid"].map((name, i) => <button className="queue-row" key={name}><span className="queue-number">0{i + 1}</span><span className="queue-copy"><strong>{name}</strong><small>{i === 0 ? "UPPER_BOUND" : i === 1 ? "CONSTRUCTION" : "ASYMPTOTIC_BOUND"} · Paper evidence attached</small></span><span className="queue-status">Needs review <ChevronIcon /></span></button>)}</div></div>
     </section> : <>
-      <section className="hero" id="top"><div className="hero-copy"><p className="section-kicker">A public record of known limits</p><h1>The verified boundaries<br />of what is possible.</h1><p className="hero-description">Limits Registry makes the frontier between achievement and impossibility legible — with sources, proofs, and the people behind every claim.</p><div className="search-wrap"><SearchIcon /><input aria-label="Search limits" value={query} onChange={(e) => { setQuery(e.target.value); setPage(1); }} placeholder="Search limits, claims, papers…" /><kbd>⌘ K</kbd></div></div><Link className="hero-certificate" href="/certificates/preview"><div className="hero-certificate-mark"><Image src="/icon-no-bg.png" width={112} height={102} alt="Limits Registry certificate seal" priority /></div><div className="hero-certificate-copy"><span>Certificate preview</span><strong>See a verified record</strong><small>What an approved Claim receives <ArrowIcon /></small></div></Link><div className="hero-rule"><span>01</span><span>Explore the registry</span><ArrowIcon /></div></section>
+      <section className="hero" id="top"><div className="hero-copy"><p className="section-kicker">A public record of known limits</p><h1>The verified boundaries<br />of what is possible.</h1><p className="hero-description">Limits Registry makes the frontier between achievement and impossibility legible — with sources, proofs, and the people behind every claim.</p><div className="search-wrap"><SearchIcon /><input ref={searchInputRef} aria-label="Search limits" value={query} onChange={(e) => { setQuery(e.target.value); setPage(1); }} placeholder="Search limits, claims, papers…" /><kbd>⌘ K</kbd></div></div><Link className="hero-certificate" href="/certificates/preview"><div className="hero-certificate-mark"><Image src="/icon-no-bg.png" width={112} height={102} alt="Limits Registry certificate seal" priority /></div><div className="hero-certificate-copy"><span>Certificate preview</span><strong>See a verified record</strong><small>What an approved Claim receives <ArrowIcon /></small></div></Link><a className="hero-rule" href="#registry"><span>01</span><span>Explore the registry</span><ArrowIcon /></a></section>
       {stats ? <section className="trust-strip"><div className="stat"><strong>{stats.limitCount.toLocaleString()}</strong><span>Published limits</span></div><div className="stat"><strong>{stats.evidenceCount.toLocaleString()}</strong><span>Evidence records</span></div><div className="stat"><strong>{stats.categoryCount.toLocaleString()}</strong><span>Domains covered</span></div><div className="stat"><strong>{stats.sourceCount.toLocaleString()}</strong><span>Primary sources</span></div><div className="trust-links"><Link href="/methodology">Methodology ↗</Link><small>How a record gets published</small></div></section> : null}
       {recentBreakthroughs.length || featuredBounties.length ? <section className="home-teasers">
         <div className="home-teaser"><div className="home-teaser-head"><span className="section-kicker">Recent activity</span><Link href="/breakthroughs">All breakthroughs ↗</Link></div>{recentBreakthroughs.length ? recentBreakthroughs.map((event) => <Link className="home-teaser-row" href={`/limits/${event.registryNumber}`} key={event.id}><strong>{event.registryNumber}</strong><span>{BREAKTHROUGH_LABEL[event.eventType] ?? event.eventType}</span><small>{event.occurredAt.slice(0, 10)}</small></Link>) : <p className="home-teaser-empty">No breakthroughs recorded yet.</p>}</div>
