@@ -15,6 +15,8 @@ const STATIC_PAGES: Array<[string, number, MetadataRoute.Sitemap[number]["change
   ["breakthroughs", 0.6, "daily"],
   ["recent", 0.6, "daily"],
   ["bounties", 0.5, "weekly"],
+  ["activity", 0.5, "daily"],
+  ["compare", 0.3, "monthly"],
   ["methodology", 0.5, "monthly"],
   ["developers", 0.4, "monthly"],
   ["about", 0.3, "yearly"],

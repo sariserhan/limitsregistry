@@ -4,7 +4,7 @@ import { PublicHeader } from "../../src/components/public-header";
 import { SiteFooter } from "../../src/components/site-footer";
 import { listPublishedLimits } from "../../src/db/repository";
 import "./compare.css";
-export const metadata: Metadata = { title: "Compare Limits — Limits Registry" };
+export const metadata: Metadata = { title: "Compare Limits — Limits Registry", description: "Compare two Limits Registry records side by side — question, direction, publication state, and source trail.", alternates: { canonical: "/compare" } };
 type Props = { searchParams: Promise<{ a?: string; b?: string }> };
 export default async function ComparePage({ searchParams }: Props) {
   const [limits, params] = await Promise.all([listPublishedLimits(), searchParams]);

@@ -4,7 +4,7 @@ import { PublicHeader } from "../../src/components/public-header";
 import { SiteFooter } from "../../src/components/site-footer";
 import { listPublicSubmissionLedger } from "../../src/db/repository.submissions";
 import "./activity.css";
-export const metadata: Metadata = { title: "Challenge Ledger — Limits Registry", description: "A public record of evidence-backed challenges to Registry Limits." };
+export const metadata: Metadata = { title: "Challenge Ledger — Limits Registry", description: "A public record of evidence-backed challenges to Registry Limits.", alternates: { canonical: "/activity" } };
 type Props = { searchParams: Promise<{ status?: string }> };
 const FILTERS = ["ALL", "SUBMITTED", "UNDER_REVIEW", "ACCEPTED", "REJECTED", "NEEDS_REVISION"] as const;
 export default async function ActivityPage({ searchParams }: Props) {
