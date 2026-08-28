@@ -59,6 +59,34 @@ export const blogPosts: BlogPost[] = [
     publishedAt: "2026-08-28",
     tags: ["Mathematics", "Combinatorics"],
   },
+  {
+    slug: "what-is-a-kissing-number",
+    title: "What Is a Kissing Number?",
+    dek: "The surprising geometry of how many equal spheres can touch one central sphere without overlap.",
+    publishedAt: "2026-08-28",
+    tags: ["Mathematics", "Geometry"],
+  },
+  {
+    slug: "what-is-the-no-cloning-theorem",
+    title: "What Is the No-Cloning Theorem?",
+    dek: "Why quantum mechanics forbids a universal machine from making a perfect copy of an unknown quantum state.",
+    publishedAt: "2026-08-28",
+    tags: ["Quantum information", "Impossibility"],
+  },
+  {
+    slug: "how-do-upper-and-lower-bounds-work",
+    title: "How Do Upper and Lower Bounds Work?",
+    dek: "The two-sided language researchers use to describe exactly what is known when the final answer is still out of reach.",
+    publishedAt: "2026-08-28",
+    tags: ["Methodology", "Open problems"],
+  },
+  {
+    slug: "what-is-channel-capacity",
+    title: "What Is Channel Capacity?",
+    dek: "The hard ceiling on reliable communication through a noisy channel — and why more clever coding cannot erase noise for free.",
+    publishedAt: "2026-08-28",
+    tags: ["Information theory", "Computing"],
+  },
 ];
 
 export function getBlogPost(slug: string) {
