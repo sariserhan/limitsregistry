@@ -6,7 +6,7 @@ import { formatExact, publishedLimits, type PublishedLimit } from "../src/domain
 import type { ExactValue } from "../src/domain/types";
 import { deriveFrontierPresentation } from "../src/domain/frontier-presentation";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 60;
 const displayValue = (value: Parameters<typeof formatExact>[0]): ExactValue | null => value ? { kind: "text", value: formatExact(value) } : null;
 
 export default async function Home() {
