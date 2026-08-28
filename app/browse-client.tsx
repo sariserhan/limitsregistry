@@ -15,7 +15,8 @@ type RegistryStats = { limitCount: number; evidenceCount: number; categoryCount:
 type RecentBreakthrough = { id: string; registryNumber: string; eventType: string; occurredAt: string };
 type FeaturedBounty = { id: string; title: string; sponsor: string; amount: string | null; currency: string | null; registryNumber: string };
 type FeaturedArticle = { slug: string; title: string; dek: string };
-type BrowseClientProps = { initialLimits: PublishedLimit[]; stats: RegistryStats | null; recentBreakthroughs: RecentBreakthrough[]; featuredBounties: FeaturedBounty[]; featuredArticles: FeaturedArticle[] };
+type FaqItem = { question: string; answer: string };
+type BrowseClientProps = { initialLimits: PublishedLimit[]; stats: RegistryStats | null; recentBreakthroughs: RecentBreakthrough[]; featuredBounties: FeaturedBounty[]; featuredArticles: FeaturedArticle[]; faq: FaqItem[] };
 
 const BREAKTHROUGH_LABEL: Record<string, string> = { STRONGER_BOUND: "Stronger bound accepted", FRONTIER_CLOSED: "Frontier closed" };
 const bountyAmount = (amount: string | null, currency: string | null) => amount && currency ? `${new Intl.NumberFormat("en-US", { maximumFractionDigits: 2 }).format(Number(amount))} ${currency}` : "Amount not specified";
@@ -34,7 +35,7 @@ function BrowseFrontier({ limit }: { limit: PublishedLimit }) {
   return <div className="bound-block"><div className="bound-labels"><span>{limit.direction === "MINIMIZE" ? "Proven lower bound" : "Best known lower bound"}</span><span>{limit.direction === "MINIMIZE" ? "Best known upper bound" : "Proven upper bound"}</span></div><div className="bound-line"><div className="bound-value"><strong>{formatExact(limit.frontier.lowerBound)}</strong><small>{limit.direction === "MINIMIZE" ? "proven lower bound" : "best known lower bound"}</small></div><div className="bound-track"><span className={limit.frontier.status === "PROVEN" ? "closed" : ""} /><i /></div><div className="bound-value align-right"><strong>{formatExact(limit.frontier.upperBound)}</strong><small>{limit.direction === "MINIMIZE" ? "best known upper bound" : "proven upper bound"}</small></div></div><div className="gap-callout"><span>Gap</span><strong>{limit.frontier.gap}</strong></div></div>;
 }
 
-export default function Home({ initialLimits, stats, recentBreakthroughs, featuredBounties, featuredArticles }: BrowseClientProps) {
+export default function Home({ initialLimits, stats, recentBreakthroughs, featuredBounties, featuredArticles, faq }: BrowseClientProps) {
   const limits = initialLimits;
   const [selectedId, setSelectedId] = useState(limits[4]?.id ?? limits[0]?.id);
   const [query, setQuery] = useState("");
@@ -127,6 +128,8 @@ export default function Home({ initialLimits, stats, recentBreakthroughs, featur
           <Link className="home-cta-secondary" href="/bounties/propose">Propose a prize pool <ArrowIcon /></Link>
         </div>
       </section>
+      <section className="watchlist-cta"><div className="watchlist-cta-copy"><p className="section-kicker">Follow the frontier</p><h2>Get an email the moment a bound tightens.</h2><p>Watch any record and we&apos;ll notify you when a stronger Claim is accepted or a frontier closes.</p></div><Link className="primary-button" href="/watchlists">Start a watchlist <ArrowIcon /></Link></section>
+      <section className="home-faq" id="faq"><p className="section-kicker">Frequently asked</p><h2>How the Registry works</h2><div className="home-faq-list">{faq.map((item) => <details className="home-faq-item" key={item.question}><summary>{item.question}<ChevronIcon /></summary><p>{item.answer}</p></details>)}</div></section>
     </>}
     <SiteFooter />
   </main>;
