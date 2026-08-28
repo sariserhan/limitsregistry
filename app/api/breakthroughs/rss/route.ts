@@ -13,7 +13,9 @@ export async function GET() {
   const events = await listRecentBreakthroughEvents(50);
   const items = events.map(({ event, claimNumber, relation, valueExact, limit }) => {
     const detail = claimNumber ? `${claimNumber} ${relation} ${valueExact}` : "Accepted Claim";
-    return `<item><title>${xml(`${limit.registryNumber} — ${event.eventType}`)}</title><description>${xml(`${limit.title}: ${detail}`)}</description><link>https://www.limitsregistry.com/limits/${xml(limit.registryNumber)}</link><pubDate>${event.occurredAt.toUTCString()}</pubDate><guid>${event.id}</guid></item>`;
+    return `<item><title>${xml(`${limit.registryNumber} — ${event.eventType}`)}</title><description>${xml(`${limit.title}: ${detail}`)}</description><link>https://www.limitsregistry.com/limits/${xml(limit.registryNumber)}</link><pubDate>${event.occurredAt.toUTCString()}</pubDate><guid isPermaLink="false">${event.id}</guid></item>`;
   }).join("");
-  return new Response(`<?xml version="1.0" encoding="UTF-8"?><rss version="2.0"><channel><title>Breakthroughs — Limits Registry</title><link>https://www.limitsregistry.com/breakthroughs</link><description>Recently accepted stronger bounds, constructions, and frontier closures across the Registry.</description>${items}</channel></rss>`, { headers: { "content-type": "application/rss+xml; charset=utf-8", "cache-control": "public, max-age=300" } });
+  // guid is a bare UUID, not a URL — isPermaLink defaults to true per the RSS 2.0 spec, so without
+  // isPermaLink="false" a validator or reader treats a non-URL guid as an invalid permalink.
+  return new Response(`<?xml version="1.0" encoding="UTF-8"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Breakthroughs — Limits Registry</title><link>https://www.limitsregistry.com/breakthroughs</link><atom:link href="https://www.limitsregistry.com/api/breakthroughs/rss" rel="self" type="application/rss+xml" /><description>Recently accepted stronger bounds, constructions, and frontier closures across the Registry.</description>${items}</channel></rss>`, { headers: { "content-type": "application/rss+xml; charset=utf-8", "cache-control": "public, max-age=300" } });
 }
