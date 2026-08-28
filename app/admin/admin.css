@@ -1,5 +1,5 @@
 .admin-shell { min-height:100vh; }
-.admin-content { padding:74px 9.2vw 100px; max-width:1100px; margin:0 auto; }
+.admin-content { padding:74px var(--page-pad) 100px; max-width:1100px; margin:0 auto; }
 .admin-shell h1 { font:600 40px 'Space Grotesk',sans-serif; letter-spacing:-.05em; margin:0 0 8px; }
 .admin-content > p { color:var(--muted); margin:0 0 40px; }
 .admin-table-scroll { overflow-x:auto; border-top:1px solid var(--ink); }

@@ -1,5 +1,5 @@
 .status-page { min-height:100vh; }
-.status-content { min-height:calc(100vh - 78px); display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:40px 24px; gap:14px; }
+.status-content { min-height:calc(100vh - 78px); display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:40px var(--page-pad); gap:14px; }
 .status-content .status-code { color:var(--blue); font:500 11px 'DM Mono',monospace; text-transform:uppercase; letter-spacing:.1em; }
 .status-content h1 { margin:0; font:600 clamp(32px,5vw,48px) 'Space Grotesk',sans-serif; letter-spacing:-.04em; color:var(--ink); }
 .status-content p { margin:0; color:var(--muted); font-size:14px; max-width:420px; line-height:1.5; }
