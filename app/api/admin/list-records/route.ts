@@ -21,6 +21,11 @@ function authorized(request: Request) {
 export async function GET(request: Request) {
   if (!authorized(request)) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const { searchParams } = new URL(request.url);
+  const email = searchParams.get("email");
+  if (email) {
+    const rows = await db.execute(sql`select id, name, email, role from "user" where email = ${email} limit 1`);
+    return NextResponse.json({ user: rows[0] ?? null });
+  }
   const status = searchParams.get("status") ?? "OPEN";
   const limit = Math.min(Number(searchParams.get("limit") ?? "50"), 200);
   const rows = await db.execute(sql`
