@@ -47,7 +47,8 @@ export function EditorialWorkspace({ canDecide }: { canDecide: boolean }) {
         <h2>Create a Limit</h2>
         <form onSubmit={submit}><label>Registry number<input name="registryNumber" placeholder="LR-000200" required /></label><label>Slug<input name="slug" placeholder="new-limit" required /></label><label>Title<input name="title" required /></label><label>Category<input name="category" placeholder="Graph theory" required /></label><label>Summary<textarea name="summary" minLength={10} required /></label><button className="primary-button" type="submit">Create draft limit</button></form>
         <hr />
-        <h2>Source intake (manual)</h2>
+        <h2>Attach evidence to a Claim</h2>
+        <p>This is different from adding a paper above: it links a specific source, proof, dataset, or reproduction to an existing Claim.</p>
         <form onSubmit={e => void submitAction(e, "create-evidence")}><label>Source label<input name="label" required /></label><label>Source URL<input name="url" type="url" /></label><label>Location<input name="location" placeholder="Theorem 1, page 4" /></label><label>Type<select name="type" defaultValue="PAPER"><option>PAPER</option><option>FORMAL_PROOF</option><option>SOURCE_CODE</option><option>DATASET</option><option>EXHAUSTIVE_COMPUTATION</option><option>REPRODUCTION</option><option>OTHER</option></select></label><button className="secondary-button" type="submit">Attach evidence</button></form>
         <hr />
         <h2>Claim draft</h2>

@@ -3,6 +3,7 @@ import { PublicHeader } from "../../src/components/public-header";
 import { SiteFooter } from "../../src/components/site-footer";
 import { requireRole } from "../../src/auth/session";
 import { ConsoleNav } from "./ConsoleNav";
+import { SignOutButton } from "../../src/components/sign-out-button";
 import "./console.css";
 
 // Baseline gate for the whole Research Console subtree. Pages with a stricter minimum (CODATA
@@ -16,8 +17,7 @@ export default async function ConsoleLayout({ children }: Readonly<{ children: R
     <PublicHeader />
     <div className="console-content">
       <header className="console-header">
-        <span className="console-session">Signed in as {session.user.email} · {session.user.role}</span>
-        <Link className="console-exit" href="/account">Your account</Link>
+        <div className="console-header-meta"><span className="console-session">Signed in as {session.user.email} · {session.user.role}</span><Link className="console-exit" href="/account">Your account</Link><SignOutButton /></div>
         <Link className="console-exit" href="/">Public Registry ↗</Link>
       </header>
       <ConsoleNav />

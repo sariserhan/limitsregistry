@@ -38,20 +38,20 @@ if git status --porcelain drizzle/ | grep -q .; then
   exit 1
 fi
 
-ENV_FILE="$(mktemp -t "vercel-env-${TARGET}.XXXXXX")"
-trap 'rm -f "$ENV_FILE"' EXIT
+if command -v vercel >/dev/null 2>&1; then
+  VERCEL=(vercel)
+else
+  echo "==> Vercel CLI not installed globally; using npx vercel"
+  VERCEL=(npx --yes vercel)
+fi
 
-echo "==> Pulling ${TARGET} environment variables from Vercel"
-vercel env pull --environment="$TARGET" --yes "$ENV_FILE"
-
-DB_URL="$(grep '^DATABASE_URL=' "$ENV_FILE" | head -1 | cut -d= -f2- | sed -e 's/^"//' -e 's/"$//')"
-if [[ -z "$DB_URL" || "$DB_URL" == "[SENSITIVE]" ]]; then
-  echo "DATABASE_URL for ${TARGET} was not resolvable (masked or missing). Aborting without migrating." >&2
+if [[ ! -f ".vercel/project.json" && ! -d ".vercel" && ! -f ".env.local" ]] || { ! grep -q "^VERCEL_OIDC_TOKEN=" ".env.local" 2>/dev/null && [[ ! -f ".vercel/project.json" ]]; }; then
+  echo "No linked Vercel project found. Run: npx vercel link" >&2
   exit 1
 fi
 
 echo "==> Applying forward migrations against ${TARGET}"
-DATABASE_URL="$DB_URL" npm run db:migrate
+"${VERCEL[@]}" env run --environment="${TARGET}" -- npm run db:migrate
 
 HEALTH_URL="https://www.limitsregistry.com/api/health/db"
 if [[ "$TARGET" == "preview" ]]; then

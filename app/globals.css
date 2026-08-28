@@ -155,3 +155,5 @@ main>.public-header{width:100vw;margin-left:calc(50% - 50vw);box-sizing:border-b
     font-size: 9px;
   }
 }
+
+.sign-out-control{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.sign-out-button{border:1px solid var(--line);background:var(--paper);color:var(--muted);padding:8px 11px;font:10px 'DM Mono',monospace;text-transform:uppercase;letter-spacing:.06em;cursor:pointer}.sign-out-button:hover,.sign-out-button:focus-visible{border-color:var(--blue);color:var(--blue)}.sign-out-button:disabled{cursor:wait;opacity:.55}.sign-out-error{color:var(--red);font-size:11px}.admin-session{display:flex;align-items:center;justify-content:space-between;gap:16px;margin:0 0 40px}.admin-session>p{color:var(--muted);margin:0}@media(max-width:640px){.console-header-meta,.admin-session{align-items:flex-start;flex-direction:column}.admin-session{gap:10px}}

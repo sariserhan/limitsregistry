@@ -3,7 +3,8 @@
 import { revalidatePath } from "next/cache";
 import { requireRole } from "../../src/auth/session";
 import { allowRequest } from "../../src/ops/rate-limit";
-import { insertSubmission, type NewSubmission } from "../../src/db/repository.submissions";
+import { getSubmissionNotification, insertProofAttachment, insertSubmission, type NewSubmission } from "../../src/db/repository.submissions";
+import { sendSubmissionReceivedEmail } from "../../src/lib/email/submission-emails";
 
 const SUBMISSION_TYPES = ["BETTER_ACHIEVABLE_RESULT", "STRONGER_BOUND", "PROOF", "REPRODUCTION", "CORRECTION"] as const;
 const RELATIONS = ["<", "<=", "=", ">=", ">"] as const;
@@ -34,11 +35,22 @@ export async function createSubmission(formData: FormData) {
   const proposedRelation = String(formData.get("proposedRelation") ?? "");
   const proposedValueExact = String(formData.get("proposedValueExact") ?? "").trim();
   const evidenceUrl = String(formData.get("evidenceUrl") ?? "").trim();
+  const proofFile = formData.get("proofFile");
+  const uploadedProof = proofFile instanceof File && proofFile.size > 0 ? proofFile : null;
 
   if (!limitId) throw new Error("Choose a Limit.");
   if (!SUBMISSION_TYPES.includes(submissionType as (typeof SUBMISSION_TYPES)[number])) throw new Error("Invalid submission type.");
   if (title.length < 4) throw new Error("Title is too short.");
   if (description.length < 10) throw new Error("Description is too short.");
+  if (!RELATIONS.includes(proposedRelation as (typeof RELATIONS)[number])) throw new Error("Choose a proposed lower or upper bound.");
+  if (!proposedValueExact) throw new Error("Provide the proposed bound value.");
+  if (!evidenceUrl && !uploadedProof) throw new Error("Provide an evidence URL or upload proof.");
+  for (const field of ["scopeConfirmed", "boundConfirmed", "evidenceConfirmed", "reviewConfirmed"]) {
+    if (formData.get(field) !== "on") throw new Error("Complete every evidence checklist item before submitting.");
+  }
+  if (uploadedProof && uploadedProof.size > 10 * 1024 * 1024) throw new Error("Proof files must be 10 MB or smaller.");
+  const allowedProofTypes = new Set(["application/pdf", "text/plain", "text/markdown", "application/zip", "application/x-zip-compressed"]);
+  if (uploadedProof && !allowedProofTypes.has(uploadedProof.type)) throw new Error("Proof uploads must be PDF, text, Markdown, or ZIP files.");
 
   const input: NewSubmission = {
     submitterUserId: session.user.id,
@@ -48,11 +60,12 @@ export async function createSubmission(formData: FormData) {
     description,
     evidenceUrl: safeEvidenceUrl(evidenceUrl),
   };
-  if (proposedRelation && RELATIONS.includes(proposedRelation as (typeof RELATIONS)[number]) && proposedValueExact) {
-    input.proposedRelation = proposedRelation as NewSubmission["proposedRelation"];
-    input.proposedValueExact = proposedValueExact;
-  }
+  input.proposedRelation = proposedRelation as NewSubmission["proposedRelation"];
+  input.proposedValueExact = proposedValueExact;
 
-  await insertSubmission(input);
+  const submission = await insertSubmission(input);
+  if (uploadedProof) await insertProofAttachment({ submissionId: submission.id, filename: uploadedProof.name.slice(0, 180), mimeType: uploadedProof.type, sizeBytes: uploadedProof.size, contents: Buffer.from(await uploadedProof.arrayBuffer()) });
+  const record = await getSubmissionNotification(submission.id);
+  if (record) void sendSubmissionReceivedEmail(record.submitter.email, record.submitter.name, record.limit.registryNumber, title, submission.id).catch((error) => console.error("[submission] receipt email failed", error));
   revalidatePath("/submit");
 }

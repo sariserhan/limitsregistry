@@ -1,0 +1,1 @@
+-- Snapshot alignment only: tables are created by migrations 0016 and 0017.
