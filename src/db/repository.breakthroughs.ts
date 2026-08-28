@@ -1,4 +1,5 @@
 import "server-only";
+import { unstable_cache } from "next/cache";
 import { desc, eq, inArray } from "drizzle-orm";
 import { db } from "./client";
 import { breakthroughEvents, watchlistEvents, auditLogs, claims, specificationVersions, limits } from "./schema";
@@ -17,15 +18,20 @@ export async function listBreakthroughEventsForLimit(limitId: string) {
 // detectAndRecordBreakthroughs after a real ACCEPTED transition, so every row here already
 // passed the draft/disputed guard; no extra published-only filtering is needed at read time.
 export async function listRecentBreakthroughEvents(resultLimit = 50) {
-  const rows = await db.select({ event: breakthroughEvents, claimNumber: claims.claimNumber, relation: claims.relation, valueExact: claims.valueExact })
-    .from(breakthroughEvents)
-    .leftJoin(claims, eq(claims.id, breakthroughEvents.claimId))
-    .orderBy(desc(breakthroughEvents.occurredAt))
-    .limit(resultLimit);
-  if (rows.length === 0) return [];
-  const limitRows = await db.select({ id: limits.id, registryNumber: limits.registryNumber, title: limits.title }).from(limits).where(inArray(limits.id, [...new Set(rows.map((r) => r.event.limitId))]));
-  const limitById = new Map(limitRows.map((l) => [l.id, l]));
-  return rows.flatMap((row) => { const limit = limitById.get(row.event.limitId); return limit ? [{ ...row, limit }] : []; });
+  const read = unstable_cache(async () => {
+    const rows = await db.select({ event: breakthroughEvents, claimNumber: claims.claimNumber, relation: claims.relation, valueExact: claims.valueExact })
+      .from(breakthroughEvents)
+      .leftJoin(claims, eq(claims.id, breakthroughEvents.claimId))
+      .orderBy(desc(breakthroughEvents.occurredAt))
+      .limit(resultLimit);
+    if (rows.length === 0) return [];
+    const limitRows = await db.select({ id: limits.id, registryNumber: limits.registryNumber, title: limits.title }).from(limits).where(inArray(limits.id, [...new Set(rows.map((r) => r.event.limitId))]));
+    const limitById = new Map(limitRows.map((l) => [l.id, l]));
+    return rows.flatMap((row) => { const limit = limitById.get(row.event.limitId); return limit ? [{ ...row, limit }] : []; });
+  }, ["recent-breakthroughs", String(resultLimit)], { revalidate: 60, tags: ["breakthroughs"] });
+  const rows = await read();
+  // occurredAt round-trips through unstable_cache's JSON cache as a string despite its Date type.
+  return rows.map((row) => ({ ...row, event: { ...row.event, occurredAt: new Date(row.event.occurredAt) } }));
 }
 
 async function persistBreakthroughEvents(events: BreakthroughDetection[], limitId: string, claimId: string, actorUserId: string) {

@@ -138,22 +138,32 @@ export async function getCertificate(certificateNumber: string) { const rows = a
 
 /** One cached read for the public Browse surface; prevents database records from inheriting launch-fixture frontiers. */
 export async function listPublishedLimitsWithFrontiers() {
-  const publicStatuses: Array<"OPEN" | "PROVEN" | "DISPUTED" | "RETIRED"> = ["OPEN", "PROVEN", "DISPUTED", "RETIRED"];
-  const [rows, events] = await Promise.all([
-    db.select({ limit: limits, specification: specificationVersions, claim: claims }).from(limits).innerJoin(specificationVersions, eq(specificationVersions.limitId, limits.id)).leftJoin(claims, eq(claims.specificationVersionId, specificationVersions.id)).where(inArray(limits.status, publicStatuses)).orderBy(asc(limits.registryNumber), sql`${specificationVersions.versionNumber} desc`),
-    db.select({ limitId: timelineEvents.limitId, id: timelineEvents.id, eventType: timelineEvents.eventType, title: timelineEvents.title, description: timelineEvents.description, occurredAt: timelineEvents.occurredAt }).from(timelineEvents).innerJoin(limits, eq(limits.id, timelineEvents.limitId)).where(inArray(limits.status, publicStatuses)).orderBy(sql`${timelineEvents.occurredAt} desc`),
-  ]);
-  const eventsByLimit = new Map<string, typeof events>();
-  for (const event of events) eventsByLimit.set(event.limitId, [...(eventsByLimit.get(event.limitId) ?? []), event]);
-  const grouped = new Map<string, { limit: typeof limits.$inferSelect; specification: typeof specificationVersions.$inferSelect; claimRows: Array<typeof claims.$inferSelect> }>();
-  for (const row of rows) {
-    const current = grouped.get(row.limit.id);
-    if (!current) grouped.set(row.limit.id, { limit: row.limit, specification: row.specification, claimRows: row.claim ? [row.claim] : [] });
-    else if (current.specification.id === row.specification.id && row.claim) current.claimRows.push(row.claim);
-  }
-  return [...grouped.values()].map(({ limit, specification, claimRows }) => {
+  const read = unstable_cache(async () => {
+    const publicStatuses: Array<"OPEN" | "PROVEN" | "DISPUTED" | "RETIRED"> = ["OPEN", "PROVEN", "DISPUTED", "RETIRED"];
+    const [rows, events] = await Promise.all([
+      db.select({ limit: limits, specification: specificationVersions, claim: claims }).from(limits).innerJoin(specificationVersions, eq(specificationVersions.limitId, limits.id)).leftJoin(claims, eq(claims.specificationVersionId, specificationVersions.id)).where(inArray(limits.status, publicStatuses)).orderBy(asc(limits.registryNumber), sql`${specificationVersions.versionNumber} desc`),
+      db.select({ limitId: timelineEvents.limitId, id: timelineEvents.id, eventType: timelineEvents.eventType, title: timelineEvents.title, description: timelineEvents.description, occurredAt: timelineEvents.occurredAt }).from(timelineEvents).innerJoin(limits, eq(limits.id, timelineEvents.limitId)).where(inArray(limits.status, publicStatuses)).orderBy(sql`${timelineEvents.occurredAt} desc`),
+    ]);
+    const eventsByLimit = new Map<string, typeof events>();
+    for (const event of events) eventsByLimit.set(event.limitId, [...(eventsByLimit.get(event.limitId) ?? []), event]);
+    const grouped = new Map<string, { limit: typeof limits.$inferSelect; specification: typeof specificationVersions.$inferSelect; claimRows: Array<typeof claims.$inferSelect> }>();
+    for (const row of rows) {
+      const current = grouped.get(row.limit.id);
+      if (!current) grouped.set(row.limit.id, { limit: row.limit, specification: row.specification, claimRows: row.claim ? [row.claim] : [] });
+      else if (current.specification.id === row.specification.id && row.claim) current.claimRows.push(row.claim);
+    }
+    // Claim rows are kept raw here (not run through serializeClaim) — parseExact() can produce a
+    // BigInt for integer-valued claims, and unstable_cache JSON-serializes its return value to store
+    // it; BigInt isn't JSON-serializable and throws before the cache write completes. Serialization
+    // happens after the cache boundary instead, below — same pattern as getLimitResearchData.
+    return [...grouped.values()].map(({ limit, specification, claimRows }) => ({ limit, specification, claimRows, timeline: eventsByLimit.get(limit.id) ?? [] }));
+  }, ["published-limits-with-frontiers"], { revalidate: 60, tags: ["published-limits"] });
+  const rows = await read();
+  // Date fields round-trip through unstable_cache's JSON cache as strings despite their Date type.
+  return rows.map(({ limit, specification, claimRows, timeline }) => {
     const serializedSpecification = serializeSpecification(specification);
-    const serializedClaims = claimRows.filter((claim) => claim.status === "ACCEPTED").map((claim) => serializeClaim(claim));
-    return { limit, specification: serializedSpecification, claims: serializedClaims, timeline: eventsByLimit.get(limit.id) ?? [], frontier: deriveFrontier(limit.direction, serializedSpecification, serializedClaims) };
+    const serializedClaims = claimRows.filter((claim) => claim.status === "ACCEPTED").map((claim) => serializeClaim({ ...claim, createdAt: new Date(claim.createdAt) }));
+    const rehydratedLimit = { ...limit, publishedAt: limit.publishedAt ? new Date(limit.publishedAt) : null, createdAt: new Date(limit.createdAt), updatedAt: new Date(limit.updatedAt) };
+    return { limit: rehydratedLimit, specification: serializedSpecification, claims: serializedClaims, timeline: timeline.map((event) => ({ ...event, occurredAt: new Date(event.occurredAt) })), frontier: deriveFrontier(limit.direction, serializedSpecification, serializedClaims) };
   });
 }
