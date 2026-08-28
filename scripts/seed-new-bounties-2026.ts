@@ -32,7 +32,7 @@ async function main() { try {
       await sql`update research_bounties set title=${b.bountyTitle},updated_at=now() where id=${existingBounty[0].id}`;
       bountiesSkipped++; continue;
     }
-    await sql`insert into research_bounties (limit_id,title,sponsor,description,source_url,status,amount,currency,expires_at,moderation_note,verified_at) values (${limitId},${b.bountyTitle},${b.sponsor},${b.description},${b.sourceUrl},${"VERIFIED"},${b.amount},${"USD"},${b.expiresAt},${`Verified against the sponsor's own official competition page (${b.sourceUrl}) as active and unclaimed on 2026-08-28.`},${sql`now()`})`;
+    await sql`insert into research_bounties (limit_id,title,sponsor,description,source_url,status,amount,currency,expires_at,moderation_note,verified_at) values (${limitId},${b.bountyTitle},${b.sponsor},${b.description},${b.sourceUrl},${"VERIFIED"},${b.amount},${b.currency},${b.expiresAt},${`Verified against the sponsor's own official competition page (${b.sourceUrl}) as active and unclaimed on 2026-08-28.`},${sql`now()`})`;
     bountiesPublished++;
   }
   const [{ verifiedBountyCount }] = await sql`select count(*)::int as "verifiedBountyCount" from research_bounties where status='VERIFIED'`;
