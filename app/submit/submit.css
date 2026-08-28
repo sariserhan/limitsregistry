@@ -27,3 +27,5 @@
   .submit-content h1 { font-size:30px; }
   .submit-row { flex-direction:column; }
 }
+
+.challenge-context{border-left:3px solid var(--blue);background:var(--paper);padding:14px 16px;color:var(--muted);font-size:13px;line-height:1.5}.challenge-context strong{color:var(--ink)}.submit-help{margin:0;color:var(--muted);font-size:12px;line-height:1.5}
