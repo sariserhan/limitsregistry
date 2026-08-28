@@ -42,7 +42,9 @@ const RECORDS: Array<{ rank: number; p: number; year: number; discoverer: string
   { rank: 30, p: 132049, year: 1983, discoverer: "David Slowinski et al." },
 ];
 
-const ordinal = (n: number) => `${n}${n === 1 ? "st" : n === 2 ? "nd" : n === 3 ? "rd" : "th"}`;
+// 11-13 are always "th" (eleventh, twelfth, thirteenth) even though 21/22/23 are "st"/"nd"/"rd" —
+// a bare "n % 10" check alone gets 11/12/13 wrong (would say "11st", "12nd", "13rd").
+const ordinal = (n: number) => { const r100 = n % 100; if (r100 >= 11 && r100 <= 13) return `${n}th`; const r10 = n % 10; return `${n}${r10 === 1 ? "st" : r10 === 2 ? "nd" : r10 === 3 ? "rd" : "th"}`; };
 const summaryFor = (item: (typeof RECORDS)[number]) => `A Mersenne prime is a prime number of the form 2^p − 1 where the exponent p is itself prime — named for Marin Mersenne, who studied them in 1644. This is the ${ordinal(item.rank)} known one: 2^${item.p} − 1.`;
 
 let inserted = 0, updated = 0;

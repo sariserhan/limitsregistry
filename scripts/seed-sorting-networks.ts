@@ -29,16 +29,19 @@ const RECORDS: Array<{ n: number; exact: number | null; lower: number; upper: nu
   { n: 12, exact: null, lower: 37, upper: 39 },
 ];
 
-let inserted = 0, skipped = 0;
+let inserted = 0, updated = 0;
 async function main() { try {
   let [paper] = await sql`select id from papers where title=${PAPER_TITLE} limit 1`;
   if (!paper) [paper] = await sql`insert into papers (title,abstract,doi,publisher_url) values (${PAPER_TITLE},${"Proves S(9) = 25 and S(10) = 29 for optimal-size sorting networks, closing the smallest open instances known since 1964."},${"10.1145/2591796.2591834"},${SOURCE_URL}) returning id`;
   for (const item of RECORDS) {
     const registryNumber = `LR-SORTNET-${item.n}`, slug = `sorting-network-${item.n}-inputs`;
-    if ((await sql`select id from limits where registry_number=${registryNumber} limit 1`).length) { skipped++; continue; }
+    const article = item.n === 8 || item.n === 11 ? "an" : "a";
+    const title = `Minimum comparators for ${article} ${item.n}-input sorting network`;
+    const existingSN = await sql`select id from limits where registry_number=${registryNumber} limit 1`;
+    if (existingSN.length) { await sql`update limits set title=${title},updated_at=now() where id=${existingSN[0].id}`; updated++; continue; }
     const status = item.exact !== null ? "PROVEN" : "OPEN";
     await sql.begin(async (tx) => {
-      const [limit] = await tx`insert into limits (registry_number,slug,title,summary,category,subcategory,direction,metric_name,status,published_at) values (${registryNumber},${slug},${`Minimum comparators for a ${item.n}-input sorting network`},${`The minimum number of fixed compare-exchange operations needed for a data-oblivious network to sort every possible ordering of ${item.n} inputs.`},${"Algorithms"},${"Sorting networks"},${"MINIMIZE"},${"S(n)"},${status},${new Date("2014-05-01T00:00:00Z")}) returning id`;
+      const [limit] = await tx`insert into limits (registry_number,slug,title,summary,category,subcategory,direction,metric_name,status,published_at) values (${registryNumber},${slug},${title},${`The minimum number of fixed compare-exchange operations needed for a data-oblivious network to sort every possible ordering of ${item.n} inputs.`},${"Algorithms"},${"Sorting networks"},${"MINIMIZE"},${"S(n)"},${status},${new Date("2014-05-01T00:00:00Z")}) returning id`;
       const [spec] = await tx`insert into limit_spec_versions (limit_id,version_number,formal_statement,constraints,assumptions) values (${limit.id},1,${`S(${item.n}) is the minimum number of comparators in a fixed network that sorts every ${item.n}-input sequence.`},${tx.json({inputs:item.n,network:"fixed/data-oblivious"})},${tx.json({publicationProcess:"FOUNDING_CATALOG_IMPORT"})}) returning id`;
       const [evidence] = await tx`insert into evidence (type,label,url,location,metadata) values (${"EXHAUSTIVE_COMPUTATION"},${`Sorting network bounds — n=${item.n}`},${SOURCE_URL},${`n = ${item.n}`},${tx.json({inputs:item.n,exact:item.exact,lower:item.lower,upper:item.upper,proof:item.proof ?? null})}) returning id`;
       if (item.exact !== null) {
@@ -55,6 +58,6 @@ async function main() { try {
     }); inserted++;
   }
   const [{ publicCount }] = await sql`select count(*)::int as "publicCount" from limits where status in ('OPEN','PROVEN')`;
-  console.log(JSON.stringify({ inserted, skipped, publicCount }));
+  console.log(JSON.stringify({ inserted, updated, publicCount }));
 } finally { await sql.end(); } }
 void main().catch((error) => { console.error(error); process.exitCode = 1; });
