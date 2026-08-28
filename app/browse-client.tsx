@@ -89,6 +89,45 @@ export default function Home({ initialLimits, stats, recentBreakthroughs, featur
         <div className="home-teaser"><div className="home-teaser-head"><span className="section-kicker">Articles</span><Link href="/articles">All articles ↗</Link></div>{featuredArticles.length ? featuredArticles.map((article) => <Link className="home-teaser-row article-teaser-row" href={`/articles/${article.slug}`} key={article.slug}><strong>{article.title}</strong><small>{article.dek}</small></Link>) : <p className="home-teaser-empty">No articles published yet.</p>}</div>
       </section> : null}
       <section className="registry-layout" id="registry"><aside className="sidebar"><div className="sidebar-label">Browse by field</div><button className={category === "All categories" ? "side-link active" : "side-link"} onClick={() => { setCategory("All categories"); setPage(1); }}>All limits <span>{limits.length}</span></button>{categories.map(([item, count]) => <div className="side-field" key={item}><button className={category === item ? "side-link active" : "side-link"} onClick={() => { setCategory(item); setPage(1); }}>{item}<span>{count}</span></button><Link aria-label={"View all " + item + " records"} href={"/categories/" + categorySlug(item)}>↗</Link></div>)}<div className="sidebar-divider" /><div className="sidebar-label">Status</div><button className={status === "ALL" ? "side-link active" : "side-link"} onClick={() => { setStatus("ALL"); setPage(1); }}>All statuses <span>{limits.length}</span></button>{statuses.map(([item, count]) => <button key={item} className={status === item ? "side-link active" : "side-link"} onClick={() => { setStatus(item); setPage(1); }}>{item.replaceAll("_", " ")} <span>{count}</span></button>)}</aside><div className="registry-content"><div className="registry-heading"><div><p className="section-kicker">Curated registry</p><h2><Link href={fieldPageHref}>{category === "All categories" ? "All limits" : category} <span aria-hidden="true">↗</span></Link></h2></div><div className="registry-meta"><span>Curated registry</span><span className="meta-divider" /><span>Updated today</span></div></div><div className="content-grid"><div className="limit-list">{visibleLimits.map((limit) => <button className={`limit-row ${selected.id === limit.id ? "selected" : ""}`} onClick={() => setSelectedId(limit.id)} key={limit.id}><div className="limit-row-top"><span className="registry-id">{limit.id}</span><span className={`status ${limit.status.toLowerCase()}`}>{limit.status.replaceAll("_", " ")}</span></div><h3>{limit.title}</h3><p>{limit.summary}</p><div className="limit-row-bottom"><span>{limit.category}</span><span>{limit.direction === "MAXIMIZE" ? "↗" : "↘"} {limit.direction.toLowerCase()}</span></div><ChevronIcon /></button>)}{filtered.length === 0 && <div className="empty-state"><strong>No limits found</strong><span>Try another search or category.</span></div>}{filtered.length > 0 && <nav className="pagination" aria-label="Registry pages"><button disabled={currentPage === 1} onClick={() => setPage(currentPage - 1)}>Previous</button><span>Page {currentPage} of {pageCount} · {filtered.length} records</span><button disabled={currentPage === pageCount} onClick={() => setPage(currentPage + 1)}>Next</button></nav>}</div><article className="limit-detail"><div className="detail-top"><span className="registry-id">{selected.id}</span><span className={`status ${selected.status.toLowerCase()}`}>{selected.status.replaceAll("_", " ")} limit</span></div><h2>{selected.title}</h2><p className="detail-summary">{selected.summary}</p><a className="canonical-link" href={`/limits/${selected.id}`}>Open canonical Limit page <ArrowIcon /></a><BrowseFrontier limit={selected} /><div className="detail-section"><div className="detail-section-head"><h3>Claims</h3><span>{selected.claims} total</span></div>{selected.claimsData.length ? selected.claimsData.map((claim) => <div className="claim-row" key={claim.id}><div className="claim-relation">{claim.relation} {formatExact(claim.value)}</div><div className="claim-main"><strong>{claim.claimType.replaceAll("_", " ")}</strong><span>{claim.methodSummary ?? "No method summary recorded."}</span><small>{claim.source} · {claim.year}</small></div><span className="claim-status confirmed">{claim.epistemicStatus.replaceAll("_", " ")}</span></div>) : <div className="empty-state"><strong>No accepted Claims</strong><span>This record has no accepted Claims in its current specification.</span></div>}</div><div className="detail-section timeline"><div className="detail-section-head"><h3>Timeline</h3><a href="#timeline">View all <ArrowIcon /></a></div>{selected.timelineData?.length ? selected.timelineData.map((event) => <div className="timeline-item" key={event.id}><span className="timeline-year">{event.occurredAt.slice(0, 4)}</span><span className="timeline-dot" /><span><strong>{event.title}</strong><small>{event.description ?? event.occurredAt.slice(0, 10)}</small></span></div>) : <div className="empty-state"><strong>No timeline events</strong><span>No public history has been recorded for this Limit.</span></div>}</div></article></div></div></section>
+      <section className="home-trust-path" aria-labelledby="home-trust-title">
+        <div className="home-section-intro">
+          <p className="section-kicker">How trust is built</p>
+          <h2 id="home-trust-title">A number is only as strong as its trail.</h2>
+          <p>Every published record moves through a visible chain: a precise question, inspectable evidence, independent review, and a public state that can be challenged.</p>
+        </div>
+        <div className="home-trust-steps">
+          <article><span>01</span><strong>Specification</strong><p>Define the exact object, metric, direction, and scope.</p></article>
+          <article><span>02</span><strong>Evidence</strong><p>Attach papers, proofs, benchmarks, or reproducible source material.</p></article>
+          <article><span>03</span><strong>Review</strong><p>Editors and reviewers test whether the evidence supports the claim.</p></article>
+          <article><span>04</span><strong>Published record</strong><p>Freeze the accepted state so progress has something solid to move.</p></article>
+        </div>
+      </section>
+      <section className="home-researchers" aria-labelledby="home-researchers-title">
+        <div className="home-section-intro">
+          <p className="section-kicker">For researchers</p>
+          <h2 id="home-researchers-title">Turn a frontier into a contribution.</h2>
+          <p>Find the open edge, compare what is known, and send the next piece of evidence into a process people can inspect.</p>
+        </div>
+        <nav className="home-researcher-links" aria-label="Researcher tools">
+          <Link href="/submit"><span>Submit evidence</span><ArrowIcon /></Link>
+          <Link href="/compare"><span>Compare limits</span><ArrowIcon /></Link>
+          <Link href="/activity"><span>Follow activity</span><ArrowIcon /></Link>
+          <Link href="/developers"><span>Read the API</span><ArrowIcon /></Link>
+          <Link href="/console"><span>Open Research Console</span><ArrowIcon /></Link>
+        </nav>
+      </section>
+      <section className="home-find-gap" aria-labelledby="home-find-gap-title">
+        <div>
+          <p className="section-kicker">The next contribution</p>
+          <h2 id="home-find-gap-title">Do not just search for answers.<br />Find the gap.</h2>
+          <p>Open problems are not vague mysteries here. They are bounded records with a next move: sharpen a lower bound, tighten an upper bound, challenge an assumption, or fund the attempt.</p>
+        </div>
+        <div className="home-find-gap-actions">
+          <Link className="home-cta-primary" href="/open-limits">Browse open Limits <ArrowIcon /></Link>
+          <Link className="home-cta-secondary" href="/submit">Submit evidence <ArrowIcon /></Link>
+          <Link className="home-cta-secondary" href="/bounties/propose">Propose a prize pool <ArrowIcon /></Link>
+        </div>
+      </section>
       <section className="home-faq" id="faq"><p className="section-kicker">Frequently asked</p><h2>How the Registry works</h2><div className="home-faq-list">{faq.map((item) => <details className="home-faq-item" key={item.question}><summary>{item.question}<ChevronIcon /></summary><p>{item.answer}</p></details>)}</div></section>
       <section className="watchlist-cta"><div className="watchlist-cta-copy"><p className="section-kicker">Follow the frontier</p><h2>Get an email the moment a bound tightens.</h2><p>Watch any record and we&apos;ll notify you when a stronger Claim is accepted or a frontier closes.</p></div><Link className="primary-button" href="/watchlists">Start a watchlist <ArrowIcon /></Link></section>
     </>}
