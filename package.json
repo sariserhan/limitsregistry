@@ -18,6 +18,7 @@
     "db:seed:miplib": "tsx scripts/seed-miplib-2017.ts",
     "db:seed:networking": "tsx scripts/seed-networking-rfcs.ts",
     "db:seed:mathematics": "tsx scripts/seed-mathematics-foundations.ts",
+    "db:seed:information-theory": "tsx scripts/seed-information-theory.ts",
     "db:publish:founding-queue": "tsx scripts/publish-founding-queue.ts"
   },
   "dependencies": {
