@@ -1,6 +1,7 @@
-.admin-shell { padding:74px 9.2vw 100px; max-width:1100px; margin:0 auto; }
+.admin-shell { min-height:100vh; }
+.admin-content { padding:74px 9.2vw 100px; max-width:1100px; margin:0 auto; }
 .admin-shell h1 { font:600 40px 'Space Grotesk',sans-serif; letter-spacing:-.05em; margin:0 0 8px; }
-.admin-shell > p { color:var(--muted); margin:0 0 40px; }
+.admin-content > p { color:var(--muted); margin:0 0 40px; }
 .admin-table-scroll { overflow-x:auto; border-top:1px solid var(--ink); }
 .admin-table { width:100%; min-width:520px; border-collapse:collapse; }
 .admin-table th { text-align:left; font:10px 'DM Mono',monospace; text-transform:uppercase; letter-spacing:.08em; color:var(--faint); padding:12px 10px; white-space:nowrap; }
@@ -56,7 +57,7 @@
 .admin-gallery-item[open] summary::before { content:"− "; }
 
 @media (max-width:640px) {
-  .admin-shell { padding:48px 24px 70px; }
+  .admin-content { padding:48px 24px 70px; }
   .admin-shell h1 { font-size:30px; }
   .admin-status-row { flex-direction:column; align-items:flex-start; }
 }

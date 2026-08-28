@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 import { PublicHeader } from "../../src/components/public-header";
+import { SiteFooter } from "../../src/components/site-footer";
 import { listRecentBreakthroughEvents } from "../../src/db/repository.breakthroughs";
 import "./breakthroughs.css";
 
@@ -52,5 +53,6 @@ export default async function BreakthroughsPage() {
         <span className={`breakthrough-badge ${event.eventType.toLowerCase()}`}>{LABEL[event.eventType] ?? event.eventType}</span>
       </article>) : <div className="breakthroughs-empty" role="status"><strong>No breakthroughs recorded yet.</strong><span>Events appear here the moment an accepted Claim tightens a bound or closes a frontier anywhere in the Registry.</span></div>}
     </section>
+    <SiteFooter />
   </main>;
 }

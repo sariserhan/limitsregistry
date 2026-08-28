@@ -1,4 +1,5 @@
-import Link from "next/link";
+import { PublicHeader } from "../../src/components/public-header";
+import { SiteFooter } from "../../src/components/site-footer";
 import { requireRole } from "../../src/auth/session";
 import { listPublishedLimits } from "../../src/db/repository";
 import { listSubmissionsByUser } from "../../src/db/repository.submissions";
@@ -18,7 +19,8 @@ export default async function SubmitPage() {
   const [publishedLimits, own] = await Promise.all([listPublishedLimits(), listSubmissionsByUser(session.user.id)]);
 
   return <main className="submit-page">
-    <Link href="/">&larr; Back to Registry</Link>
+    <PublicHeader />
+    <div className="submit-content">
     <h1>Submit a proposal</h1>
     <p className="lede">Propose a better result, a stronger bound, a proof, a reproduction, or a correction for a published Limit. Every submission goes through editorial review before anything changes — nothing here publishes automatically.</p>
 
@@ -64,5 +66,7 @@ export default async function SubmitPage() {
       </div>)}
       {own.length === 0 && <p>You haven&rsquo;t submitted anything yet.</p>}
     </section>
+    </div>
+    <SiteFooter />
   </main>;
 }

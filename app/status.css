@@ -1,11 +1,12 @@
-.status-page { min-height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:40px 24px; gap:14px; }
-.status-page .status-code { color:var(--blue); font:500 11px 'DM Mono',monospace; text-transform:uppercase; letter-spacing:.1em; }
-.status-page h1 { margin:0; font:600 clamp(32px,5vw,48px) 'Space Grotesk',sans-serif; letter-spacing:-.04em; color:var(--ink); }
-.status-page p { margin:0; color:var(--muted); font-size:14px; max-width:420px; line-height:1.5; }
-.status-page .status-actions { display:flex; gap:14px; margin-top:12px; flex-wrap:wrap; justify-content:center; }
-.status-page a, .status-page button { color:#fff; background:var(--blue); border:0; padding:12px 20px; font-size:13px; text-decoration:none; }
-.status-page a.secondary, .status-page button.secondary { color:var(--ink); background:transparent; border:1px solid var(--line); }
-.status-page code { color:var(--faint); font:10px 'DM Mono',monospace; }
+.status-page { min-height:100vh; }
+.status-content { min-height:calc(100vh - 78px); display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:40px 24px; gap:14px; }
+.status-content .status-code { color:var(--blue); font:500 11px 'DM Mono',monospace; text-transform:uppercase; letter-spacing:.1em; }
+.status-content h1 { margin:0; font:600 clamp(32px,5vw,48px) 'Space Grotesk',sans-serif; letter-spacing:-.04em; color:var(--ink); }
+.status-content p { margin:0; color:var(--muted); font-size:14px; max-width:420px; line-height:1.5; }
+.status-content .status-actions { display:flex; gap:14px; margin-top:12px; flex-wrap:wrap; justify-content:center; }
+.status-content a, .status-content button { color:#fff; background:var(--blue); border:0; padding:12px 20px; font-size:13px; text-decoration:none; }
+.status-content a.secondary, .status-content button.secondary { color:var(--ink); background:transparent; border:1px solid var(--line); }
+.status-content code { color:var(--faint); font:10px 'DM Mono',monospace; }
 
 @keyframes skeleton-pulse { 0%,100% { opacity:1; } 50% { opacity:.5; } }
 .skeleton { background:var(--surface); animation:skeleton-pulse 1.6s ease-in-out infinite; }
