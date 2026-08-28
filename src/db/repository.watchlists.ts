@@ -1,7 +1,7 @@
 import "server-only";
 import { and, asc, eq, inArray, lt, lte, or } from "drizzle-orm";
 import { db } from "./client";
-import { follows, limits, notifications, watchlistEvents } from "./schema";
+import { claimFollows, follows, limits, notifications, watchlistEvents } from "./schema";
 import { nextRetryAt, shouldRetry } from "../watchlists/retry";
 import { verifyUnsubscribe } from "../watchlists/security";
 export type WatchFrequency = "INSTANT" | "WEEKLY";
@@ -43,3 +43,5 @@ export async function markNotificationsSent(ids: string[], providerMessageId?: s
 export async function markNotificationsFailed(rows: Array<{ id: string; attempts: number }>, error: string) { for (const row of rows) await db.update(notifications).set({ status: "FAILED", lastError: error.slice(0, 1000), nextAttemptAt: nextRetryAt(row.attempts), updatedAt: new Date() }).where(eq(notifications.id, row.id)); }
 export async function recoverStaleDeliveries() { const cutoff = new Date(Date.now() - 15 * 60_000); await db.update(notifications).set({ status: "FAILED", lastError: "Delivery lease expired before completion.", nextAttemptAt: new Date(), updatedAt: new Date() }).where(and(eq(notifications.status, "SENDING"), lt(notifications.updatedAt, cutoff))); }
 export { shouldRetry };
+
+export async function followClaim(input: { claimNumber: string; subscriberKey: string; email: string }) { return db.insert(claimFollows).values(input).onConflictDoUpdate({ target: [claimFollows.claimNumber, claimFollows.subscriberKey], set: { enabled: true, email: input.email, updatedAt: new Date() } }).returning(); }
