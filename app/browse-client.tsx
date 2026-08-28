@@ -45,9 +45,10 @@ export default function Home({ initialLimits }: BrowseClientProps) {
     const dateDifference = (Date.parse(right.publishedAt ?? "") || 0) - (Date.parse(left.publishedAt ?? "") || 0);
     return dateDifference || left.id.localeCompare(right.id);
   }), [limits, query, category, status]);
-  const pageCount = Math.max(1, Math.ceil(filtered.length / 6));
+  const pageSize = 3;
+  const pageCount = Math.max(1, Math.ceil(filtered.length / pageSize));
   const currentPage = Math.min(page, pageCount);
-  const visibleLimits = filtered.slice((currentPage - 1) * 6, currentPage * 6);
+  const visibleLimits = filtered.slice((currentPage - 1) * pageSize, currentPage * pageSize);
   const fieldPageHref = category === "All categories" ? "/categories/all" : "/categories/" + categorySlug(category);
 
   return <main className="app-shell">
