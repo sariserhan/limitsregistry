@@ -28,7 +28,7 @@ export const timelineEvents = pgTable("timeline_events", { id: uuid("id").defaul
 export const auditLogs = pgTable("audit_logs", { id: uuid("id").defaultRandom().primaryKey(), actorUserId: text("actor_user_id").references(() => user.id), action: text("action").notNull(), entityType: text("entity_type").notNull(), entityId: text("entity_id").notNull(), before: jsonb("before"), after: jsonb("after"), reason: text("reason"), createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull() }, (t) => [index("audit_entity_idx").on(t.entityType, t.entityId)]);
 
 // --- V3: submissions, verification, reproduction, and follows ---
-export const submissionTypeEnum = pgEnum("submission_type", ["BETTER_ACHIEVABLE_RESULT", "STRONGER_BOUND", "PROOF", "REPRODUCTION", "CORRECTION"]);
+export const submissionTypeEnum = pgEnum("submission_type", ["BETTER_ACHIEVABLE_RESULT", "STRONGER_BOUND", "PROOF", "REPRODUCTION", "CORRECTION", "SCOPE_CHALLENGE"]);
 export const submissionStatusEnum = pgEnum("submission_status", ["SUBMITTED", "UNDER_REVIEW", "ACCEPTED", "REJECTED", "NEEDS_REVISION"]);
 // Authenticated public submissions (master spec §39-40). A submission never writes to `claims`
 // directly — accepting one is a manual editorial action, same draft-only posture as candidateClaims.

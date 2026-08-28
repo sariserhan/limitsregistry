@@ -14,8 +14,9 @@ const SUBMISSION_TYPE_LABELS: Record<string, string> = {
   PROOF: "A proof",
   REPRODUCTION: "An independent reproduction",
   CORRECTION: "A correction to an existing record",
+  SCOPE_CHALLENGE: "Challenge the reference-value scope",
 };
-const SUBMISSION_STATUS_HELP: Record<string, string> = { SUBMITTED: "Received — waiting for an editor to open it.", UNDER_REVIEW: "An editor is checking the scope and evidence.", ACCEPTED: "Accepted by an editor; publication is a separate editorial step.", REJECTED: "Not accepted for the current record. Read the reviewer note for context.", NEEDS_REVISION: "The editor asked for clarification or stronger evidence." };
+const SUBMISSION_STATUS_HELP: Record<string, string> = { SUBMITTED: "Received — waiting to be opened for review.", UNDER_REVIEW: "The scope and evidence are being checked.", ACCEPTED: "Accepted; publication is a separate step.", REJECTED: "Not accepted for the current record. Read the reviewer note for context.", NEEDS_REVISION: "Clarification or stronger evidence was requested." };
 
 type Props = { searchParams: Promise<{ limitId?: string }> };
 
@@ -30,7 +31,7 @@ export default async function SubmitPage({ searchParams }: Props) {
     <div className="submit-content">
     <Link className="submit-back" href="/account">Your account &rarr;</Link>
     <h1>Submit a proposal</h1>
-    <p className="lede">Think a published record is wrong? Bring evidence. Propose a better result, a stronger bound, a proof, a reproduction, or a correction. Nothing changes automatically: an editor checks the scope and source first.</p>
+    <p className="lede">Think a published record is wrong? Bring evidence. Propose a better result, a stronger bound, a proof, a reproduction, a correction, or challenge whether a reference value&rsquo;s stated scope is right. Nothing changes automatically: the scope and source are checked first.</p>
     {selectedLimit ? <p className="challenge-context"><strong>You are challenging {selectedLimit.registryNumber} — {selectedLimit.title}.</strong> A lower bound raises what is known to be achievable; an upper bound lowers what is still possible.</p> : null}
 
     <section>
@@ -56,12 +57,12 @@ export default async function SubmitPage({ searchParams }: Props) {
         <div className="submit-field"><label htmlFor="title">Title</label><input id="title" name="title" required minLength={4} placeholder="Short summary of the proposal" /></div>
         <div className="submit-field"><label htmlFor="description">Description</label><textarea id="description" name="description" required minLength={10} rows={5} placeholder="What are you proposing, and why?" /></div>
         <div className="submit-row">
-          <div className="submit-field"><label htmlFor="proposedRelation">Proposed bound (required)</label><select id="proposedRelation" name="proposedRelation" required defaultValue=""><option value="" disabled>Select ≥ or ≤</option><option value="<=">&le; — upper bound</option><option value=">=">&ge; — lower bound</option></select></div>
-          <div className="submit-field"><label htmlFor="proposedValueExact">Proposed value (required)</label><input id="proposedValueExact" name="proposedValueExact" required placeholder="e.g. 7 or O(n log n)" /></div>
+          <div className="submit-field"><label htmlFor="proposedRelation">Proposed bound (not needed for a scope challenge)</label><select id="proposedRelation" name="proposedRelation" defaultValue=""><option value="">Select ≥ or ≤</option><option value="<=">&le; — upper bound</option><option value=">=">&ge; — lower bound</option></select></div>
+          <div className="submit-field"><label htmlFor="proposedValueExact">Proposed value (not needed for a scope challenge)</label><input id="proposedValueExact" name="proposedValueExact" placeholder="e.g. 7 or O(n log n)" /></div>
         </div>
-        <p className="submit-help">Use ≥ for a stronger achievable result or ≤ for a tighter impossibility result. Include enough detail that someone else can verify the claim. Provide a stable HTTPS evidence URL or upload a PDF, text, Markdown, or ZIP proof (max 10 MB).</p>
+        <p className="submit-help">Use ≥ for a stronger achievable result or ≤ for a tighter impossibility result. Include enough detail that someone else can verify the claim. A scope challenge doesn&rsquo;t need a bound — describe what&rsquo;s wrong with the stated scope in the description instead. Provide a stable HTTPS evidence URL or upload a PDF, text, Markdown, or ZIP proof (max 10 MB).</p>
         <div className="submit-field"><label htmlFor="evidenceUrl">Evidence URL or proof upload (one required)</label><input id="evidenceUrl" name="evidenceUrl" type="url" placeholder="https://doi.org/… or proof/repository link" /><input id="proofFile" name="proofFile" type="file" accept=".pdf,.txt,.md,.zip,application/pdf,text/plain,text/markdown,application/zip" /></div>
-        <fieldset className="submit-checklist"><legend>Evidence checklist (all required)</legend><label><input name="scopeConfirmed" type="checkbox" required /> My result applies to the exact scope and assumptions of this Limit.</label><label><input name="boundConfirmed" type="checkbox" required /> I have stated whether this is a lower bound (≥) or upper bound (≤).</label><label><input name="evidenceConfirmed" type="checkbox" required /> The attached evidence actually supports the proposed value.</label><label><input name="reviewConfirmed" type="checkbox" required /> I understand an editor will verify this before publication.</label></fieldset>
+        <fieldset className="submit-checklist"><legend>Evidence checklist (all required)</legend><label><input name="scopeConfirmed" type="checkbox" required /> My result applies to the exact scope and assumptions of this Limit.</label><label><input name="boundConfirmed" type="checkbox" /> I have stated whether this is a lower bound (≥) or upper bound (≤) — not applicable to a scope challenge.</label><label><input name="evidenceConfirmed" type="checkbox" required /> The attached evidence actually supports the proposal.</label><label><input name="reviewConfirmed" type="checkbox" required /> I understand this will be verified before publication.</label></fieldset>
         <SubmissionPreviewButton />
         <button className="submit-submit" type="submit">Submit for review</button>
       </form>

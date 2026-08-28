@@ -148,6 +148,13 @@
       "when": 1787944745700,
       "tag": "0020_solid_iron_monger",
       "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "7",
+      "when": 1787949220965,
+      "tag": "0021_add-scope-challenge-type",
+      "breakpoints": true
     }
   ]
 }
