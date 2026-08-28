@@ -5,8 +5,9 @@ import { listPublicBounties } from "../src/db/repository.research";
 import { formatExact, publishedLimits, type PublishedLimit } from "../src/domain/published";
 import type { ExactValue } from "../src/domain/types";
 import { deriveFrontierPresentation } from "../src/domain/frontier-presentation";
-import { buildSiteJsonLd, jsonLdScript } from "../src/domain/structured-data";
+import { buildSiteJsonLd, buildFaqJsonLd, jsonLdScript } from "../src/domain/structured-data";
 import { blogPosts } from "../src/domain/blog-posts";
+import { HOMEPAGE_FAQ } from "../src/domain/faq";
 
 export const revalidate = 60;
 const displayValue = (value: Parameters<typeof formatExact>[0]): ExactValue | null => value ? { kind: "text", value: formatExact(value) } : null;
@@ -27,6 +28,7 @@ export default async function Home() {
   }) : publishedLimits;
   return <>
     <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdScript(buildSiteJsonLd()) }} />
-    <BrowseClient initialLimits={limits} stats={stats} recentBreakthroughs={recentBreakthroughs} featuredBounties={featuredBounties} featuredArticles={featuredArticles} />
+    <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdScript(buildFaqJsonLd(HOMEPAGE_FAQ)) }} />
+    <BrowseClient initialLimits={limits} stats={stats} recentBreakthroughs={recentBreakthroughs} featuredBounties={featuredBounties} featuredArticles={featuredArticles} faq={HOMEPAGE_FAQ} />
   </>;
 }

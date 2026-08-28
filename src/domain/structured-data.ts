@@ -67,6 +67,19 @@ export function buildSiteJsonLd() {
   };
 }
 
+/** FAQPage markup for the homepage FAQ section — eligible for a rich FAQ result in Google Search. */
+export function buildFaqJsonLd(items: { question: string; answer: string }[]) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: items.map((item) => ({
+      "@type": "Question",
+      name: item.question,
+      acceptedAnswer: { "@type": "Answer", text: item.answer },
+    })),
+  };
+}
+
 /** JSON.stringify doesn't escape "</script>" — a value containing that literal substring could
  * otherwise close the script tag early and inject markup. < keeps it inert. Use for every
  * JSON-LD script tag, not just record pages. */
