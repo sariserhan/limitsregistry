@@ -16,6 +16,7 @@
     "db:seed:research": "tsx scripts/seed-research-drafts.ts",
     "db:seed:codata": "tsx scripts/seed-codata-2022.ts",
     "db:seed:miplib": "tsx scripts/seed-miplib-2017.ts",
+    "db:seed:ramsey": "tsx scripts/seed-ramsey-numbers.ts",
     "db:publish:founding-queue": "tsx scripts/publish-founding-queue.ts"
   },
   "dependencies": {

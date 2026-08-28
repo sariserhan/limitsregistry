@@ -12,7 +12,10 @@ async function categoryData(slug: string) {
   const rows = await listPublishedLimits().catch(() => []);
   const category = categoryForSlug([...new Set(rows.map((row) => row.category))], slug);
   if (!category) return null;
-  return { category, rows: rows.filter((row) => row.category === category).sort((left, right) => (right.publishedAt?.getTime() ?? 0) - (left.publishedAt?.getTime() ?? 0) || left.registryNumber.localeCompare(right.registryNumber)) };
+  // listPublishedLimits() is unstable_cache-wrapped, which JSON-round-trips the result — publishedAt
+  // comes back as a string at runtime despite its Date type, so it needs re-coercing before .getTime().
+  const publishedAtMs = (row: (typeof rows)[number]) => row.publishedAt ? new Date(row.publishedAt).getTime() : 0;
+  return { category, rows: rows.filter((row) => row.category === category).sort((left, right) => publishedAtMs(right) - publishedAtMs(left) || left.registryNumber.localeCompare(right.registryNumber)) };
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
