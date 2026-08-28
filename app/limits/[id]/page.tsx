@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { PublicHeader } from "../../../src/components/public-header";
 import { SiteFooter } from "../../../src/components/site-footer";
@@ -28,6 +29,29 @@ function CanonicalFrontier({ presentation, isMinimization, isAsymptotic, status,
   if (presentation.mode === "SINGLE_VALUE") return <div className="frontier-single"><span>{presentation.label}</span><strong>{exactDisplay(presentation.value)}</strong><p>{presentation.note}</p></div>;
   if (presentation.mode === "ONE_SIDED") return <div className={"frontier " + (isAsymptotic ? "asymptotic" : "integer")}><div className="frontier-labels"><span>KNOWN LOWER BOUND</span><span>KNOWN UPPER BOUND</span></div><div className="frontier-values"><strong>{lower === "?" ? "Unknown" : lower}</strong><div className="frontier-line"><i /><span>OPEN FRONTIER</span><i /></div><strong>{upper === "?" ? "Unknown" : upper}</strong></div><div className="frontier-foot"><span>Lower bound</span><span>Gap: Unknown</span><span>Upper bound</span></div></div>;
   return <div className={"frontier " + (isAsymptotic ? "asymptotic" : "integer")}><div className="frontier-labels"><span>{isMinimization ? "PROVEN LOWER BOUND" : "BEST KNOWN LOWER BOUND"}</span><span>{isMinimization ? "BEST KNOWN UPPER BOUND" : "PROVEN UPPER BOUND"}</span></div><div className="frontier-values"><strong>{lower}</strong><div className="frontier-line"><i /><span>{status === "PROVEN" ? "CLOSED FRONTIER" : "UNKNOWN GAP"}</span><i /></div><strong>{upper}</strong></div><div className="frontier-foot"><span>{isMinimization ? "Proven lower bound" : "Best known lower bound"}</span><span>Gap: {gap}</span><span>{isMinimization ? "Best known upper bound" : "Proven upper bound"}</span></div></div>;
+}
+
+// Runs separately from the page component (Next.js convention — see opengraph-image.tsx too),
+// so this re-fetches rather than sharing state with LimitPage below; both calls are cheap reads
+// through the same 60s data cache.
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { id } = await params;
+  const launch = getPublishedLimit(id);
+  const database = await getPublishedLimitWithFrontier(id).catch(() => null);
+  const fallback = launch ?? getCanonicalRecord(id);
+  if (!database && !fallback) return { title: "Record not found — Limits Registry" };
+  const record = database
+    ? { id: database.limit.registryNumber, title: database.limit.title, summary: database.limit.summary }
+    : { id: fallback!.id, title: fallback!.title, summary: fallback!.summary };
+  const title = `${record.title} (${record.id}) — Limits Registry`;
+  const path = `/limits/${record.id}`;
+  return {
+    title,
+    description: record.summary,
+    alternates: { canonical: path },
+    openGraph: { title, description: record.summary, url: path, type: "article" },
+    twitter: { card: "summary_large_image", title, description: record.summary },
+  };
 }
 
 export default async function LimitPage({ params }: PageProps) {

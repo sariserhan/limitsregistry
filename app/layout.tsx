@@ -11,9 +11,19 @@ import { AdminModeBanner } from "../src/components/admin-mode-banner";
 import { getSession } from "../src/auth/session";
 import { hasRole, type Role } from "../src/auth/permissions";
 
+const SITE_URL = "https://www.limitsregistry.com";
+const SITE_TITLE = "Limits Registry — The verified boundaries of what is possible";
+const SITE_DESCRIPTION = "A curated public record of the verified boundaries of what is possible.";
+
 export const metadata: Metadata = {
-  title: "Limits Registry — The verified boundaries of what is possible",
-  description: "A curated public record of the verified boundaries of what is possible.",
+  // Lets per-page metadata use relative URLs (alternates.canonical, openGraph.url, image src) and
+  // have them resolve to absolute www.limitsregistry.com URLs — required for OG/Twitter tags,
+  // which only accept absolute URLs.
+  metadataBase: new URL(SITE_URL),
+  title: SITE_TITLE,
+  description: SITE_DESCRIPTION,
+  openGraph: { type: "website", siteName: "Limits Registry", title: SITE_TITLE, description: SITE_DESCRIPTION, url: SITE_URL },
+  twitter: { card: "summary_large_image", title: SITE_TITLE, description: SITE_DESCRIPTION },
 };
 
 // Always allowed through, even during maintenance — otherwise an admin could lock themselves
