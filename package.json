@@ -24,6 +24,7 @@
     "db:seed:astrophysics": "tsx scripts/seed-astrophysics.ts",
     "db:seed:chemistry": "tsx scripts/seed-chemistry.ts",
     "db:seed:science-frontiers": "tsx scripts/seed-science-frontiers.ts",
+    "db:seed:periodic-elements": "tsx scripts/seed-periodic-elements.ts",
     "db:seed:ai-limits": "tsx scripts/seed-ai-limits.ts",
     "db:seed:data-storage": "tsx scripts/seed-data-storage.ts",
     "db:seed:ramsey": "tsx scripts/seed-ramsey-numbers.ts",
