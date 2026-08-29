@@ -46,8 +46,14 @@ export async function POST(request: Request) {
     const existing = await db.select({ id: limits.id }).from(limits).where(eq(limits.registryNumber, registryNumber)).limit(1);
     if (existing.length) { skipped++; continue; }
 
+    // Every CODATA row is a single published reference value, not two opposing bounds — OPEN on
+    // this Registry means a real, unclosed achievable-vs-impossibility gap, which doesn't apply
+    // here regardless of whether the value is SI-exact or has a stated experimental uncertainty.
+    // Both publish as PROVEN; the exact/measured distinction is carried by epistemicStatus and
+    // valueStatus, which deriveFrontierPresentation already reads to label an exact one "Exact
+    // defined value" vs "Recommended reference value".
     const exact = item.uncertainty === "(exact)";
-    const publicStatus = exact ? "PROVEN" : "OPEN";
+    const publicStatus = "PROVEN";
     const valueStatus = exact ? "EXACT_BY_SI_DEFINITION" : "EXPERIMENTALLY_DETERMINED";
 
     await db.transaction(async (tx) => {

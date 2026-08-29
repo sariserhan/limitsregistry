@@ -14,7 +14,14 @@ try {
   if(!paper){[paper]=await sql`insert into papers (title,abstract,publication_date,venue,publisher_url) values (${paperTitle},${"The 2022 self-consistent recommended values and conversion factors of physics and chemistry from the CODATA least-squares adjustment."},${new Date("2025-04-30T00:00:00Z")},${"Reviews of Modern Physics / NIST"},${CODATA_CITATION_URL}) returning id`;}
   for(let index=0;index<rows.length;index++){
     const item=rows[index],registryNumber=codataRegistryNumber(index),slug=codataSlug(item.quantity,index);
-    const exact=item.uncertainty==="(exact)",publicStatus=exact?"PROVEN":"OPEN",valueStatus=exact?"EXACT_BY_SI_DEFINITION":"EXPERIMENTALLY_DETERMINED";
+    // Every CODATA row is a single published reference value, not two opposing bounds — OPEN on
+    // this Registry specifically means a real, unclosed gap between an achievable and an
+    // impossibility frontier, which doesn't apply here regardless of whether the value itself is
+    // SI-exact or an experimentally-determined figure with a stated uncertainty. Both cases
+    // publish as PROVEN; the exact/measured distinction is carried by epistemic_status and
+    // valueStatus instead, which the presentation layer (deriveFrontierPresentation) already
+    // reads to correctly label an exact one "Exact defined value" vs "Recommended reference value".
+    const exact=item.uncertainty==="(exact)",publicStatus="PROVEN",valueStatus=exact?"EXACT_BY_SI_DEFINITION":"EXPERIMENTALLY_DETERMINED";
     const exists=await sql`select id from limits where registry_number=${registryNumber} limit 1`;if(exists.length){await sql`update limits set subcategory=${"Reference values / CODATA 2022"},status=${publicStatus},published_at=${new Date("2025-04-30T00:00:00Z")},updated_at=now() where id=${exists[0].id}`;await sql`update claims set epistemic_status=${exact?"PROVEN":"SOURCE_CONFIRMED"},status=${"ACCEPTED"},updated_at=now() where specification_version_id in (select id from limit_spec_versions where limit_id=${exists[0].id})`;updated++;continue;}
     await sql.begin(async tx=>{
       const [limit]=await tx`insert into limits (registry_number,slug,title,summary,category,subcategory,direction,metric_name,unit,status) values (${registryNumber},${slug},${item.quantity},${`The 2022 CODATA recommended value of ${item.quantity}, retained with its published standard uncertainty.`},${"Physics"},${"Reference values / CODATA 2022"},${"MAXIMIZE"},${item.quantity},${item.unit||null},${publicStatus}) returning id`;
