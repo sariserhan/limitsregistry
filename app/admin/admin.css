@@ -8,6 +8,7 @@
 .admin-table td { padding:14px 10px; border-bottom:1px solid var(--line); font-size:13px; vertical-align:middle; white-space:nowrap; }
 .admin-table select { font-size:12px; padding:6px 8px; border:1px solid var(--line); background:var(--paper); }
 .admin-table button { border:0; background:var(--blue); color:#fff; padding:7px 12px; font-size:12px; margin-left:8px; }
+.admin-delete-button { background:var(--red); }
 
 .admin-tabs { display:flex; flex-wrap:wrap; gap:2px; border-bottom:1px solid var(--line); margin-bottom:36px; }
 .admin-tabs a { padding:10px 14px; font:11px 'DM Mono',monospace; text-transform:uppercase; letter-spacing:.06em; color:var(--muted); text-decoration:none; border-bottom:2px solid transparent; margin-bottom:-1px; }

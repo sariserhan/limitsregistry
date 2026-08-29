@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { requireRole } from "../../src/auth/session";
 import { ROLES, hasRole, type Role } from "../../src/auth/permissions";
-import { listUsers, setUserRole } from "../../src/db/repository.users";
+import { listUsers, setUserRole, deleteUser } from "../../src/db/repository.users";
 
 export async function updateUserRole(formData: FormData) {
   const session = await requireRole("ADMIN");
@@ -17,5 +17,17 @@ export async function updateUserRole(formData: FormData) {
   const touchesAdminTier = hasRole(role as Role, "ADMIN") || hasRole(target.role as Role, "ADMIN");
   if (touchesAdminTier && session.user.role !== "SUPERADMIN") throw new Error("Only a superadmin can modify admin-level accounts.");
   await setUserRole(userId, role as Role, session.user.id, target.role as Role);
+  revalidatePath("/admin");
+}
+
+// SUPERADMIN-only — same bar as touching another admin-tier account (updateUserRole above), since
+// deleting an account is at least as consequential as changing its role. deleteUser() itself
+// anonymizes rather than hard-deletes, so this never destroys a user's real Registry contributions.
+export async function deleteUserAccount(formData: FormData) {
+  const session = await requireRole("SUPERADMIN");
+  const userId = String(formData.get("userId"));
+  if (!userId) throw new Error("Missing user id.");
+  if (userId === session.user.id) throw new Error("You cannot delete your own account.");
+  await deleteUser(userId, session.user.id);
   revalidatePath("/admin");
 }
