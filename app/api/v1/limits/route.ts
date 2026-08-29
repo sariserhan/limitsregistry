@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { listPublishedLimits } from "../../../../src/db/repository";
+import { listPublicLimitPage } from "../../../../src/db/repository.public-limits";
 import { API_V1_PAUSED, pausedApiResponse } from "../../../../src/api/v1-paused";
 
 export const runtime = "nodejs";
@@ -13,10 +13,8 @@ export async function GET(request: Request) {
   const pageSize = Math.min(Math.max(parseInt(params.get("pageSize") ?? "50", 10) || 50, 1), 100);
   const page = Math.max(parseInt(params.get("page") ?? "1", 10) || 1, 1);
 
-  const all = await listPublishedLimits();
-  const filtered = category ? all.filter((limit) => limit.category.toLowerCase() === category.toLowerCase()) : all;
-  const start = (page - 1) * pageSize;
-  const data = filtered.slice(start, start + pageSize).map((limit) => ({
+  const pageData = await listPublicLimitPage({ page, pageSize, category: category ?? undefined });
+  const data = pageData.rows.map((limit) => ({
     registryNumber: limit.registryNumber,
     title: limit.title,
     summary: limit.summary,
@@ -30,5 +28,5 @@ export async function GET(request: Request) {
     url: `https://www.limitsregistry.com/limits/${limit.registryNumber}`,
   }));
 
-  return NextResponse.json({ data, page, pageSize, total: filtered.length }, { headers: { "cache-control": "public, s-maxage=60, stale-while-revalidate=300" } });
+  return NextResponse.json({ data, page: pageData.page, pageSize, total: pageData.total }, { headers: { "cache-control": "public, s-maxage=60, stale-while-revalidate=300" } });
 }

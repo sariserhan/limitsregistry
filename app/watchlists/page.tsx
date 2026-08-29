@@ -2,32 +2,28 @@ import Link from "next/link";
 import { PublicHeader } from "../../src/components/public-header";
 import { SiteFooter } from "../../src/components/site-footer";
 import { requireRole } from "../../src/auth/session";
-import { listPublishedLimits } from "../../src/db/repository";
+import { listPublicCategories } from "../../src/db/repository";
+import { listPublicLimitPage } from "../../src/db/repository.public-limits";
 import { listUserFollows } from "../../src/db/repository.watchlists";
 import { subscribeAction, unsubscribeAction, updatePreferenceAction } from "./actions";
 import "../submit/submit.css";
 import "./watchlists.css";
 
-const PAGE_SIZE = 50;
 type Props = { searchParams: Promise<{ success?: string; error?: string; q?: string; category?: string; page?: string }> };
 
 export default async function WatchlistsPage({ searchParams }: Props) {
   const session = await requireRole("USER");
-  const [limits, followed, params] = await Promise.all([listPublishedLimits(), listUserFollows(session.user.id), searchParams]);
-  const followedIds = new Set(followed.filter(({ follow }) => follow.enabled).map(({ follow }) => follow.limitId));
-
-  const categories = [...new Set(limits.map((limit) => limit.category))].sort((a, b) => a.localeCompare(b));
+  const params = await searchParams;
   const q = (params.q ?? "").trim();
-  const category = params.category ?? "";
-  const filteredLimits = limits.filter((limit) => {
-    const matchesQuery = !q || `${limit.title} ${limit.registryNumber} ${limit.category}`.toLowerCase().includes(q.toLowerCase());
-    const matchesCategory = !category || limit.category === category;
-    return matchesQuery && matchesCategory;
-  });
+  const category = params.category?.trim() ?? "";
   const requestedPage = Number.parseInt(params.page ?? "1", 10);
-  const pageCount = Math.max(1, Math.ceil(filteredLimits.length / PAGE_SIZE));
-  const page = Number.isFinite(requestedPage) ? Math.min(Math.max(requestedPage, 1), pageCount) : 1;
-  const visibleLimits = filteredLimits.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+  const [pageData, followed, categories] = await Promise.all([
+    listPublicLimitPage({ page: Number.isFinite(requestedPage) ? Math.max(requestedPage, 1) : 1, pageSize: 50, query: q, category }),
+    listUserFollows(session.user.id),
+    listPublicCategories(),
+  ]);
+  const followedIds = new Set(followed.filter(({ follow }) => follow.enabled).map(({ follow }) => follow.limitId));
+  const { rows: visibleLimits, total, page, pageCount } = pageData;
   const pageHref = (targetPage: number) => {
     const qs = new URLSearchParams();
     if (q) qs.set("q", q);
@@ -58,7 +54,7 @@ export default async function WatchlistsPage({ searchParams }: Props) {
         </article>) : <p className="watchlist-empty">You are not following any Limits yet.</p>}
       </div>
       <div>
-        <h2>Published Limits ({filteredLimits.length})</h2>
+        <h2>Published Limits ({total})</h2>
         <form className="watchlist-filter-form" method="get">
           <input type="search" name="q" defaultValue={q} placeholder="Search title, registry number…" aria-label="Search published Limits" />
           <select name="category" defaultValue={category} aria-label="Filter by category">

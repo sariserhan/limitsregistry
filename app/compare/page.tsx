@@ -2,14 +2,16 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { PublicHeader } from "../../src/components/public-header";
 import { SiteFooter } from "../../src/components/site-footer";
-import { listPublishedLimits } from "../../src/db/repository";
+import { getPublicLimitOptionByRegistryNumber, listPublicLimitOptions } from "../../src/db/repository.public-limits";
 import "./compare.css";
 export const metadata: Metadata = { title: "Compare Limits — Limits Registry", description: "Compare two Limits Registry records side by side — question, direction, publication state, and source trail.", alternates: { canonical: "/compare" } };
 type Props = { searchParams: Promise<{ a?: string; b?: string }> };
 export default async function ComparePage({ searchParams }: Props) {
-  const [limits, params] = await Promise.all([listPublishedLimits(), searchParams]);
-  const a = limits.find((limit) => limit.registryNumber === params.a) ?? limits[0];
-  const b = limits.find((limit) => limit.registryNumber === params.b) ?? limits[1] ?? limits[0];
+  const params = await searchParams;
+  const [options, aMatch, bMatch] = await Promise.all([listPublicLimitOptions("", 100), params.a ? getPublicLimitOptionByRegistryNumber(params.a) : Promise.resolve(null), params.b ? getPublicLimitOptionByRegistryNumber(params.b) : Promise.resolve(null)]);
+  const limits = [...new Map([...options, ...aMatch ? [aMatch] : [], ...bMatch ? [bMatch] : []].map((limit) => [limit.id, limit])).values()];
+  const a = aMatch ?? limits[0];
+  const b = bMatch ?? limits[1] ?? limits[0];
   const comparisons: Array<[string, string, string]> = [
     ["Category", a?.category ?? "—", b?.category ?? "—"],
     ["Direction", a?.direction ?? "—", b?.direction ?? "—"],

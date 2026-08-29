@@ -2,7 +2,7 @@ import Link from "next/link";
 import { PublicHeader } from "../../src/components/public-header";
 import { SiteFooter } from "../../src/components/site-footer";
 import { requireRole } from "../../src/auth/session";
-import { listPublishedLimits } from "../../src/db/repository";
+import { getPublicLimitOptionById, listPublicLimitOptions } from "../../src/db/repository.public-limits";
 import { listSubmissionsByUser } from "../../src/db/repository.submissions";
 import { createSubmission } from "./actions";
 import { SubmissionPreviewButton } from "./submission-preview-button";
@@ -22,9 +22,11 @@ type Props = { searchParams: Promise<{ limitId?: string }> };
 
 export default async function SubmitPage({ searchParams }: Props) {
   const session = await requireRole("USER");
-  const [publishedLimits, own, params] = await Promise.all([listPublishedLimits(), listSubmissionsByUser(session.user.id), searchParams]);
-  const selectedLimitId = params.limitId && publishedLimits.some((limit) => limit.id === params.limitId) ? params.limitId : "";
-  const selectedLimit = publishedLimits.find((limit) => limit.id === selectedLimitId);
+  const params = await searchParams;
+  const [publishedOptions, own, linkedLimit] = await Promise.all([listPublicLimitOptions("", 100), listSubmissionsByUser(session.user.id), params.limitId ? getPublicLimitOptionById(params.limitId) : Promise.resolve(null)]);
+  const publishedLimits = linkedLimit && !publishedOptions.some((limit) => limit.id === linkedLimit.id) ? [linkedLimit, ...publishedOptions] : publishedOptions;
+  const selectedLimitId = linkedLimit?.id ?? "";
+  const selectedLimit = linkedLimit ?? publishedOptions.find((limit) => limit.id === selectedLimitId);
 
   return <main className="submit-page">
     <PublicHeader />
