@@ -11,7 +11,7 @@ export default async function AdminAcquisitionPage() {
       {!result.available ? (
         <div className="admin-panel">
           <strong>Analytics storage is not available yet.</strong>
-          <p>Apply migration <code>0023_acquisition_events.sql</code> to the database used by this deployment, then refresh this page.</p>
+          <p>Apply migration <code>0023_acquisition_events.sql</code> to the database used by this deployment, then refresh this page.</p>{result.error ? <p><code>{result.error}</code></p> : null}
         </div>
       ) : null}
       <div className="admin-stat-grid">

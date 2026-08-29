@@ -22,7 +22,12 @@ export async function getAcquisitionReport(days = 30) {
 export async function getAcquisitionReportSafe(days = 30) {
   try {
     return { available: true, report: await getAcquisitionReport(days) };
-  } catch {
-    return { available: false, report: { days, totals: [], paths: [], referrers: [] } };
+  } catch (error) {
+    console.error("Acquisition analytics query failed", error);
+    return {
+      available: false,
+      error: error instanceof Error ? error.message : "Unknown database error",
+      report: { days, totals: [], paths: [], referrers: [] },
+    };
   }
 }
