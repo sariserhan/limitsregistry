@@ -32,3 +32,5 @@
 .breadcrumbs li { display: flex; gap: .6rem; }
 
 .frontier-history-data{margin-top:16px;font-size:11px}.frontier-history-data summary{color:var(--blue);cursor:pointer;font:10px "DM Mono",monospace;text-transform:uppercase}.frontier-history-data table{width:100%;margin-top:12px;border-collapse:collapse;text-align:left}.frontier-history-data caption{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)}.frontier-history-data th,.frontier-history-data td{padding:7px 10px 7px 0;border-bottom:1px solid var(--line)}.frontier-history-data th{color:var(--faint);font:9px "DM Mono",monospace;text-transform:uppercase}.frontier-history-data td{color:var(--muted)}
+
+.canonical-share-actions{margin-top:20px}.canonical-share-actions a{display:inline-flex;align-items:center;border:1px solid var(--blue);padding:10px 13px;color:var(--blue);font:10px "DM Mono",monospace;text-transform:uppercase;letter-spacing:.05em;text-decoration:none}.canonical-share-actions a:hover{background:var(--blue);color:var(--paper)}
