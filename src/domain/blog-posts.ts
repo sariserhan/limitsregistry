@@ -87,6 +87,20 @@ export const blogPosts: BlogPost[] = [
     publishedAt: "2026-08-28",
     tags: ["Information theory", "Computing"],
   },
+  {
+    slug: "what-is-miplib",
+    title: "What Is MIPLIB, and Why Do Solvers Compete on It?",
+    dek: "The standard benchmark library for mixed-integer programming — and the 382 provably optimal objective values it puts in the Registry.",
+    publishedAt: "2026-08-29",
+    tags: ["Computing", "Optimization"],
+  },
+  {
+    slug: "real-world-records-in-the-registry",
+    title: "The Fastest, Highest, Deepest: Real-World Records in the Registry",
+    dek: "From a 9.58-second 100 meters to a 10,934-meter dive — verified real-world records, sourced and dated like everything else here.",
+    publishedAt: "2026-08-29",
+    tags: ["Records", "Methodology"],
+  },
 ];
 
 export function getBlogPost(slug: string) {
