@@ -24,9 +24,11 @@ export async function getAcquisitionReportSafe(days = 30) {
     return { available: true, report: await getAcquisitionReport(days) };
   } catch (error) {
     console.error("Acquisition analytics query failed", error);
+    const message = error instanceof Error ? error.message : "Unknown database error";
+    const cause = error instanceof Error && error.cause instanceof Error ? error.cause.message : null;
     return {
       available: false,
-      error: error instanceof Error ? error.message : "Unknown database error",
+      error: cause ? `${message}: ${cause}` : message,
       report: { days, totals: [], paths: [], referrers: [] },
     };
   }
