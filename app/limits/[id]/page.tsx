@@ -58,7 +58,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     description: record.summary,
     alternates: { canonical: path },
     openGraph: { title, description: record.summary, url: path, type: "article" },
-    twitter: { card: "summary_large_image", title, description: record.summary },
+    twitter: { card: "summary_large_image", title, description: record.summary, images: [`${path}/opengraph-image`] },
   };
 }
 
