@@ -26,6 +26,14 @@ export async function GET(request: Request) {
     const rows = await db.execute(sql`select id, name, email, role from "user" where email = ${email} limit 1`);
     return NextResponse.json({ user: rows[0] ?? null });
   }
+  const registryNumber = searchParams.get("registryNumber");
+  if (registryNumber) {
+    const [limitRow] = await db.execute(sql`select id, registry_number as "registryNumber", title, category, subcategory, status, direction, metric_name as "metricName", unit, summary from limits where registry_number = ${registryNumber} limit 1`);
+    if (!limitRow) return NextResponse.json({ limit: null });
+    const specs = await db.execute(sql`select id, version_number as "versionNumber", formal_statement as "formalStatement" from limit_spec_versions where limit_id = ${limitRow.id} order by version_number desc`);
+    const claimRows = await db.execute(sql`select c.id, c.claim_number as "claimNumber", c.claim_type as "claimType", c.relation, c.value_exact as "valueExact", c.unit, c.status, c.epistemic_status as "epistemicStatus" from claims c join limit_spec_versions sv on sv.id = c.specification_version_id where sv.limit_id = ${limitRow.id}`);
+    return NextResponse.json({ limit: limitRow, specs, claims: claimRows });
+  }
   const timelineFor = searchParams.get("timelineFor");
   if (timelineFor) {
     const registryNumbers = timelineFor.split(",");
