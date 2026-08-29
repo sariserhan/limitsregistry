@@ -7,6 +7,8 @@ export function SiteFooter() {
     <span className="footer-links">
       <Link href="/about">About</Link>
       <Link href="/articles">Articles</Link>
+      <Link href="/collections">Collections</Link>
+      <Link href="/graph">Knowledge graph</Link>
       <Link href="/methodology">Methodology</Link>
       <Link href="/compare">Compare</Link>
       <Link href="/certificates/preview">Certificate preview</Link>
