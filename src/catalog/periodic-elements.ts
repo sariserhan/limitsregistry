@@ -1,0 +1,11 @@
+export type PeriodicElementRecord = { registryNumber: string; slug: string; title: string; summary: string; abstract: string; symbol: string; atomicNumber: number; sourceUrl: string };
+const sourceUrl = "https://www.nist.gov/pml/periodic-table-elements";
+const elements = [["Hydrogen","H"],["Helium","He"],["Lithium","Li"],["Beryllium","Be"],["Boron","B"],["Carbon","C"],["Nitrogen","N"],["Oxygen","O"],["Fluorine","F"],["Neon","Ne"],["Sodium","Na"],["Magnesium","Mg"],["Aluminum","Al"],["Silicon","Si"],["Phosphorus","P"],["Sulfur","S"],["Chlorine","Cl"],["Argon","Ar"],["Potassium","K"],["Calcium","Ca"],["Scandium","Sc"],["Titanium","Ti"],["Vanadium","V"],["Chromium","Cr"],["Manganese","Mn"],["Iron","Fe"],["Cobalt","Co"],["Nickel","Ni"],["Copper","Cu"],["Zinc","Zn"],["Gallium","Ga"],["Germanium","Ge"],["Arsenic","As"],["Selenium","Se"],["Bromine","Br"],["Krypton","Kr"],["Rubidium","Rb"],["Strontium","Sr"],["Yttrium","Y"],["Zirconium","Zr"],["Niobium","Nb"],["Molybdenum","Mo"],["Technetium","Tc"],["Ruthenium","Ru"],["Rhodium","Rh"],["Palladium","Pd"],["Silver","Ag"],["Cadmium","Cd"],["Indium","In"],["Tin","Sn"],["Antimony","Sb"],["Tellurium","Te"],["Iodine","I"],["Xenon","Xe"],["Cesium","Cs"],["Barium","Ba"],["Lanthanum","La"],["Cerium","Ce"],["Praseodymium","Pr"],["Neodymium","Nd"],["Promethium","Pm"],["Samarium","Sm"],["Europium","Eu"],["Gadolinium","Gd"],["Terbium","Tb"],["Dysprosium","Dy"],["Holmium","Ho"],["Erbium","Er"],["Thulium","Tm"],["Ytterbium","Yb"],["Lutetium","Lu"],["Hafnium","Hf"],["Tantalum","Ta"],["Tungsten","W"],["Rhenium","Re"]] as const;
+export const periodicElementRecords: PeriodicElementRecord[] = elements.map(([name, symbol], index) => ({
+  registryNumber: `LR-${String(5000 + index).padStart(6, "0")}`,
+  slug: `element-${name.toLowerCase()}`,
+  title: `${name} atomic number`,
+  summary: `${name} (${symbol}) has atomic number ${index + 1}, the number of protons in its nucleus.`,
+  abstract: `This record identifies ${name} by its atomic number, an exact integer that defines the element. The value is independent of sample mass, isotope abundance, and chemical compound, while the cited periodic-table source provides the authoritative element identity.`,
+  symbol, atomicNumber: index + 1, sourceUrl,
+}));
