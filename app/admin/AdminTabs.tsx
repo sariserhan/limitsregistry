@@ -9,6 +9,8 @@ const TABS = [
   { href: "/admin/prize-pools", label: "Prize pools" },
   { href: "/admin/settings", label: "Site controls" },
   { href: "/admin/send-email", label: "Send email" },
+  { href: "/admin/quality", label: "Data quality" },
+  { href: "/admin/duplicates", label: "Duplicates" },
   { href: "/admin/health", label: "Health" },
   { href: "/admin/usage", label: "Usage" },
   { href: "/admin/emails", label: "Emails" },
