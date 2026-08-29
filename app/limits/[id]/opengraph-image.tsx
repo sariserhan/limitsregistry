@@ -1,4 +1,5 @@
 import { ImageResponse } from "next/og";
+import { readFile } from "node:fs/promises";
 import { getCanonicalRecord } from "../../../src/domain/canonical";
 import { getPublishedLimit } from "../../../src/domain/published";
 import { getPublishedLimitWithFrontier } from "../../../src/db/repository";
@@ -6,13 +7,14 @@ import { getPublishedLimitWithFrontier } from "../../../src/db/repository";
 export const alt = "Limits Registry record";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
+export const runtime = "nodejs";
 
 const INK = "#121820";
 const MUTED = "#687585";
 const PAPER = "#f7f5f0";
 const BLUE = "#2457ff";
 const LINE = "#ddd6c7";
-const LOGO = "https://www.limitsregistry.com/brand-seal.png";
+const LOGO_FILE = new URL("../../../public/brand-seal.png", import.meta.url);
 
 function formatValue(value: { kind: "integer"; value: bigint } | { kind: "rational"; numerator: bigint; denominator: bigint } | { kind: "text"; value: string } | null | undefined) {
   if (!value) return "Unknown";
@@ -23,6 +25,8 @@ function formatValue(value: { kind: "integer"; value: bigint } | { kind: "ration
 
 export default async function Image({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
+  const logoBytes = await readFile(LOGO_FILE);
+  const logo = `data:image/png;base64,${logoBytes.toString("base64")}`;
   const launch = getPublishedLimit(id);
   const database = await getPublishedLimitWithFrontier(id).catch(() => null);
   const fallback = launch ?? getCanonicalRecord(id);
@@ -37,7 +41,7 @@ export default async function Image({ params }: { params: Promise<{ id: string }
     (
       <div style={{ width: "100%", height: "100%", display: "flex", flexDirection: "column", justifyContent: "space-between", background: PAPER, padding: "64px 72px", fontFamily: "sans-serif" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 12, fontSize: 22, fontWeight: 600, color: INK, letterSpacing: -1 }}><img src={LOGO} width="34" height="34" alt="" style={{ objectFit: "contain" }} />Limits Registry</div>
+          <div style={{ display: "flex", alignItems: "center", gap: 12, fontSize: 22, fontWeight: 600, color: INK, letterSpacing: -1 }}><img src={logo} width="34" height="34" alt="" style={{ objectFit: "contain" }} />Limits Registry</div>
           <div style={{ display: "flex", fontSize: 18, color: BLUE, fontFamily: "monospace" }}>{record.id}</div>
         </div>
         <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
