@@ -23,6 +23,7 @@ export function FrontierHistoryChart({ history }: { history: FrontierHistory }) 
   const { lower, upper } = history;
   const { x, y, minYear, maxYear } = buildScale(lower, upper);
   const sameYear = minYear === maxYear;
+  const dataPoints = [...lower.map((point) => ({ ...point, bound: "Lower bound" })), ...upper.map((point) => ({ ...point, bound: "Upper bound" }))].sort((a, b) => a.year - b.year || a.bound.localeCompare(b.bound));
   return <div className="frontier-history">
     <svg viewBox={`0 0 ${WIDTH} ${HEIGHT}`} role="img" aria-label="How this record's accepted bounds moved over time">
       <line x1={PAD_X} y1={HEIGHT - PAD_Y} x2={WIDTH - PAD_X} y2={HEIGHT - PAD_Y} className="fh-axis" />
@@ -37,5 +38,13 @@ export function FrontierHistoryChart({ history }: { history: FrontierHistory }) 
       {lower.length ? <span className="fh-legend-lower">Achievable / lower bound</span> : null}
       {upper.length ? <span className="fh-legend-upper">Impossibility / upper bound</span> : null}
     </div>
+    <details className="frontier-history-data">
+      <summary>View frontier data</summary>
+      <table>
+        <caption>Accepted frontier changes over time</caption>
+        <thead><tr><th scope="col">Year</th><th scope="col">Bound</th><th scope="col">Value</th></tr></thead>
+        <tbody>{dataPoints.map((point, index) => <tr key={`${point.year}-${point.bound}-${index}`}><td>{point.year}</td><td>{point.bound}</td><td>{point.value}</td></tr>)}</tbody>
+      </table>
+    </details>
   </div>;
 }
