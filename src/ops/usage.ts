@@ -63,21 +63,49 @@ export async function getVercelUsage(): Promise<UsageStat> {
   }
 }
 
+const NEON_NOT_CONFIGURED = "Not configured — add a Neon management API token to enable";
+
+function neonAuthReady() {
+  const token = process.env.NEON_API_KEY;
+  const projectId = process.env.NEON_PROJECT_ID;
+  return token && projectId ? { token, projectId } : null;
+}
+
 // Branch count + total logical storage size over the Neon API. Neon's usage-based consumption
 // endpoint (matching invoice line items) requires a paid plan tier; branch logical_size is
 // available on every tier, so this is what actually works regardless of plan.
-export async function getNeonUsage(): Promise<UsageStat> {
-  const token = process.env.NEON_API_KEY;
-  const projectId = process.env.NEON_PROJECT_ID;
-  if (!token || !projectId) return { label: "Neon storage/compute usage", value: "—", detail: "Not configured — add a Neon management API token to enable" };
+export async function getNeonStorageUsage(): Promise<UsageStat> {
+  const auth = neonAuthReady();
+  if (!auth) return { label: "Neon storage", value: "—", detail: NEON_NOT_CONFIGURED };
   try {
-    const response = await fetch(`https://console.neon.tech/api/v2/projects/${projectId}/branches`, { headers: { Authorization: `Bearer ${token}`, Accept: "application/json" } });
+    const response = await fetch(`https://console.neon.tech/api/v2/projects/${auth.projectId}/branches`, { headers: { Authorization: `Bearer ${auth.token}`, Accept: "application/json" } });
     if (!response.ok) throw new Error(`Neon API returned ${response.status}`);
     const data = await response.json();
     const branches: Array<{ logical_size?: number }> = data.branches ?? [];
     const totalMB = branches.reduce((sum, branch) => sum + (branch.logical_size ?? 0), 0) / (1024 * 1024);
-    return { label: "Neon storage/compute usage", value: `${totalMB.toFixed(1)} MB`, detail: `${branches.length} branch${branches.length === 1 ? "" : "es"}` };
+    return { label: "Neon storage", value: `${totalMB.toFixed(1)} MB`, detail: `${branches.length} branch${branches.length === 1 ? "" : "es"}` };
   } catch (error) {
-    return { label: "Neon storage/compute usage", value: "—", detail: error instanceof Error ? error.message : "Could not reach Neon" };
+    return { label: "Neon storage", value: "—", detail: error instanceof Error ? error.message : "Could not reach Neon" };
+  }
+}
+
+// Compute endpoint state + provisioned autoscaling range over the Neon API — genuinely distinct
+// from storage: this reflects whether compute is currently running (billable) or suspended
+// (scale-to-zero), and how large it's allowed to scale, not how much data is stored.
+export async function getNeonComputeUsage(): Promise<UsageStat> {
+  const auth = neonAuthReady();
+  if (!auth) return { label: "Neon compute", value: "—", detail: NEON_NOT_CONFIGURED };
+  try {
+    const response = await fetch(`https://console.neon.tech/api/v2/projects/${auth.projectId}/endpoints`, { headers: { Authorization: `Bearer ${auth.token}`, Accept: "application/json" } });
+    if (!response.ok) throw new Error(`Neon API returned ${response.status}`);
+    const data = await response.json();
+    const endpoints: Array<{ current_state?: string; autoscaling_limit_min_cu?: number; autoscaling_limit_max_cu?: number }> = data.endpoints ?? [];
+    if (!endpoints.length) return { label: "Neon compute", value: "0", detail: "No compute endpoints found" };
+    const activeCount = endpoints.filter((e) => e.current_state === "active").length;
+    const primary = endpoints[0];
+    const range = primary.autoscaling_limit_min_cu !== undefined && primary.autoscaling_limit_max_cu !== undefined ? `${primary.autoscaling_limit_min_cu}–${primary.autoscaling_limit_max_cu} CU` : "range unknown";
+    return { label: "Neon compute", value: `${activeCount}/${endpoints.length} active`, detail: `${range}${endpoints.length > 1 ? ` (${endpoints.length} endpoints)` : ""}` };
+  } catch (error) {
+    return { label: "Neon compute", value: "—", detail: error instanceof Error ? error.message : "Could not reach Neon" };
   }
 }

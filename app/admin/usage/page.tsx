@@ -1,8 +1,8 @@
-import { getDatabaseUsage, getUpstashUsage, getVercelUsage, getNeonUsage, getAiGatewayConfigured, type UsageStat } from "../../../src/ops/usage";
+import { getDatabaseUsage, getUpstashUsage, getVercelUsage, getNeonStorageUsage, getNeonComputeUsage, getAiGatewayConfigured, type UsageStat } from "../../../src/ops/usage";
 
 export default async function AdminUsagePage() {
-  const [dbUsage, upstashUsage, vercelUsage, neonUsage] = await Promise.all([getDatabaseUsage(), getUpstashUsage(), getVercelUsage(), getNeonUsage()]);
-  const remoteStats: UsageStat[] = [upstashUsage, vercelUsage, neonUsage];
+  const [dbUsage, upstashUsage, vercelUsage, neonStorage, neonCompute] = await Promise.all([getDatabaseUsage(), getUpstashUsage(), getVercelUsage(), getNeonStorageUsage(), getNeonComputeUsage()]);
+  const remoteStats: UsageStat[] = [upstashUsage, vercelUsage, neonStorage, neonCompute];
   const configured = remoteStats.filter((stat) => stat.value !== "—");
   const unconfigured = remoteStats.filter((stat) => stat.value === "—");
   if (!getAiGatewayConfigured()) unconfigured.push({ label: "AI Gateway usage", value: "—", detail: "Not configured — add AI_GATEWAY_API_KEY" });
