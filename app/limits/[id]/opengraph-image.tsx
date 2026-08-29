@@ -12,7 +12,7 @@ const MUTED = "#687585";
 const PAPER = "#f7f5f0";
 const BLUE = "#2457ff";
 const LINE = "#ddd6c7";
-const LOGO = "https://www.limitsregistry.com/favicon-64.png";
+const LOGO = "https://www.limitsregistry.com/icon-no-bg.png";
 
 function formatValue(value: { kind: "integer"; value: bigint } | { kind: "rational"; numerator: bigint; denominator: bigint } | { kind: "text"; value: string } | null | undefined) {
   if (!value) return "Unknown";
