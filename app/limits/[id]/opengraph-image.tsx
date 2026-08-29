@@ -14,7 +14,7 @@ const MUTED = "#687585";
 const PAPER = "#f7f5f0";
 const BLUE = "#2457ff";
 const LINE = "#ddd6c7";
-const LOGO_FILE = new URL("../../../public/brand-seal.png", import.meta.url);
+const LOGO_FILE = new URL("../../../public/favicon-64.png", import.meta.url);
 
 function formatValue(value: { kind: "integer"; value: bigint } | { kind: "rational"; numerator: bigint; denominator: bigint } | { kind: "text"; value: string } | null | undefined) {
   if (!value) return "Unknown";
