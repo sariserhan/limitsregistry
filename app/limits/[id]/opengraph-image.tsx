@@ -12,6 +12,7 @@ const MUTED = "#687585";
 const PAPER = "#f7f5f0";
 const BLUE = "#2457ff";
 const LINE = "#ddd6c7";
+const LOGO = "https://www.limitsregistry.com/brand-seal.png";
 
 function formatValue(value: { kind: "integer"; value: bigint } | { kind: "rational"; numerator: bigint; denominator: bigint } | { kind: "text"; value: string } | null | undefined) {
   if (!value) return "Unknown";
@@ -36,7 +37,7 @@ export default async function Image({ params }: { params: Promise<{ id: string }
     (
       <div style={{ width: "100%", height: "100%", display: "flex", flexDirection: "column", justifyContent: "space-between", background: PAPER, padding: "64px 72px", fontFamily: "sans-serif" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <div style={{ display: "flex", fontSize: 22, fontWeight: 600, color: INK, letterSpacing: -1 }}>Limits Registry</div>
+          <div style={{ display: "flex", alignItems: "center", gap: 12, fontSize: 22, fontWeight: 600, color: INK, letterSpacing: -1 }}><img src={LOGO} width="34" height="34" alt="" style={{ objectFit: "contain" }} />Limits Registry</div>
           <div style={{ display: "flex", fontSize: 18, color: BLUE, fontFamily: "monospace" }}>{record.id}</div>
         </div>
         <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
