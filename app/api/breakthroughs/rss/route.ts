@@ -13,7 +13,7 @@ export async function GET() {
   const events = await listRecentBreakthroughEvents(50);
   const items = events.map(({ event, claimNumber, relation, valueExact, limit }) => {
     const detail = claimNumber ? `${claimNumber} ${relation} ${valueExact}` : "Accepted Claim";
-    return `<item><title>${xml(`${limit.registryNumber} — ${event.eventType}`)}</title><description>${xml(`${limit.title}: ${detail}`)}</description><link>https://www.limitsregistry.com/limits/${xml(limit.registryNumber)}</link><pubDate>${event.occurredAt.toUTCString()}</pubDate><guid isPermaLink="false">${event.id}</guid></item>`;
+    return `<item><title>${xml(`${limit.registryNumber} — ${event.eventType}`)}</title><description>${xml(`${limit.title}: ${detail}`)}</description><link>https://www.limitsregistry.com/breakthroughs/${event.id}</link><pubDate>${event.occurredAt.toUTCString()}</pubDate><guid isPermaLink="false">${event.id}</guid></item>`;
   }).join("");
   // guid is a bare UUID, not a URL — isPermaLink defaults to true per the RSS 2.0 spec, so without
   // isPermaLink="false" a validator or reader treats a non-URL guid as an invalid permalink.

@@ -30,3 +30,4 @@ pnpm-debug.log*
 .vercel
 .env*
 .qa-screenshots/
+MONETEZATION_MODEL.md

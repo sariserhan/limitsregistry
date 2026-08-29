@@ -1,0 +1,21 @@
+.collections-page { min-height: 100vh; background: var(--paper, #f5f1e8); color: var(--ink, #171717); }
+.collections-intro, .collection-detail-intro { max-width: 1100px; margin: 0 auto; padding: 7rem 2rem 3rem; }
+.collections-intro h1, .collection-detail-intro h1 { max-width: 800px; margin: .4rem 0 1rem; font-size: clamp(3rem, 8vw, 6.5rem); line-height: .9; letter-spacing: -.07em; }
+.collections-intro p:not(.section-kicker), .collection-detail-intro p:not(.section-kicker) { max-width: 680px; font-size: 1.15rem; line-height: 1.6; }
+.collection-detail-intro > a { display: inline-block; margin-bottom: 4rem; }
+.collection-detail-intro > span { display: block; margin-top: 2rem; color: #716b61; }
+.collections-grid { max-width: 1100px; margin: 0 auto; padding: 0 2rem 7rem; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
+.collection-card { min-height: 260px; padding: 1.5rem; border: 1px solid #d5cdbd; color: inherit; text-decoration: none; display: flex; flex-direction: column; transition: transform .2s, background .2s; }
+.collection-card:hover { transform: translateY(-3px); background: #ebe4d6; }
+.collection-number, .collection-record-id { color: #8a7762; font: .75rem ui-monospace, monospace; letter-spacing: .08em; }
+.collection-card h2 { margin: 2rem 0 .7rem; font-size: 1.7rem; }
+.collection-card p { color: #625d55; line-height: 1.5; }
+.collection-card strong { margin-top: auto; font-size: .9rem; }
+.collection-card strong span { float: right; font-size: 1.4rem; }
+.collection-records { max-width: 1100px; margin: 0 auto; padding: 0 2rem 7rem; }
+.collection-record { display: flex; justify-content: space-between; gap: 2rem; padding: 1.5rem 0; border-top: 1px solid #d5cdbd; }
+.collection-record h2 { margin: .45rem 0; font-size: 1.35rem; }
+.collection-record h2 a { color: inherit; }
+.collection-record p { margin: 0; color: #625d55; line-height: 1.5; }
+.collection-record > .public-status { flex: 0 0 auto; align-self: flex-start; }
+@media (max-width: 700px) { .collections-grid { grid-template-columns: 1fr; } .collection-record { display: block; } .collection-record > .public-status { display: inline-block; margin-top: 1rem; } }

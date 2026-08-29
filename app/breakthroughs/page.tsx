@@ -50,7 +50,7 @@ export default async function BreakthroughsPage() {
           <strong><Link href={`/limits/${limit.registryNumber}`}>{limit.registryNumber} — {limit.title}</Link></strong>
           <small>{claimNumber ? `${claimNumber} · ${relation} ${valueExact}` : "Accepted Claim"} · {event.occurredAt.toISOString().slice(0, 10)}</small>
         </div>
-        <span className={`breakthrough-badge ${event.eventType.toLowerCase()}`}>{LABEL[event.eventType] ?? event.eventType}</span>
+        <span className={"breakthrough-badge " + event.eventType.toLowerCase()}><Link href={"/breakthroughs/" + event.id}>{LABEL[event.eventType] ?? event.eventType}</Link></span>
       </article>) : <div className="breakthroughs-empty" role="status"><strong>No breakthroughs recorded yet.</strong><span>Events appear here the moment an accepted Claim tightens a bound or closes a frontier anywhere in the Registry.</span></div>}
     </section>
     <SiteFooter />

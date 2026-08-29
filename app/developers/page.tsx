@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import InfoPage from "../_components/InfoPage";
 import { API_V1_PAUSED } from "../../src/api/v1-paused";
@@ -48,7 +49,7 @@ export default function Page() {
 <p>Every category with at least one published record.</p>
 
 <h2>Other formats</h2>
-<p>Beyond the JSON API: an embeddable SVG status badge at <code>/api/badge/&#123;registryNumber&#125;</code>, a BibTeX citation per record (see the record page), and RSS feeds for the <a href="/breakthroughs">breakthroughs</a> and <a href="/watchlists">watchlist</a> feeds.</p>
+<p>Beyond the JSON API: an embeddable SVG status badge at <code>/api/badge/&#123;registryNumber&#125;</code>, a BibTeX citation per record (see the record page), and RSS feeds for the <Link href="/breakthroughs">breakthroughs</Link> and <a href="/watchlists">watchlist</a> feeds.</p>
 
 <h2>Rate limits and caching</h2>
 <p>No API key and no hard rate limit today &mdash; please cache client-side (responses carry <code>Cache-Control</code>, refreshed at most once a minute) rather than polling in a tight loop. This is a best-effort read-only mirror of the public site, not a guaranteed-uptime service; nothing here requires authentication, and nothing here lets you write.</p>
