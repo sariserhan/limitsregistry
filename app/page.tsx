@@ -21,7 +21,7 @@ export default async function Home({ searchParams }: HomeProps) {
   const category = params.category?.trim() ?? "";
   const status = (params.status === "OPEN" || params.status === "PROVEN" || params.status === "DISPUTED" || params.status === "RETIRED" ? params.status : "ALL") as BrowseStatus;
   const [browseResult, facets, stats, recentBreakthroughs, bountyRows] = await Promise.all([
-    listPublishedBrowsePage({ page, pageSize: 3, query, category, status }).catch(() => null),
+    listPublishedBrowsePage({ page, pageSize: 4, query, category, status }).catch(() => null),
     listPublishedBrowseFacets().catch(() => ({ categories: [], statuses: [] })),
     getRegistryStats().catch(() => null),
     listRecentBreakthroughEvents(3).catch(() => []),
@@ -35,10 +35,10 @@ export default async function Home({ searchParams }: HomeProps) {
     const fallback = publishedLimits.find((item) => item.id === limit.registryNumber) ?? publishedLimits[0];
     const safeFrontier = { ...frontier, lowerBound: displayValue(frontier.lowerBound), upperBound: displayValue(frontier.upperBound), achievable: displayValue(frontier.achievable) };
     return { ...fallback, publishedAt: limit.publishedAt?.toISOString(), id: limit.registryNumber, title: limit.title, category: limit.category, summary: limit.summary, direction: limit.direction, status: limit.status as PublishedLimit["status"], achievable: formatExact(frontier.lowerBound), bound: formatExact(frontier.upperBound), gap: frontier.gap, claims: claims.length, papers: 0, specification, claimsData: claims, timelineData: timeline.map((event) => ({ ...event, occurredAt: new Date(event.occurredAt).toISOString() })), frontier: safeFrontier, frontierPresentation: deriveFrontierPresentation(specification.recordKind, claims, frontier) };
-  }) : fallbackLimits.slice((page - 1) * 3, page * 3);
+  }) : fallbackLimits.slice((page - 1) * 4, page * 4);
   return <>
     <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdScript(buildSiteJsonLd()) }} />
     <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdScript(buildFaqJsonLd(HOMEPAGE_FAQ)) }} />
-    <BrowseClient key={query + "|" + category + "|" + status + "|" + page} initialLimits={limits} total={browseResult?.total ?? fallbackLimits.length} currentPage={browseResult?.page ?? page} pageCount={browseResult?.pageCount ?? Math.max(1, Math.ceil(fallbackLimits.length / 3))} categoryCounts={browseResult ? facets.categories : Array.from(new Map(fallbackLimits.map((limit) => [limit.category, (fallbackLimits.filter((item) => item.category === limit.category).length)])).entries())} statusCounts={browseResult ? facets.statuses : []} initialQuery={query} initialCategory={category} initialStatus={status} stats={stats} recentBreakthroughs={recent} featuredBounties={featuredBounties} featuredArticles={featuredArticles} faq={HOMEPAGE_FAQ} />
+    <BrowseClient key={query + "|" + category + "|" + status + "|" + page} initialLimits={limits} total={browseResult?.total ?? fallbackLimits.length} currentPage={browseResult?.page ?? page} pageCount={browseResult?.pageCount ?? Math.max(1, Math.ceil(fallbackLimits.length / 4))} categoryCounts={browseResult ? facets.categories : Array.from(new Map(fallbackLimits.map((limit) => [limit.category, (fallbackLimits.filter((item) => item.category === limit.category).length)])).entries())} statusCounts={browseResult ? facets.statuses : []} initialQuery={query} initialCategory={category} initialStatus={status} stats={stats} recentBreakthroughs={recent} featuredBounties={featuredBounties} featuredArticles={featuredArticles} faq={HOMEPAGE_FAQ} />
   </>;
 }

@@ -11,7 +11,7 @@ export type BrowseStatus = "ALL" | (typeof PUBLIC_LIMIT_STATUSES)[number];
 export type BrowsePageOptions = { page?: number; pageSize?: number; query?: string; category?: string; status?: BrowseStatus };
 
 export async function listPublishedBrowsePage(options: BrowsePageOptions = {}) {
-  const pageSize = Math.min(Math.max(options.pageSize ?? 3, 1), 50);
+  const pageSize = Math.min(Math.max(options.pageSize ?? 4, 1), 50);
   const page = Math.max(options.page ?? 1, 1);
   const query = (options.query ?? "").trim();
   const category = (options.category ?? "").trim();
