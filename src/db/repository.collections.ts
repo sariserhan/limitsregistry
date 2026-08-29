@@ -20,6 +20,11 @@ export const LIMIT_COLLECTIONS: LimitCollection[] = [
   { slug: "unsolved-limits-in-biology", title: "Unsolved Limits in Biology", description: "Open biological frontiers spanning genomes, cells, organisms, evolution, and living systems.", categories: ["Biology"], status: "OPEN" },
   { slug: "physical-limits-of-energy", title: "The Physical Limits of Energy", description: "Limits on energy density, conversion, transport, efficiency, and the useful work available in physical systems.", categories: ["Energy", "Physics", "Engineering"] },
   { slug: "recently-proven-scientific-limits", title: "Recently Proven Scientific Limits", description: "The newest published records whose accepted claims establish or sharpen a scientific frontier.", status: "PROVEN", recent: true },
+  { slug: "chemistry-limits", title: "Limits of Chemistry", description: "Measured and theoretical boundaries on atoms, molecules, reactions, and materials.", categories: ["Chemistry"] },
+  { slug: "frontiers-in-materials-science", title: "Frontiers in Materials Science", description: "Strength, conductivity, fracture, phase, and energy-density limits across engineered materials.", categories: ["Materials Science"], },
+  { slug: "earth-and-climate-frontiers", title: "Earth and Climate Frontiers", description: "Extremes and boundaries recorded across Earth’s atmosphere, oceans, climate, and geology.", categories: ["Earth & Climate"] },
+  { slug: "medicine-and-human-physiology", title: "Medicine and Human Physiology", description: "Documented boundaries on human performance, lifespan, dosage, and physiological response.", categories: ["Medicine & Physiology"] },
+  { slug: "mathematical-limits", title: "Mathematical Limits", description: "Open and proven boundaries in combinatorics, number theory, geometry, and algorithms.", categories: ["Mathematics"] },
 ];
 
 export function getLimitCollection(slug: string) {

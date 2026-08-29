@@ -16,3 +16,12 @@
 
 .confidence-meter{display:grid;gap:4px;margin-top:14px;padding-top:12px;border-top:1px solid var(--line)}.confidence-meter strong{font:600 14px Space Grotesk,sans-serif}.confidence-meter small{color:var(--muted);font-size:11px}.version-row{display:grid;grid-template-columns:1fr auto;gap:4px}.version-row small{grid-column:1/-1;color:var(--muted);line-height:1.4}
 .claim-follow-form{grid-column:2;display:inline-flex}.claim-follow-form button{border:0;background:transparent;padding:0;color:var(--blue);font:10px "DM Mono",monospace;text-transform:uppercase;cursor:pointer}.claim-follow-form button:hover{text-decoration:underline}@media(max-width:800px){.claim-follow-form{grid-column:2}}
+
+.related-limits { padding: 4rem 2rem 6rem; max-width: 1180px; margin: 0 auto; }
+.related-limits-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem; }
+.related-limits-grid a { display: flex; flex-direction: column; gap: .55rem; padding: 1.25rem; border: 1px solid var(--line, #d5cdbd); color: inherit; text-decoration: none; }
+.related-limits-grid a:hover { background: rgba(0,0,0,.04); }
+.related-limits-grid span { color: #8a7762; font: .7rem ui-monospace, monospace; }
+.related-limits-grid strong { font-size: 1.1rem; }
+.related-limits-grid small { color: #625d55; line-height: 1.45; }
+@media (max-width: 760px) { .related-limits-grid { grid-template-columns: 1fr; } }

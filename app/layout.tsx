@@ -20,6 +20,7 @@ export const metadata: Metadata = {
   // have them resolve to absolute www.limitsregistry.com URLs — required for OG/Twitter tags,
   // which only accept absolute URLs.
   metadataBase: new URL(SITE_URL),
+  verification: process.env.GOOGLE_SITE_VERIFICATION ? { google: process.env.GOOGLE_SITE_VERIFICATION } : undefined,
   title: SITE_TITLE,
   description: SITE_DESCRIPTION,
   openGraph: { type: "website", siteName: "Limits Registry", title: SITE_TITLE, description: SITE_DESCRIPTION, url: SITE_URL },
