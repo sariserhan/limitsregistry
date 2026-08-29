@@ -18,3 +18,11 @@ export async function getAcquisitionReport(days = 30) {
   ]);
   return { days, totals, paths, referrers };
 }
+
+export async function getAcquisitionReportSafe(days = 30) {
+  try {
+    return { available: true, report: await getAcquisitionReport(days) };
+  } catch {
+    return { available: false, report: { days, totals: [], paths: [], referrers: [] } };
+  }
+}
