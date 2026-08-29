@@ -16,6 +16,8 @@ import { EmbedSnippet } from "./embed-snippet";
 import { followClaimAction } from "./claim-follow-actions";
 import { deriveFrontierPresentation, type FrontierPresentation } from "../../../src/domain/frontier-presentation";
 import { buildRecordJsonLd, jsonLdScript } from "../../../src/domain/structured-data";
+import { buildFrontierHistory } from "../../../src/domain/frontier-history";
+import { FrontierHistoryChart } from "../../../src/components/frontier-history-chart";
 
 type PageProps = { params: Promise<{ id: string }> };
 
@@ -80,6 +82,7 @@ export default async function LimitPage({ params }: PageProps) {
   // by the authenticated research console where drafts are exactly what needs reviewing.
   const acceptedClaims = research?.claims.filter((claim) => claim.status === "ACCEPTED") ?? [];
   const frontierPresentation = database?.frontier ? deriveFrontierPresentation(research?.specification?.recordKind, acceptedClaims, database.frontier) : { mode: "INTERVAL" as const };
+  const frontierHistory = acceptedClaims.length ? buildFrontierHistory(acceptedClaims) : null;
   const displayedClaims = acceptedClaims.length ? acceptedClaims.map((claim) => ({ id: claim.id, relation: `${claim.relation} ${exactDisplay(claim.value)}`, kind: claim.claimType.replaceAll("_", " "), author: claim.methodSummary ?? claim.source, status: claim.epistemicStatus.replaceAll("_", " "), year: claim.year, sources: claim.evidenceIds.flatMap((evidenceId) => { const item = research?.evidence.find((row) => row.id === evidenceId); return item ? [item] : []; }) })) : database ? [] : launchClaims.map(([claimId, relation, kind, author, status], index) => ({ id: claimId, relation, kind, author, status: status.replaceAll("_", " "), year: index === 0 ? 2018 : index === 1 ? 2019 : 1950, sources: [] }));
   const isAsymptotic = database ? (research?.specification?.asymptotic ?? false) : record.gap === "Asymptotic";
   // "Read full specification" used to just jump to #claims on the same page — no actual source to
