@@ -13,7 +13,10 @@ function parseNumericValue(value: Claim["value"]): number | null {
   const cleaned = value.value.replace(/\s+/g, "");
   const direct = Number(cleaned);
   if (Number.isFinite(direct)) return direct;
-  const match = cleaned.match(/^[-+]?\d*\.?\d+(?:e[-+]?\d+)?/i);
+  // Only accept a leading numeric token followed by a unit suffix with no further digits — this
+  // is what rejects prose values like "2 of 3 (Consistency, ...)" (a trailing "3" disqualifies
+  // it) while still accepting "300 km/h" or a stray "9.58 s".
+  const match = cleaned.match(/^[-+]?\d*\.?\d+(?:e[-+]?\d+)?(?=\D*$)/i);
   if (!match) return null;
   const fallback = Number(match[0]);
   return Number.isFinite(fallback) ? fallback : null;
@@ -36,6 +39,9 @@ export function buildFrontierHistory(claims: Claim[]): FrontierHistory | null {
   }
   lower.sort((a, b) => a.year - b.year);
   upper.sort((a, b) => a.year - b.year);
-  if (lower.length + upper.length < 2) return null;
+  // A lone "=" claim contributes the same {year, value} to both series — that's one fact, not a
+  // history. Require at least 2 genuinely distinct (year, value) points before charting anything.
+  const distinct = new Set([...lower, ...upper].map((p) => `${p.year}:${p.value}`));
+  if (distinct.size < 2) return null;
   return { lower, upper };
 }
