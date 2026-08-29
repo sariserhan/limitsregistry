@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { PublicHeader } from "../../../src/components/public-header";
 import { SiteFooter } from "../../../src/components/site-footer";
 import { getClaimsForPerson, getInstitutionsForPerson, getPerson } from "../../../src/db/repository.entities";
+import { getSession } from "../../../src/auth/session";
 
 type PageProps = { params: Promise<{ id: string }> };
 
@@ -10,7 +11,8 @@ export default async function ResearcherPage({ params }: PageProps) {
   const { id } = await params;
   const person = await getPerson(id);
   if (!person) notFound();
-  const [claims, affiliations] = await Promise.all([getClaimsForPerson(person.id), getInstitutionsForPerson(person.id)]);
+  const [claims, affiliations, session] = await Promise.all([getClaimsForPerson(person.id), getInstitutionsForPerson(person.id), getSession()]);
+  const isClaimedByCurrentUser = person.claimedByUserId && session?.user?.id === person.claimedByUserId;
 
   return <main className="canonical-page">
     <PublicHeader />
@@ -22,6 +24,9 @@ export default async function ResearcherPage({ params }: PageProps) {
         {person.website && <a href={person.website} target="_blank" rel="noreferrer">Website ↗</a>}
         {affiliations.map(({ institution }) => <Link key={institution.id} href={`/institutions/${institution.id}`}>{institution.name}</Link>)}
       </div>
+      {person.profileStatus === "CLAIMED"
+        ? <p className="researcher-claim-status verified">✓ Verified profile{isClaimedByCurrentUser ? " (yours)" : ""}</p>
+        : <p className="researcher-claim-status unclaimed">Unclaimed profile — <Link href={`/researchers/${person.id}/claim`}>is this you? Request attribution ↗</Link></p>}
     </section>
     <section className="canonical-columns"><div className="canonical-main">
       <div className="section-title"><span>01</span><h2>Contributions</h2></div>

@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 const TABS = [
   { href: "/console", label: "Console", description: "Add papers and review Claims" },
   { href: "/console/applications", label: "Applications", description: "Review reviewer applicants" },
+  { href: "/console/person-claims", label: "Attribution", description: "Review researcher claim requests" },
   { href: "/console/research", label: "Infrastructure", description: "Research relationships and tools" },
   { href: "/console/research/graph", label: "Graph", description: "Connect related Limits" },
   { href: "/console/research/artifacts", label: "Artifacts", description: "Verify Claims with evidence" },
