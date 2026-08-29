@@ -4,7 +4,7 @@ import { db } from "./client";
 import { auditLogs, claimEvidence, claims, limits, reviews, specificationVersions, timelineEvents, user } from "./schema";
 
 const CODATA_PATTERN = "LR-001%";
-const EXPECTED_CODATA_RECORDS = 200;
+const EXPECTED_CODATA_RECORDS = 355;
 
 export async function getCodataReviewSummary(currentUserId?: string) {
   const records = await db.select({ claimId: claims.id, claimStatus: claims.status, limitStatus: limits.status }).from(claims).innerJoin(specificationVersions, eq(specificationVersions.id, claims.specificationVersionId)).innerJoin(limits, eq(limits.id, specificationVersions.limitId)).where(like(limits.registryNumber, CODATA_PATTERN));

@@ -1,7 +1,7 @@
 export type CodataConstant = { quantity: string; value: string; uncertainty: string; unit: string };
 export const CODATA_SOURCE_URL = "https://physics.nist.gov/cuu/Constants/Table/allascii.txt";
 export const CODATA_CITATION_URL = "https://www.nist.gov/publications/codata-recommended-values-fundamental-physical-constants-2022";
-export const CODATA_DRAFT_COUNT = 200;
+export const CODATA_DRAFT_COUNT = 355;
 
 export function parseCodataAscii(input: string): CodataConstant[] {
   const divider = input.split(/\r?\n/).findIndex((line) => /^-{20,}$/.test(line.trim()));

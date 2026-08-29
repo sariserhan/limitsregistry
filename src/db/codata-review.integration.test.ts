@@ -17,16 +17,16 @@ describe.skipIf(!sql)("CODATA bulk editorial review integration",()=>{
       // can insert against them.
       await sql!`insert into "user" ${sql!(userIds.map((id)=>({id,name:`Fixture ${id.slice(0,8)}`,email:`${id}@codata-review-fixture.test`,email_verified:true,role:"EDITOR"})))}`;
       await expect(publishReviewedCodataBatch({actorUserId:editor,rationale:"Attempted publication before the required independent review threshold."})).rejects.toThrow("two independent");
-      expect((await recordCodataBatchReview({reviewerUserId:reviewerA,rationale:"Inspected the frozen NIST source, quantities, values, uncertainties, units, and generated specifications."})).reviewed).toBe(200);
+      expect((await recordCodataBatchReview({reviewerUserId:reviewerA,rationale:"Inspected the frozen NIST source, quantities, values, uncertainties, units, and generated specifications."})).reviewed).toBe(355);
       await expect(recordCodataBatchReview({reviewerUserId:reviewerA,rationale:"A duplicate review by the same identity must not satisfy independent review requirements."})).rejects.toThrow("already reviewed");
-      expect((await recordCodataBatchReview({reviewerUserId:reviewerB,rationale:"Independently checked the NIST CODATA 2022 source snapshot, parser output, units, and uncertainty metadata."})).reviewed).toBe(200);
+      expect((await recordCodataBatchReview({reviewerUserId:reviewerB,rationale:"Independently checked the NIST CODATA 2022 source snapshot, parser output, units, and uncertainty metadata."})).reviewed).toBe(355);
       const reviewerCounts=await sql!`select reviewer_user_id,count(distinct claim_id)::int as claims from reviews where reviewer_user_id in ${sql!(userIds)} and decision='ACCEPTED' group by reviewer_user_id`;
       expect(reviewerCounts).toHaveLength(2);
-      expect(reviewerCounts.every(({claims})=>claims===200)).toBe(true);
+      expect(reviewerCounts.every(({claims})=>claims===355)).toBe(true);
       const published=await publishReviewedCodataBatch({actorUserId:editor,rationale:"Two independent attributed reviews completed for every source-backed CODATA 2022 Claim."});
-      expect(published).toEqual({published:200,alreadyPublished:false});
+      expect(published).toEqual({published:355,alreadyPublished:false});
       const [counts]=await sql!`select count(*) filter(where l.status='PROVEN')::int as limits,count(*) filter(where c.status='ACCEPTED')::int as claims from limits l join limit_spec_versions s on s.limit_id=l.id join claims c on c.specification_version_id=s.id where l.registry_number like 'LR-001%'`;
-      expect(counts).toEqual({limits:200,claims:200});
+      expect(counts).toEqual({limits:355,claims:355});
       await expect(publishReviewedCodataBatch({actorUserId:editor,rationale:"Idempotent publication confirmation after the complete reviewed batch was already published."})).resolves.toEqual({published:0,alreadyPublished:true});
     }finally{
       await sql!`delete from audit_logs where actor_user_id in ${sql!(userIds)}`;
