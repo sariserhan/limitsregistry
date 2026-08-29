@@ -1,12 +1,17 @@
 import "server-only";
 import { randomUUID } from "node:crypto";
-import { and, asc, eq, ne } from "drizzle-orm";
+import { and, asc, eq, ne, notLike } from "drizzle-orm";
 import { db } from "./client";
 import { auditLogs, session, account, user } from "./schema";
 import type { Role } from "../auth/permissions";
 
+const DELETED_EMAIL_SUFFIX = "@deleted.limitsregistry.internal";
+
+// Anonymized (deleted) accounts stay in the table for attribution integrity but have no reason
+// to clutter the admin Users list — they're identified by the placeholder email domain deleteUser
+// assigns them, not a separate deletedAt column, since that's already a reliable, unique marker.
 export async function listUsers() {
-  return db.select({ id: user.id, name: user.name, email: user.email, role: user.role, createdAt: user.createdAt }).from(user).orderBy(asc(user.createdAt));
+  return db.select({ id: user.id, name: user.name, email: user.email, role: user.role, createdAt: user.createdAt }).from(user).where(notLike(user.email, `%${DELETED_EMAIL_SUFFIX}`)).orderBy(asc(user.createdAt));
 }
 
 export async function setUserRole(userId: string, role: Role, actorUserId: string, previousRole: Role) {
@@ -25,7 +30,7 @@ export async function deleteUser(userId: string, actorUserId: string) {
   const [target] = await db.select().from(user).where(eq(user.id, userId)).limit(1);
   if (!target) throw new Error("User not found.");
   if (target.role === "SUPERADMIN" && (await countSuperadmins()) <= 1) throw new Error("Cannot delete the only remaining superadmin.");
-  const placeholderEmail = `deleted-${randomUUID()}@deleted.limitsregistry.internal`;
+  const placeholderEmail = `deleted-${randomUUID()}${DELETED_EMAIL_SUFFIX}`;
   await db.transaction(async (tx) => {
     await tx.update(user).set({ name: "Deleted user", email: placeholderEmail, image: null, role: "USER", updatedAt: new Date() }).where(eq(user.id, userId));
     await tx.delete(session).where(eq(session.userId, userId));
