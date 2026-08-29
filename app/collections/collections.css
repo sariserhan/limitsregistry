@@ -19,3 +19,5 @@
 .collection-record p { margin: 0; color: #625d55; line-height: 1.5; }
 .collection-record > .public-status { flex: 0 0 auto; align-self: flex-start; }
 @media (max-width: 700px) { .collections-grid { grid-template-columns: 1fr; } .collection-record { display: block; } .collection-record > .public-status { display: inline-block; margin-top: 1rem; } }
+
+.breadcrumbs { max-width: 1100px; margin: 0 auto; }

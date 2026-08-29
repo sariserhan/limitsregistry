@@ -8,6 +8,7 @@ import { getSiteSettings } from "../src/db/repository.settings";
 import { AnnouncementBanner } from "../src/components/announcement-banner";
 import { MaintenanceScreen } from "../src/components/maintenance-screen";
 import { AdminModeBanner } from "../src/components/admin-mode-banner";
+import { AcquisitionTracker } from "../src/components/acquisition-tracker";
 import { getSession } from "../src/auth/session";
 import { hasRole, type Role } from "../src/auth/permissions";
 
@@ -40,6 +41,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
 
   return <html lang="en" data-scroll-behavior="smooth"><body suppressHydrationWarning>
     {isAdmin && <AdminModeBanner />}
+    <AcquisitionTracker />
     {!showMaintenance && settings.announcementEnabled && <AnnouncementBanner message={settings.announcementMessage} level={settings.announcementLevel} />}
     {showMaintenance ? <MaintenanceScreen message={settings.maintenanceMessage} /> : children}
     <Script

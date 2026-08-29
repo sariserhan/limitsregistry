@@ -25,3 +25,8 @@
 .related-limits-grid strong { font-size: 1.1rem; }
 .related-limits-grid small { color: #625d55; line-height: 1.45; }
 @media (max-width: 760px) { .related-limits-grid { grid-template-columns: 1fr; } }
+
+.breadcrumbs { max-width: 1180px; margin: 0 auto; padding: 1rem var(--page-pad, 2rem); color: var(--muted, #716b61); font: 10px "DM Mono", monospace; }
+.breadcrumbs ol { display: flex; flex-wrap: wrap; gap: .6rem; list-style: none; padding: 0; margin: 0; }
+.breadcrumbs a { color: inherit; }
+.breadcrumbs li { display: flex; gap: .6rem; }

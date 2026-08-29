@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { PublicHeader } from "../../../src/components/public-header";
 import { SiteFooter } from "../../../src/components/site-footer";
+import { Breadcrumbs } from "../../../src/components/breadcrumbs";
 import { getLimitCollection, listCollectionLimits } from "../../../src/db/repository.collections";
 import "../collections.css";
 
@@ -21,5 +22,5 @@ export default async function CollectionPage({ params }: { params: Promise<{ slu
   const collection = getLimitCollection((await params).slug);
   if (!collection) notFound();
   const rows = await listCollectionLimits(collection);
-  return <main className="collections-page"><PublicHeader /><section className="collection-detail-intro"><Link href="/collections">← All collections</Link><p className="section-kicker">Registry collection</p><h1>{collection.title}</h1><p>{collection.description}</p><span>{rows.length}{rows.length === 100 ? "+" : ""} published records in this collection</span></section><section className="collection-records" aria-label={`${collection.title} records`}>{rows.map((record) => <article className="collection-record" key={record.id}><div><span className="collection-record-id">{record.registryNumber} · {record.category}</span><h2><Link href={`/limits/${record.registryNumber}`}>{record.title}</Link></h2><p>{record.summary}</p></div><span className={`public-status ${record.status.toLowerCase()}`}>{record.status}</span></article>)}</section><SiteFooter /></main>;
+  return <main className="collections-page"><PublicHeader /><Breadcrumbs items={[{ label: "Home", href: "/" }, { label: "Collections", href: "/collections" }, { label: collection.title }]} /><section className="collection-detail-intro"><Link href="/collections">← All collections</Link><p className="section-kicker">Registry collection</p><h1>{collection.title}</h1><p>{collection.description}</p><span>{rows.length}{rows.length === 100 ? "+" : ""} published records in this collection</span></section><section className="collection-records" aria-label={`${collection.title} records`}>{rows.map((record) => <article className="collection-record" key={record.id}><div><span className="collection-record-id">{record.registryNumber} · {record.category}</span><h2><Link href={`/limits/${record.registryNumber}`}>{record.title}</Link></h2><p>{record.summary}</p></div><span className={`public-status ${record.status.toLowerCase()}`}>{record.status}</span></article>)}</section><SiteFooter /></main>;
 }

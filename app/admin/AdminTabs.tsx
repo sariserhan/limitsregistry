@@ -10,6 +10,7 @@ const TABS = [
   { href: "/admin/settings", label: "Site controls" },
   { href: "/admin/send-email", label: "Send email" },
   { href: "/admin/quality", label: "Data quality" },
+  { href: "/admin/acquisition", label: "Acquisition" },
   { href: "/admin/duplicates", label: "Duplicates" },
   { href: "/admin/health", label: "Health" },
   { href: "/admin/usage", label: "Usage" },

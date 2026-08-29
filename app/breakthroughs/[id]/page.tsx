@@ -14,7 +14,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   const event = await getPublicBreakthroughEvent((await params).id);
   if (!event) return { title: "Breakthrough not found — Limits Registry" };
   const title = `${LABEL[event.event.eventType] ?? "Breakthrough"}: ${event.limit.title}`;
-  return { title: `${title} — Limits Registry`, description: event.event.eventType === "FRONTIER_CLOSED" ? `A frontier closed for ${event.limit.title}.` : `A stronger bound was accepted for ${event.limit.title}.`, alternates: { canonical: `${BASE}/breakthroughs/${event.event.id}` }, openGraph: { title, url: `${BASE}/breakthroughs/${event.event.id}`, type: "article" } };
+  return { title: title + " — Limits Registry", description: event.event.eventType === "FRONTIER_CLOSED" ? "A frontier closed for " + event.limit.title + "." : "A stronger bound was accepted for " + event.limit.title + ".", alternates: { canonical: BASE + "/breakthroughs/" + event.event.id }, openGraph: { title, url: BASE + "/breakthroughs/" + event.event.id, type: "article", images: [BASE + "/breakthroughs/" + event.event.id + "/opengraph-image"] } };
 }
 
 export default async function BreakthroughPage({ params }: { params: Promise<{ id: string }> }) {
