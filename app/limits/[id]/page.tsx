@@ -21,6 +21,8 @@ import { buildRecordJsonLd, jsonLdScript } from "../../../src/domain/structured-
 import { buildFrontierHistory } from "../../../src/domain/frontier-history";
 import { FrontierHistoryChart } from "../../../src/components/frontier-history-chart";
 
+export const revalidate = 3600;
+
 type PageProps = { params: Promise<{ id: string }> };
 
 const BREAKTHROUGH_LABEL: Record<string, string> = { STRONGER_BOUND: "Stronger bound accepted", FRONTIER_CLOSED: "Frontier closed" };
