@@ -159,3 +159,27 @@ copies cannot be withdrawn by this service.
   cache isolation, accounting failures and independent rate-limit policies.
 - Live provider delivery and production migration/deployment must be verified
   separately; mocks and local database checks do not establish either.
+
+## Production rollout — 2026-09-20
+
+- Applied migration `0024_bright_magma` to the verified Limits Registry production
+  database (Neon project `lucky-math-24474654`) in one transaction, including its
+  Drizzle journal entry. SHA-256:
+  `e6db162e4c4c4df3b5d2ff76923aa1371bdfbfe3a5f9e51e38172618273ede78`.
+  The previous latest journal entry matched 0023; older history was preserved.
+- Production Upstash returned PONG. Private Blob storage is connected and serving
+  the generated files. No replacement Redis database was needed.
+- Published 1,189 records; NDJSON size 2,536,648 bytes. Dataset revision:
+  `fd0409260d85700c3c7034a6b9f874d59e4681372ad90c97c9f2db7034629d32`.
+- Final production deployment: `dpl_BoucaDpw7EvtudbXMFCA6nkqM1zv`, aliased to
+  `https://www.limitsregistry.com`.
+- Live verification passed for JSON/NDJSON equivalence, SHA-256, private response
+  headers, anonymous 402, invalid/revoked key 401, conditional 304, rate-limit 429
+  with Retry-After, public list/detail 200, and unauthenticated admin login redirect.
+  Download usage remained at four after conditional/rate-limited requests. The
+  temporary verification key was revoked.
+- Vercel weakens ETags when applying transport compression (`W/"hash"`). Clients
+  should return the ETag verbatim; the endpoint accepts weak conditional validators.
+- The temporary authenticated release endpoint was removed from the final source
+  and returns 404 on the public site. Local environment files are now explicitly
+  excluded from deployment uploads with `.vercelignore`.
