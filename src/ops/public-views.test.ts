@@ -1,0 +1,14 @@
+import { randomUUID } from "node:crypto";
+import { beforeEach, expect, it, vi } from "vitest";
+const mocks=vi.hoisted(()=>({record:vi.fn(),limit:vi.fn(),prune:vi.fn()}));
+vi.mock("../db/repository.public-views",()=>({recordPublicView:mocks.record,prunePublicViewReceipts:mocks.prune}));
+vi.mock("./rate-limit",()=>({allowRequest:mocks.limit}));
+import { POST } from "../../app/api/views/route";
+import { GET } from "../../app/api/cron/view-receipts/route";
+const request=(body:unknown,origin="https://example.test")=>new Request("https://example.test/api/views",{method:"POST",headers:{origin,"content-type":"application/json"},body:JSON.stringify(body)});
+const input=()=>({kind:"LIMIT",target:"LR-TEST",receipt:randomUUID()});
+beforeEach(()=>{vi.resetAllMocks();vi.unstubAllEnvs();mocks.limit.mockResolvedValue(true);});
+it("returns fresh counts without shared caching",async()=>{mocks.record.mockResolvedValue({views:"12",startedAt:null});const response=await POST(request(input()));expect(response.status).toBe(200);expect(response.headers.get("cache-control")).toBe("private, no-store");expect(await response.json()).toEqual({views:"12",startedAt:null});});
+it("rejects cross-origin and malformed requests before writing",async()=>{expect((await POST(request(input(),"https://other.test"))).status).toBe(403);expect((await POST(request({...input(),kind:"OTHER"}))).status).toBe(400);expect((await POST(request({...input(),kind:"BOUNTY",target:"not-a-uuid"}))).status).toBe(400);expect(mocks.record).not.toHaveBeenCalled();});
+it("does not present failures as zero views",async()=>{mocks.record.mockResolvedValue(null);expect((await POST(request(input()))).status).toBe(404);mocks.record.mockRejectedValue(new Error("private"));expect((await POST(request(input()))).status).toBe(503);mocks.limit.mockResolvedValue(false);expect((await POST(request(input()))).status).toBe(429);});
+it("protects receipt cleanup with the cron secret",async()=>{expect((await GET(new Request("https://example.test"))).status).toBe(401);expect(mocks.prune).not.toHaveBeenCalled();vi.stubEnv("CRON_SECRET","secret");expect((await GET(new Request("https://example.test",{headers:{authorization:"Bearer secret"}}))).status).toBe(200);expect(mocks.prune).toHaveBeenCalledOnce();});

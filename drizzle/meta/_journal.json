@@ -190,6 +190,13 @@
       "when": 1789881081179,
       "tag": "0026_category_sponsorships",
       "breakpoints": true
+    },
+    {
+      "idx": 27,
+      "version": "7",
+      "when": 1789889993489,
+      "tag": "0027_public_view_counts",
+      "breakpoints": true
     }
   ]
 }

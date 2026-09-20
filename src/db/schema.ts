@@ -206,3 +206,16 @@ export const bountySponsorships = pgTable("bounty_sponsorships", {
   check("sponsorship_url_valid",sql`${t.sponsorUrl} ~ '^https://[^/?#[:space:]@]+([/?#][^[:space:]]*)?$' and length(${t.sponsorUrl}) <= 2000`),
   check("sponsorship_email_valid",sql`${t.contactEmail} ~ '^[^[:space:]@]+@[^[:space:]@]+[.][^[:space:]@]+$' and length(${t.contactEmail}) <= 254`),
 ]);
+
+export const publicViewCounts = pgTable("public_view_counts", {
+  kind: text("kind").notNull(),
+  target: text("target").notNull(),
+  views: bigint("views", { mode: "bigint" }).notNull().default(sql`0`),
+  startedAt: timestamp("started_at", { withTimezone: true }).defaultNow().notNull(),
+}, (t) => [primaryKey({ columns: [t.kind, t.target] }), check("public_view_kind", sql`${t.kind} in ('LIMIT', 'CATEGORY', 'BOUNTY')`), check("public_view_nonnegative", sql`${t.views} >= 0`)]);
+
+// Short-lived random request receipts make effect retries idempotent. No visitor identity.
+export const publicViewReceipts = pgTable("public_view_receipts", {
+  id: uuid("id").primaryKey(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+}, (t) => [index("public_view_receipts_created_idx").on(t.createdAt)]);

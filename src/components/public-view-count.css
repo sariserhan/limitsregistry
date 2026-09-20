@@ -1,0 +1,2 @@
+.public-view-count{display:inline-block;color:var(--muted);font:11px/1.5 'DM Mono',monospace;font-variant-numeric:tabular-nums;white-space:nowrap;min-width:9ch}
+.canonical-bounty .public-view-count,.public-bounty .public-view-count{margin-top:8px}
