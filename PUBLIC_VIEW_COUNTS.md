@@ -58,3 +58,26 @@ these local checks as a production rollout.
   “2 page views” after a refresh. The unavailable-counter error is resolved.
   Runner endpoint returns 404, and all recorded aliases still point to their
   original application deployments.
+
+## VisitorPing historical export (not imported)
+
+The supplied Pages API guide provides page-view rollups from 2026-08-28,
+excluding bots by default. `scripts/export-visitorping-history.ts` reads
+`VISITORPING_API_SECRET` from `.env.local` (or the process environment) and requires
+an internal site ID via `--site-id` or `VISITORPING_SITE_ID`. It follows every opaque
+cursor, checks the returned site/domain and date range, preserves exact paths, and
+refuses duplicate paths or malformed data. It writes a private local export only;
+it does not update production counts. Existing output files are not overwritten.
+
+Example: `npx tsx scripts/export-visitorping-history.ts --site-id INTERNAL_ID`.
+The default cutoff is 2026-09-19 inclusive, before live counting began on September
+20. The Pages API has only whole-day boundaries: it cannot isolate September 20
+views before our live counter began. Therefore a simple pre-cutoff backfill would
+avoid double-counting but leave that partial-day gap; do not call it a complete
+all-time total. Historical bot filtering also differs from the current browser
+counter's semantics and must be disclosed before combining figures.
+
+The current tracker public ID `vp_PBTR9YAZ` returned `404 site_not_found` with the
+configured credential. The matching internal site ID is still needed. No historical
+rows have been fetched or imported. Per-bounty card history cannot be derived from
+these page totals.
