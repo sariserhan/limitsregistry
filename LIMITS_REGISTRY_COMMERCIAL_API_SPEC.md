@@ -92,7 +92,7 @@ not grant access or reproduction rights to third-party source content.
 - 400: unsupported format.
 - 401: malformed, unknown or revoked supplied credential. No silent fallback on
   this paid-only endpoint; the public endpoints remain available.
-- 402: no credential; request a pilot key through `/contact`.
+- 402: no credential; request a pilot key through `/developers/request`.
 - 429: rate limited; honor `Retry-After`.
 - 503: service/storage unavailable or no published snapshot.
 - HEAD: 405, to avoid implicitly starting/counting a GET download.
@@ -183,3 +183,25 @@ copies cannot be withdrawn by this service.
 - The temporary authenticated release endpoint was removed from the final source
   and returns 404 on the public site. Local environment files are now explicitly
   excluded from deployment uploads with `.vercelignore`.
+
+## Pilot onboarding — 2026-09-20
+
+- `/developers` presents free record access and the paid snapshot pilot separately,
+  with endpoint examples, key security guidance, limits, and an access-request link.
+- `/developers/request` collects name, email, organisation, intended use, expected
+  volume/download frequency, and freshness needs. Server validation bounds each
+  field. Requests use the existing private CONTACT inbox and its shared five-per-hour
+  IP allowance. Provider and persistence failures return a recoverable form error.
+- Administrators review requests in the contact inbox, agree the pilot terms and
+  invoice manually, then issue keys in `/admin/api-keys`. Submission issues no key
+  and creates no charge. No database migration is needed.
+- Fresh read-only production checks: public list/categories 200, anonymous snapshot
+  402, invalid credential 401, snapshot responses private/no-store. Valid-key
+  download, revocation, usage, and rate-limit verification from the earlier rollout
+  remains historical; those production checks were not repeated during onboarding work.
+- The onboarding pages require deployment before they are available publicly.
+- Onboarding validation: 22 focused API tests passed, including disposable PostgreSQL
+  integration; typecheck and lint passed. Browser submission persisted all request
+  fields in the local inbox and displayed confirmation; the test entry was removed.
+  Desktop and 390px mobile layouts were checked, with no horizontal page overflow
+  or Next.js runtime/compilation errors. This does not verify administrator email replies.

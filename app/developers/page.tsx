@@ -3,20 +3,28 @@ import Link from "next/link";
 import InfoPage from "../_components/InfoPage";
 import { API_V1_PAUSED } from "../../src/api/v1-paused";
 
-export const metadata: Metadata = { title: "API — Limits Registry", description: "A read-only public JSON API for every published record in Limits Registry." };
+import "./developers.css";
+
+export const metadata: Metadata = { title: "API & Data — Limits Registry", description: "A read-only public JSON API for every published record in Limits Registry." };
 
 export default function Page() {
-  return <InfoPage kicker="Developers" title="API." intro="A free public record API and a commercial snapshot pilot. Every published record is citable — see the record page for citation formats.">
+  return <InfoPage kicker="Developers" title="API & Data." intro="A free public record API and a commercial snapshot pilot. Every published record is citable — see the record page for citation formats.">
 
 {API_V1_PAUSED && <p role="status">API access is temporarily paused. This documentation remains available; requests currently return 404.</p>}
+
+<div className="api-options">
+  <section className="api-option"><span>Free · No key needed</span><h2>Explore public records.</h2><p>Read published records, accepted claims, and evidence through the JSON API. Up to 100 records per page.</p><a href="#public-api">Start with the public API →</a></section>
+  <section className="api-option"><span>Paid · Manually invoiced</span><h2>Download the registry.</h2><p>A consistent bulk snapshot in JSON or NDJSON, with a version identifier for reproducible research and integrations.</p><Link href="/developers/request">Request pilot access →</Link></section>
+</div>
+<nav className="api-toc" aria-label="API documentation"><a href="#public-api">Public endpoints</a><a href="#snapshots">Snapshot downloads</a><a href="#limits">Limits & caching</a></nav>
 
 <h2>Commercial snapshot pilot</h2>
 <p>The registry’s content stays free and open. Paid access buys delivery characteristics, not exclusive rights to registry content. The public detail API already includes specifications, accepted claims, and evidence.</p>
 <p>The pilot packages the published registry into a consistent, versioned JSON or NDJSON snapshot. Snapshots are manually published after editorial releases; they are not a live feed and there is no guaranteed update cadence or uptime SLA during the pilot.</p>
-<p><Link href="/contact">Request a pilot key</Link> with your organisation, intended use, and freshness requirements. Pricing and invoicing are agreed directly. There is no self-service checkout or free-key requirement.</p>
+<p><Link href="/developers/request">Request pilot access</Link> with your organisation, intended use, and freshness requirements. Pricing and invoicing are agreed directly. There is no self-service checkout or free-key requirement.</p>
 <p>Pilot keys apply to snapshot downloads only. Public v1 endpoints retain their existing page limits and do not use keys or monthly quotas.</p>
 
-<h2>Download a snapshot</h2>
+<h2 id="snapshots">Download a snapshot</h2>
 <pre><code>{String.raw`curl -D snapshot.headers \
   -H 'Authorization: Bearer YOUR_API_KEY' \
   'https://www.limitsregistry.com/api/v1/snapshot?format=ndjson' \
@@ -34,13 +42,14 @@ export default function Page() {
   <li><code>503</code>: no published snapshot yet, or the service is temporarily unavailable. Retry later.</li>
 </ul>
 
-<h2>Public API base URL</h2>
+<h2 id="public-api">Public API base URL</h2>
 <p><code>https://www.limitsregistry.com/api/v1</code></p>
 
 <h2>List records</h2>
 <p><code>GET /api/v1/limits</code></p>
 <p>Query parameters: <code>category</code> (optional, exact match), <code>page</code> (default 1), <code>pageSize</code> (default 50, max 100).</p>
-<pre><code>{`curl https://www.limitsregistry.com/api/v1/limits?category=Mathematics
+<p>Illustrative response (values and totals will change):</p>
+<pre><code>{`curl 'https://www.limitsregistry.com/api/v1/limits?category=Mathematics'
 
 {
   "data": [
@@ -72,10 +81,14 @@ export default function Page() {
 <p><code>GET /api/v1/categories</code></p>
 <p>Every category with at least one published record.</p>
 
+<h2>Key security and rotation</h2>
+<p>Keep your pilot key on your server, outside browser code and public repositories. The complete key is shown once when issued. To rotate it, request a replacement, update your integration, then have the old key revoked. Revocation blocks subsequent snapshot requests; public record access remains free.</p>
+<p>API purchases do not influence editorial decisions, verification, or record placement.</p>
+
 <h2>Other formats</h2>
 <p>Beyond the JSON API: an embeddable SVG status badge at <code>/api/badge/&#123;registryNumber&#125;</code>, a BibTeX citation per record (see the record page), and RSS feeds for the <Link href="/breakthroughs">breakthroughs</Link> and <a href="/watchlists">watchlist</a> feeds.</p>
 
-<h2>Public API rate limits and caching</h2>
-<p>No API key and no hard rate limit today &mdash; please cache client-side (responses carry <code>Cache-Control</code>, refreshed at most once a minute) rather than polling in a tight loop. This is a best-effort read-only mirror of the public site, not a guaranteed-uptime service; these public record endpoints require no authentication and do not allow writes.</p>
+<h2 id="limits">Public API rate limits and caching</h2>
+<p>No API key and no hard rate limit today &mdash; please cache client-side rather than polling in a tight loop. Public endpoints configure a 60-second shared-cache lifetime and up to 300 seconds of stale-while-revalidate; responses may lag recent edits. This is a best-effort read-only mirror of the public site, not a guaranteed-uptime service; these public record endpoints require no authentication and do not allow writes.</p>
 
 </InfoPage>; }

@@ -16,6 +16,7 @@ export function SiteFooter() {
       <Link href="/compare">Compare</Link>
       <Link href="/certificates/preview">Certificate preview</Link>
       <Link href="/editorial-policy">Editorial policy</Link>
+      <Link href="/developers">API &amp; Data</Link>
       <Link href="/support">Support</Link>
       <Link href="/sponsor">Sponsor</Link>
       <Link href="/privacy">Privacy</Link>

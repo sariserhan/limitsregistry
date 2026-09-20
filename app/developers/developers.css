@@ -1,0 +1,10 @@
+.api-options{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin-bottom:32px}
+.api-option{border:1px solid var(--line);padding:24px;background:var(--surface);min-width:0}
+.info-body .api-option h2{margin:0 0 12px}
+.api-option>span{display:block;margin-bottom:14px;font:10px 'DM Mono',monospace;text-transform:uppercase;letter-spacing:.07em;color:var(--muted)}
+.api-option>a{display:inline-block;font-weight:600;margin-top:8px}
+.api-toc{display:flex;flex-wrap:wrap;gap:12px 20px;padding-bottom:24px;border-bottom:1px solid var(--line);font-size:13px}
+.api-access-form{max-width:none;margin-top:0}
+.api-access-form input,.api-access-form textarea{min-width:0;width:100%;box-sizing:border-box}
+.api-access-form .api-form-note{font-size:12px;margin:0}
+@media(max-width:600px){.api-options{grid-template-columns:minmax(0,1fr)}.api-option{padding:20px}}
