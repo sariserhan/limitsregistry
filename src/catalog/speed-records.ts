@@ -218,4 +218,15 @@ export const SPEED_RECORDS: FrontierRecord[] = [
     methodSummary: "Electronic timing at an International Skating Union-sanctioned event, ratified as the world record.",
     source: { title: "Guinness World Records — Fastest 500m speed skating (men)", url: "https://www.guinnessworldrecords.com/world-records/fastest-500-m-speed-skating-(men)", date: "2019-03-09", location: "Salt Lake City, Utah, USA" },
   },
+  {
+    registryNumber: "LR-FASTEST-BOBSLED-SPEED", slug: "fastest-bobsled-speed", title: "Fastest bobsled speed",
+    category: "Speed Records", subcategory: "Winter Sports", direction: "MAXIMIZE",
+    metricName: "Fastest speed recorded by a bobsled on an official track", unit: "km/h",
+    formalStatement: "The highest speed recorded by a bobsled on an official international track.",
+    summary: "A four-man bobsled reached approximately 157 km/h (97.6 mph) at the Whistler Sliding Centre during the 2019 World Championships — among the fastest speeds ever recorded in bobsled, on the same unusually steep Whistler track that also holds the luge speed record, since the track's design pushes all three sliding sports (bobsled, luge, and skeleton) to their fastest recorded speeds.",
+    value: "157",
+    claimType: "CONSTRUCTION", epistemicStatus: "LITERATURE_ASSERTED", limitStatus: "OPEN",
+    methodSummary: "Track-side speed trap measurement during International Bobsleigh and Skeleton Federation-sanctioned competition; slightly different figures (156-157.06 km/h) appear across sources for this same event.",
+    source: { title: "International Bobsleigh and Skeleton Federation — Whistler track records", url: "https://www.ibsf.org/", date: "2019-03-03", location: "Whistler Sliding Centre, Canada" },
+  },
 ];
