@@ -1,10 +1,51 @@
+import type { NextFetchEvent } from "next/server";
 import { NextRequest, NextResponse } from "next/server";
 import { getSessionCookie } from "better-auth/cookies";
+import { createAiTrafficMiddleware } from "@visitorping/vercel";
+
+/**
+ * AI crawler watching, reported to VisitorPing.
+ *
+ * Most AI crawlers never run JavaScript, so the tracking script in the root
+ * layout cannot see them at all. This runs on the request itself, which is the
+ * only place they are visible — and the only place a policy could refuse one.
+ *
+ * Built once at module scope and only when both credentials are present, so a
+ * local run or a preview deployment watches nothing rather than reporting into
+ * production.
+ */
+const watchAiTraffic =
+  process.env.VISITORPING_INSTALLATION_ID && process.env.VISITORPING_SIGNING_KEY
+    ? createAiTrafficMiddleware({
+        installationId: process.env.VISITORPING_INSTALLATION_ID,
+        signingKey: process.env.VISITORPING_SIGNING_KEY,
+        // Only set when pointing at something other than production, which is
+        // what makes this testable locally without reporting into the real
+        // account.
+        ingestUrl: process.env.VISITORPING_INGEST_URL,
+      })
+    : null;
 
 // This fork of Next.js renamed the middleware.js convention to proxy.js —
 // request-id stamping (formerly middleware.ts) lives here too since that
 // file is otherwise silently unused.
-export default async function proxy(request: NextRequest) {
+export default async function proxy(request: NextRequest, event?: NextFetchEvent) {
+  // First, and before the /api/ branch returns early, so a crawler hitting an
+  // API path is still counted and /robots.txt and /license.xml are answered
+  // before anything else considers them.
+  //
+  // Wrapped because anything thrown in here fails every request to the site.
+  // Watching AI crawlers is never worth that: a failure means we see no
+  // crawler, not that nobody sees the site.
+  if (watchAiTraffic) {
+    try {
+      const refused = await watchAiTraffic(request, event);
+      if (refused) return refused;
+    } catch (error) {
+      console.error("[visitorping] AI Traffic middleware failed", error);
+    }
+  }
+
   if (request.nextUrl.pathname.startsWith("/api/")) {
     const response = NextResponse.next();
     response.headers.set("x-request-id", request.headers.get("x-request-id") ?? crypto.randomUUID());
