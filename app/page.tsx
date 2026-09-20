@@ -28,7 +28,7 @@ export default async function Home({ searchParams }: HomeProps) {
     listPublicBounties().catch(() => []),
   ]);
   const recent = recentBreakthroughs.map((row) => ({ id: row.event.id, registryNumber: row.limit.registryNumber, eventType: row.event.eventType, occurredAt: row.event.occurredAt.toISOString() }));
-  const featuredBounties = bountyRows.slice().sort((a, b) => Number(b.bounty.amount ?? 0) - Number(a.bounty.amount ?? 0)).slice(0, 3).map(({ bounty, limit }) => ({ id: bounty.id, title: bounty.title, sponsor: bounty.sponsor, amount: bounty.amount, currency: bounty.currency, registryNumber: limit.registryNumber }));
+  const featuredBounties = bountyRows.slice().sort((a, b) => Number(b.bounty.amount ?? 0) - Number(a.bounty.amount ?? 0)).slice(0, 3).map(({ bounty, limit }) => ({ id: bounty.id, title: bounty.title, sponsor: bounty.sponsor, category: bounty.category, amount: bounty.amount, currency: bounty.currency, registryNumber: limit.registryNumber }));
   const featuredArticles = blogPosts.slice(0, 3).map((post) => ({ slug: post.slug, title: post.title, dek: post.dek }));
   const fallbackLimits = publishedLimits.filter((limit) => (!query || `${limit.title} ${limit.category} ${limit.id}`.toLowerCase().includes(query.toLowerCase())) && (!category || limit.category === category) && (status === "ALL" || limit.status === status)).sort((left, right) => (Date.parse(right.publishedAt ?? "") || 0) - (Date.parse(left.publishedAt ?? "") || 0) || left.id.localeCompare(right.id));
   const limits: PublishedLimit[] = browseResult ? browseResult.rows.map(({ limit, specification, claims, timeline, frontier }) => {
