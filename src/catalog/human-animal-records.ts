@@ -160,6 +160,20 @@ export const HUMAN_ANIMAL_RECORDS: HumanAnimalRecord[] = [
     methodSummary: "Electronically timed 50 m freestyle race at the China Swimming Open, ratified by World Aquatics as the official world record.",
     source: { title: "McEvoy breaks iconic 50m freestyle World Record — World Aquatics", url: "https://www.worldaquatics.com/news/4474806/swimming-world-record-cameron-mcevoy-breaks-iconic-50m-freestyle-world-record-cesar-cielo", date: "2026-03-20", location: "China Swimming Open, Shenzhen, China" },
   },
+  {
+    registryNumber: "LR-FROGHOPPER-JUMP-HEIGHT",
+    slug: "froghopper-jump-height",
+    title: "Highest jump by an insect",
+    subcategory: "Animal Locomotion",
+    direction: "MAXIMIZE",
+    metricName: "Maximum jump height achieved by an insect (Philaenus spumarius)",
+    unit: "cm",
+    formalStatement: "The greatest jump height recorded for any insect, measured from a standing start.",
+    summary: "The froghopper (Philaenus spumarius), a 6mm-long insect, was recorded jumping up to 70 cm high by Cambridge zoologist Malcolm Burrows in 2003 — the highest jump, relative or absolute, ever measured in an insect. The froghopper accelerates at roughly 4,000 m/s^2, pulling over 400 g, using a catapult-like mechanism that locks its hind legs before releasing stored energy in under a millisecond. This overturned the long-held popular belief that fleas were the best jumpers relative to body size.",
+    value: "70",
+    methodSummary: "High-speed video analysis of jumping froghoppers, published in a peer-reviewed study in Nature.",
+    source: { title: "Burrows, \"Froghopper insects leap to new heights,\" Nature 424 (2003)", url: "https://www.nature.com/articles/424509a", date: "2003-07-31", location: "University of Cambridge, UK" },
+  },
 ];
 
 // Fills in the existing LR-DRAFT-BIO-18 stub (title already reserved as "Cheetah sprint speed")

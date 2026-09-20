@@ -53,4 +53,15 @@ export const SPEED_RECORDS: FrontierRecord[] = [
     methodSummary: "Timed over a flying-start 200 m course and sanctioned by the International Human Powered Vehicle Association (IHPVA).",
     source: { title: "World Human Powered Speed Challenge — competition records", url: "http://www.whpva.org/competition.html", date: "2016-09-17", location: "Battle Mountain, Nevada, USA" },
   },
+  {
+    registryNumber: "LR-APOLLO-10-REENTRY-SPEED", slug: "fastest-speed-traveled-by-humans", title: "Fastest speed ever traveled by humans",
+    category: "Speed Records", subcategory: "Human spaceflight", direction: "MAXIMIZE",
+    metricName: "Speed of a crewed vehicle relative to Earth", unit: "km/h",
+    formalStatement: "The highest speed relative to Earth ever attained by a crewed vehicle.",
+    summary: "Apollo 10 astronauts Thomas Stafford, John Young, and Gene Cernan reached 39,897 km/h (24,791 mph) relative to Earth on May 26, 1969, during their high-speed return trajectory from the Moon — the fastest any humans have ever traveled. No later crewed mission, including the Moon-landing flights that followed it, has matched or exceeded it.",
+    value: "39897",
+    claimType: "CONSTRUCTION", epistemicStatus: "SOURCE_CONFIRMED", limitStatus: "OPEN",
+    methodSummary: "Tracked via NASA mission telemetry during Apollo 10's translunar return; the figure is NASA's own official mission record.",
+    source: { title: "NASA — 50 Years Ago: Apollo 10 Clears the Way for the First Moon Landing", url: "https://www.nasa.gov/history/50-years-ago-apollo-10-clears-the-way-for-the-first-moon-landing/", date: "1969-05-26", location: "Apollo 10 command module, translunar return trajectory" },
+  },
 ];
