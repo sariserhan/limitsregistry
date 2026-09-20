@@ -26,6 +26,22 @@ export async function sendResetPasswordEmail(to: string, name: string, url: stri
   await sendEmail({ to, from: SENDERS.support, replyTo: SENDERS.support, subject: "Reset your password — Limits Registry", html, text });
 }
 
+const SIGNUP_NOTIFICATION_RECIPIENT = "serhan.sari@yahoo.com";
+
+/** Internal alert, not a user-facing transactional email — fires once per new account. */
+export async function sendSignupNotificationEmail(user: { name: string; email: string; createdAt?: Date }) {
+  const siteUrl = process.env.BETTER_AUTH_URL ?? "http://localhost:3000";
+  const when = (user.createdAt ?? new Date()).toISOString();
+  const { html, text } = renderEmail({
+    preheader: `${user.name} just signed up for Limits Registry.`,
+    heading: "New account signed up",
+    intro: `Name: ${escapeHtml(user.name)}<br/>Email: ${escapeHtml(user.email)}<br/>Signed up: ${escapeHtml(when)}`,
+    ctaLabel: "View users in admin",
+    ctaUrl: `${siteUrl}/admin`,
+  });
+  await sendEmail({ to: SIGNUP_NOTIFICATION_RECIPIENT, from: SENDERS.support, subject: `New signup: ${user.name} — Limits Registry`, html, text });
+}
+
 export async function sendWelcomeEmail(to: string, name: string) {
   const siteUrl = process.env.BETTER_AUTH_URL ?? "http://localhost:3000";
   const { html, text } = renderEmail({

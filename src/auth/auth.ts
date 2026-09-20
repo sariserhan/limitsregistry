@@ -4,7 +4,7 @@ import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { nextCookies } from "better-auth/next-js";
 import { db } from "../db/client";
 import * as schema from "../db/schema";
-import { sendResetPasswordEmail, sendVerificationEmail, sendWelcomeEmail } from "../lib/email/auth-emails";
+import { sendResetPasswordEmail, sendSignupNotificationEmail, sendVerificationEmail, sendWelcomeEmail } from "../lib/email/auth-emails";
 
 function createAuth() {
   // Vercel can retain an old or missing BETTER_AUTH_URL across deployments. In production,
@@ -34,6 +34,13 @@ function createAuth() {
     user: {
       additionalFields: {
         role: { type: ["USER", "RESEARCHER", "REVIEWER", "EDITOR", "ADMIN", "SUPERADMIN"], required: false, defaultValue: "USER", input: false },
+      },
+    },
+    databaseHooks: {
+      user: {
+        create: {
+          after: async (user) => sendSignupNotificationEmail(user),
+        },
       },
     },
     plugins: [nextCookies()],
