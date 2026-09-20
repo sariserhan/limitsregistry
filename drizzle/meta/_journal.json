@@ -169,6 +169,13 @@
       "when": 1788000000000,
       "tag": "0023_acquisition_events",
       "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "7",
+      "when": 1789877231300,
+      "tag": "0024_bright_magma",
+      "breakpoints": true
     }
   ]
 }

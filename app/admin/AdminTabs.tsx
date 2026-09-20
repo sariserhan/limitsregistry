@@ -7,6 +7,7 @@ const TABS = [
   { href: "/admin", label: "Users" },
   { href: "/admin/applications", label: "Applications" },
   { href: "/admin/prize-pools", label: "Prize pools" },
+  { href: "/admin/api-keys", label: "API pilot" },
   { href: "/admin/settings", label: "Site controls" },
   { href: "/admin/send-email", label: "Send email" },
   { href: "/admin/quality", label: "Data quality" },

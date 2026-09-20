@@ -1,16 +1,40 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { notFound } from "next/navigation";
 import InfoPage from "../_components/InfoPage";
 import { API_V1_PAUSED } from "../../src/api/v1-paused";
 
 export const metadata: Metadata = { title: "API — Limits Registry", description: "A read-only public JSON API for every published record in Limits Registry." };
 
 export default function Page() {
-  if (API_V1_PAUSED) notFound();
-  return <InfoPage kicker="Developers" title="API." intro="Read-only, no key required. The same published data the site itself renders, as JSON. Every published record here is also citable — see the record page for citation formats.">
+  return <InfoPage kicker="Developers" title="API." intro="A free public record API and a commercial snapshot pilot. Every published record is citable — see the record page for citation formats.">
 
-<h2>Base URL</h2>
+{API_V1_PAUSED && <p role="status">API access is temporarily paused. This documentation remains available; requests currently return 404.</p>}
+
+<h2>Commercial snapshot pilot</h2>
+<p>The registry’s content stays free and open. Paid access buys delivery characteristics, not exclusive rights to registry content. The public detail API already includes specifications, accepted claims, and evidence.</p>
+<p>The pilot packages the published registry into a consistent, versioned JSON or NDJSON snapshot. Snapshots are manually published after editorial releases; they are not a live feed and there is no guaranteed update cadence or uptime SLA during the pilot.</p>
+<p><Link href="/contact">Request a pilot key</Link> with your organisation, intended use, and freshness requirements. Pricing and invoicing are agreed directly. There is no self-service checkout or free-key requirement.</p>
+<p>Pilot keys apply to snapshot downloads only. Public v1 endpoints retain their existing page limits and do not use keys or monthly quotas.</p>
+
+<h2>Download a snapshot</h2>
+<pre><code>{String.raw`curl -D snapshot.headers \
+  -H 'Authorization: Bearer YOUR_API_KEY' \
+  'https://www.limitsregistry.com/api/v1/snapshot?format=ndjson' \
+  -o registry.ndjson`}</code></pre>
+<p><code>format=ndjson</code> is the default: one record per line. <code>format=json</code> returns an array of the same records. Each record includes <code>schemaVersion: 1</code>, the list endpoint’s fields, the current <code>specification</code> (or null), unique accepted <code>claims</code>, and linked <code>evidence</code>. Only OPEN, PROVEN, DISPUTED, and RETIRED records are included.</p>
+<p>Claim integer values and rational numerators/denominators are decimal strings to preserve precision. Evidence links use <code>sourceUrl</code>; inclusion of a link does not grant access to or reproduction rights in the linked source. Sources may require a subscription.</p>
+<p>Response headers include <code>X-Snapshot-Revision</code> (the SHA-256 of the NDJSON file), <code>X-Snapshot-Schema-Version</code>, <code>X-Snapshot-Generated-At</code> (UTC), <code>X-Snapshot-Record-Count</code>, and a format-specific <code>ETag</code>. Records are ordered by registry number. Save the file and these headers together.</p>
+<p>Send the previous response’s <code>ETag</code> in <code>If-None-Match</code> when polling the same format. An unchanged snapshot returns <code>304</code> without starting a download or increasing usage. Use GET; HEAD is not supported. Snapshot responses are private and must not be shared-cached.</p>
+<p>Pilot requests are limited to 30 per minute per key, with a 120-per-minute IP protection limit. Conditional requests count toward rate limits. There is no monthly download quota in this pilot. We record download starts per UTC day; interrupted transfers may count, while 304s, rejected requests, and failures opening storage do not.</p>
+<ul>
+  <li><code>400</code>: unsupported format.</li>
+  <li><code>401</code>: supplied key is invalid or revoked. Public endpoints remain accessible without it.</li>
+  <li><code>402</code>: a pilot key is required for this endpoint.</li>
+  <li><code>429</code>: rate limit exceeded; follow <code>Retry-After</code>.</li>
+  <li><code>503</code>: no published snapshot yet, or the service is temporarily unavailable. Retry later.</li>
+</ul>
+
+<h2>Public API base URL</h2>
 <p><code>https://www.limitsregistry.com/api/v1</code></p>
 
 <h2>List records</h2>
@@ -51,7 +75,7 @@ export default function Page() {
 <h2>Other formats</h2>
 <p>Beyond the JSON API: an embeddable SVG status badge at <code>/api/badge/&#123;registryNumber&#125;</code>, a BibTeX citation per record (see the record page), and RSS feeds for the <Link href="/breakthroughs">breakthroughs</Link> and <a href="/watchlists">watchlist</a> feeds.</p>
 
-<h2>Rate limits and caching</h2>
-<p>No API key and no hard rate limit today &mdash; please cache client-side (responses carry <code>Cache-Control</code>, refreshed at most once a minute) rather than polling in a tight loop. This is a best-effort read-only mirror of the public site, not a guaranteed-uptime service; nothing here requires authentication, and nothing here lets you write.</p>
+<h2>Public API rate limits and caching</h2>
+<p>No API key and no hard rate limit today &mdash; please cache client-side (responses carry <code>Cache-Control</code>, refreshed at most once a minute) rather than polling in a tight loop. This is a best-effort read-only mirror of the public site, not a guaranteed-uptime service; these public record endpoints require no authentication and do not allow writes.</p>
 
 </InfoPage>; }

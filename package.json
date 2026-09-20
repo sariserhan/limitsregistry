@@ -43,6 +43,7 @@
     "@modelcontextprotocol/server": "^2.0.0",
     "@upstash/ratelimit": "^2.0.8",
     "@upstash/redis": "^1.38.3",
+    "@vercel/blob": "^2.8.0",
     "@visitorping/vercel": "^1.0.0",
     "ai": "^7.0.83",
     "better-auth": "^1.7.2",

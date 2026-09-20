@@ -3,15 +3,7 @@ import { listPublishedDomainLimits } from "../../../src/db/repository";
 import { allowRequest } from "../../../src/ops/rate-limit";
 export const runtime = "nodejs";
 export const revalidate = 300;
-// The client controls every hop it prepends to x-forwarded-for, but not the one the
-// nearest reverse proxy (Vercel's edge) appends — that's the last entry in the list.
-// Trusting the raw header as-is lets a client change its "IP" on every request and
-// bypass the limit entirely.
-function clientIp(request: Request) {
-  const forwardedFor = request.headers.get("x-forwarded-for");
-  const nearestHop = forwardedFor?.split(",").pop()?.trim();
-  return nearestHop || "unknown";
-}
+import { clientIp } from "../../../src/ops/client-ip";
 
 // Spreadsheet apps treat a leading =, +, -, or @ as a formula even inside a quoted
 // CSV cell — prefix with a single quote to neutralize formula injection from

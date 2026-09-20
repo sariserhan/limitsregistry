@@ -1,4 +1,4 @@
-import { bigint, boolean, check, index, integer, jsonb, pgEnum, pgTable, text, timestamp, uniqueIndex, uuid, vector } from "drizzle-orm/pg-core";
+import { bigint, boolean, check, date, index, integer, jsonb, pgEnum, pgTable, primaryKey, text, timestamp, uniqueIndex, uuid, vector } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
 import { customType } from "drizzle-orm/pg-core";
 
@@ -121,4 +121,55 @@ export const sourceIngestionJobs = pgTable("source_ingestion_jobs", {
 }, (t) => [
   index("source_jobs_due_idx").on(t.status, t.nextAttemptAt), uniqueIndex("source_jobs_active_unique").on(t.paperId).where(sql`${t.status} in ('QUEUED', 'PROCESSING', 'RETRY_WAIT')`), index("source_jobs_paper_idx").on(t.paperId, t.createdAt),
   check("source_jobs_type_valid", sql`${t.sourceType} in ('ARXIV', 'DOI_PUBLISHER')`), check("source_jobs_status_valid", sql`${t.status} in ('QUEUED', 'PROCESSING', 'RETRY_WAIT', 'SUCCEEDED', 'FAILED')`), check("source_jobs_attempts_valid", sql`${t.attempts} >= 0 and ${t.maxAttempts} between 1 and 10 and ${t.attempts} <= ${t.maxAttempts}`), check("source_jobs_counts_valid", sql`(${t.pageCount} is null or ${t.pageCount} > 0) and (${t.byteSize} is null or ${t.byteSize} > 0) and (${t.extractedCharacterCount} is null or ${t.extractedCharacterCount} > 0)`), check("source_jobs_source_https_valid", sql`${t.sourceUrl} ~ '^https://[^[:space:]]+$'`),
+]);
+
+// Commercial pilot: credentials and counters only; snapshot bytes live in private object storage.
+export const apiKeys = pgTable("api_keys", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  keyHash: text("key_hash").notNull(),
+  keyPrefix: text("key_prefix").notNull(),
+  organizationName: text("organization_name").notNull(),
+  contactEmail: text("contact_email").notNull(),
+  tier: text("tier").default("PILOT").notNull(),
+  status: text("status").default("ACTIVE").notNull(),
+  note: text("note"),
+  issuedByUserId: text("issued_by_user_id").references(() => user.id, { onDelete: "set null" }),
+  revokedAt: timestamp("revoked_at", { withTimezone: true }),
+  ...audit,
+}, (t) => [
+  uniqueIndex("api_keys_hash_uidx").on(t.keyHash),
+  check("api_keys_hash_valid", sql`${t.keyHash} ~ '^[0-9a-f]{64}$'`),
+  check("api_keys_prefix_valid", sql`${t.keyPrefix} ~ '^lr_live_[A-Za-z0-9_-]{8}$'`),
+  check("api_keys_org_valid", sql`length(trim(${t.organizationName})) between 1 and 200`),
+  check("api_keys_email_valid", sql`${t.contactEmail} ~ '^[^[:space:]@]+@[^[:space:]@]+\\.[^[:space:]@]+$' and length(${t.contactEmail}) <= 254`),
+  check("api_keys_tier_valid", sql`${t.tier} = 'PILOT'`),
+  check("api_keys_status_valid", sql`${t.status} in ('ACTIVE', 'REVOKED')`),
+  check("api_keys_revoked_paired", sql`(${t.status} = 'REVOKED') = (${t.revokedAt} is not null)`),
+]);
+export const apiUsageDaily = pgTable("api_usage_daily", {
+  keyId: uuid("key_id").references(() => apiKeys.id, { onDelete: "cascade" }).notNull(),
+  day: date("day").notNull(),
+  downloads: integer("downloads").default(0).notNull(),
+  lastDownloadedAt: timestamp("last_downloaded_at", { withTimezone: true }).defaultNow().notNull(),
+}, (t) => [
+  primaryKey({ columns: [t.keyId, t.day] }),
+  check("api_usage_downloads_valid", sql`${t.downloads} >= 0`),
+]);
+export const apiSnapshots = pgTable("api_snapshots", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  schemaVersion: integer("schema_version").notNull(),
+  generatedAt: timestamp("generated_at", { withTimezone: true }).notNull(),
+  publishedAt: timestamp("published_at", { withTimezone: true }).defaultNow().notNull(),
+  publishedByUserId: text("published_by_user_id").references(() => user.id, { onDelete: "set null" }),
+  recordCount: integer("record_count").notNull(),
+  jsonPath: text("json_path").notNull(),
+  ndjsonPath: text("ndjson_path").notNull(),
+  jsonHash: text("json_hash").notNull(),
+  ndjsonHash: text("ndjson_hash").notNull(),
+  current: boolean("current").default(false).notNull(),
+}, (t) => [
+  uniqueIndex("api_snapshots_current_uidx").on(t.current).where(sql`${t.current} = true`),
+  check("api_snapshots_counts_valid", sql`${t.schemaVersion} > 0 and ${t.recordCount} >= 0`),
+  check("api_snapshots_hashes_valid", sql`${t.jsonHash} ~ '^[0-9a-f]{64}$' and ${t.ndjsonHash} ~ '^[0-9a-f]{64}$'`),
+  check("api_snapshots_paths_valid", sql`${t.jsonPath} like 'registry-snapshots/%' and ${t.ndjsonPath} like 'registry-snapshots/%'`),
 ]);

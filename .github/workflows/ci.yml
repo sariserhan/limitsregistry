@@ -34,4 +34,8 @@ jobs:
       - run: npm run typecheck
       - run: npm run lint
       - run: npm test
+      # Snapshot determinism checks need a stable registry, after other DB tests finish.
+      - run: npx vitest run src/api/pilot.integration.test.ts
+        env:
+          PILOT_TEST_DATABASE_URL: postgres://limits:limits@localhost:5432/limits_registry
       - run: npm run build
