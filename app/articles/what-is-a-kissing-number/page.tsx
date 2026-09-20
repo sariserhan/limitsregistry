@@ -4,7 +4,7 @@ import InfoPage from "../../_components/InfoPage";
 import { getBlogPost } from "../../../src/domain/blog-posts";
 const post = getBlogPost("what-is-a-kissing-number")!;
 export const metadata: Metadata = { title: `What Is a Kissing Number? — Limits Registry`, description: post.dek, alternates: { canonical: `/articles/${post.slug}` }, openGraph: { title: `What Is a Kissing Number? — Limits Registry`, description: post.dek, url: `/articles/${post.slug}`, type: "article" }, twitter: { card: "summary_large_image", title: `What Is a Kissing Number? — Limits Registry`, description: post.dek } };
-export default function Page() { return <InfoPage kicker="Articles · Geometry" title={post.title} intro={post.dek}><p>Imagine placing identical billiard balls around one central ball. How many can touch it at once without any two outer balls overlapping? That maximum is the <i>kissing number</i> of the space, written <i>k(n)</i> in n-dimensional Euclidean space.</p>
+export default function Page() { return <InfoPage kicker="Articles · Geometry" title={post.title} intro={post.dek} sponsorRecord="LR-000141"><p>Imagine placing identical billiard balls around one central ball. How many can touch it at once without any two outer balls overlapping? That maximum is the <i>kissing number</i> of the space, written <i>k(n)</i> in n-dimensional Euclidean space.</p>
 <h2>Three dimensions is not obvious</h2>
 <p>In two dimensions, six equal circles fit around a central circle. In three dimensions, the answer is 12. The picture looks familiar, but proving that 13 cannot fit is much harder than arranging 12. The three-dimensional case was settled in 1953 after a long history of competing constructions and arguments.</p>
 <h2>Four dimensions: exactly 24</h2>

@@ -4,8 +4,9 @@ import "./sponsor-callout.css";
 type SponsorCalloutProps = {
   category?: string;
   record?: string;
-  context?: "record" | "bounty" | "category";
+  context?: "record" | "bounty" | "category" | "research";
   compact?: boolean;
+  heading?: string;
 };
 
 export function sponsorEnquiryHref({ category, record }: { category?: string | null; record?: string }) {
@@ -15,11 +16,11 @@ export function sponsorEnquiryHref({ category, record }: { category?: string | n
   return params.size ? `/sponsor?${params}` : "/sponsor";
 }
 
-export function SponsorCallout({ category, record, context = "record", compact = false }: SponsorCalloutProps) {
-  const label = context === "category" ? "Sponsor this category" : context === "bounty" ? "Sponsor this research" : "Sponsor this record";
+export function SponsorCallout({ category, record, context = "record", compact = false, heading = "Put your name behind the next discovery." }: SponsorCalloutProps) {
+  const label = context === "category" ? "Sponsor this category" : (context === "bounty" || context === "research") ? "Sponsor this research" : "Sponsor this record";
   return <div className={`sponsor-callout${compact ? " sponsor-callout-compact" : ""}`}>
     <span className="sponsor-callout-kicker">Become a sponsor</span>
-    <strong>Put your name behind the next discovery.</strong>
+    <strong>{heading}</strong>
     <p>{context === "category"
       ? "Get your organisation seen across this category, with your name and link on its published records."
       : "Reach people exploring this research with a visible sponsor panel for your organisation."}</p>

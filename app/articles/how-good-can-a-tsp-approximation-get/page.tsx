@@ -12,7 +12,7 @@ export const metadata: Metadata = {
   twitter: { card: "summary_large_image", title: `${post.title} — Limits Registry`, description: post.dek },
 };
 
-export default function Page() { return <InfoPage kicker="Articles · Optimization" title={post.title} intro={post.dek}>
+export default function Page() { return <InfoPage kicker="Articles · Optimization" title={post.title} intro={post.dek} sponsorRecord="LR-DRAFT-TSP">
 
 <p>The traveling salesman problem asks for the shortest possible route that visits every city in a list exactly once and returns to the start. It&rsquo;s a classic NP-hard problem: nobody can solve it exactly and efficiently for large instances (unless P = NP), so research instead asks how close a fast algorithm can get to the true optimum. For &ldquo;metric&rdquo; TSP &mdash; where distances satisfy the triangle inequality, as ordinary geographic distances do &mdash; that&rsquo;s exactly what the <b><Link href="/limits/LR-DRAFT-TSP">metric TSP approximation frontier</Link></b> tracks.</p>
 

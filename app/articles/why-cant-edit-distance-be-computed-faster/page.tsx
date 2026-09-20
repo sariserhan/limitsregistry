@@ -12,7 +12,7 @@ export const metadata: Metadata = {
   twitter: { card: "summary_large_image", title: `${post.title} — Limits Registry`, description: post.dek },
 };
 
-export default function Page() { return <InfoPage kicker="Articles · Algorithms" title={post.title} intro={post.dek}>
+export default function Page() { return <InfoPage kicker="Articles · Algorithms" title={post.title} intro={post.dek} sponsorRecord="LR-DRAFT-ALG-07">
 
 <p>The edit distance between two strings is the minimum number of single-character insertions, deletions, or substitutions needed to turn one into the other &mdash; the basis of spell-checkers, DNA sequence alignment, and diff tools. In 1974, Robert Wagner and Michael Fischer described a dynamic-programming algorithm that computes it in O(n<sup>2</sup>) time for strings of length n. For over 40 years afterward, nobody found anything meaningfully faster for the general problem, despite it being one of the most heavily studied problems in algorithms. The <b><Link href="/limits/LR-DRAFT-ALG-07">edit-distance fine-grained barrier</Link></b> is the proof of why.</p>
 

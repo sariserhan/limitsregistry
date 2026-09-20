@@ -12,7 +12,7 @@ export const metadata: Metadata = {
   twitter: { card: "summary_large_image", title: `${post.title} — Limits Registry`, description: post.dek },
 };
 
-export default function Page() { return <InfoPage kicker="Articles · Fluid dynamics" title={post.title} intro={post.dek}>
+export default function Page() { return <InfoPage kicker="Articles · Fluid dynamics" title={post.title} intro={post.dek} sponsorRecord="LR-NAVIER-STOKES">
 
 <p>The Navier&ndash;Stokes equations, worked out in the 19th century, describe how a fluid&rsquo;s velocity and pressure change over time and space. Engineers solve approximations of them constantly &mdash; to design aircraft wings, model weather systems, and simulate blood flow &mdash; almost always numerically, on a computer, rather than exactly. The <b><Link href="/limits/LR-NAVIER-STOKES">Navier&ndash;Stokes existence and smoothness</Link></b> problem asks a more basic mathematical question that all that engineering practice quietly assumes: in three dimensions, given reasonable starting conditions, do exact solutions always exist for all future time and stay smooth &mdash; or can they blow up into a singularity in finite time?</p>
 

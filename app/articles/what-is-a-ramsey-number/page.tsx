@@ -12,7 +12,7 @@ export const metadata: Metadata = {
   twitter: { card: "summary_large_image", title: `${post.title} — Limits Registry`, description: post.dek },
 };
 
-export default function Page() { return <InfoPage kicker="Articles · Combinatorics" title={post.title} intro={post.dek}>
+export default function Page() { return <InfoPage kicker="Articles · Combinatorics" title={post.title} intro={post.dek} sponsorRecord="LR-RAMSEY-5-5">
 
 <p>Invite enough people to a party, and among any group that large, you&rsquo;re guaranteed to find either a clique of mutual acquaintances or a clique of mutual strangers of a certain size &mdash; no matter how the acquaintances happen to be arranged. The Ramsey number R(m, n) is the exact smallest party size where that guarantee kicks in for a clique of m acquaintances or n strangers.</p>
 

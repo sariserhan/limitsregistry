@@ -12,7 +12,7 @@ export const metadata: Metadata = {
   twitter: { card: "summary_large_image", title: `${post.title} — Limits Registry`, description: post.dek },
 };
 
-export default function Page() { return <InfoPage kicker="Articles · Algorithms" title={post.title} intro={post.dek}>
+export default function Page() { return <InfoPage kicker="Articles · Algorithms" title={post.title} intro={post.dek} sponsorRecord="LR-DRAFT-ALG-26">
 
 <p>A vertex cover of a graph is a set of vertices that touches every edge. Finding the smallest one is NP-hard, but a startlingly simple algorithm gets within a factor of two of optimal: take any <i>maximal matching</i> &mdash; a set of edges that share no endpoints and can&rsquo;t be extended &mdash; and include both endpoints of every matched edge. Since the optimal cover must include at least one endpoint from each matching edge (they share no vertices, so no single vertex can cover two of them), and this construction uses both endpoints of each, the result is at most twice the true optimum. The <b><Link href="/limits/LR-DRAFT-ALG-26">vertex-cover approximation</Link></b> record tracks whether that factor of two can ever be beaten.</p>
 

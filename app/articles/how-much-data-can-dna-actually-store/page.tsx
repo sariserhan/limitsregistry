@@ -12,7 +12,7 @@ export const metadata: Metadata = {
   twitter: { card: "summary_large_image", title: `${post.title} — Limits Registry`, description: post.dek },
 };
 
-export default function Page() { return <InfoPage kicker="Articles · Data storage" title={post.title} intro={post.dek}>
+export default function Page() { return <InfoPage kicker="Articles · Data storage" title={post.title} intro={post.dek} sponsorRecord="LR-DRAFT-DNA">
 
 <p>DNA encodes information using four bases &mdash; A, C, G, and T &mdash; which means each base can in principle carry up to 2 bits, and the molecule packs those bases at molecular density. That combination makes DNA, in theory, the densest data-storage medium anyone knows of. The <b><Link href="/limits/LR-DRAFT-DNA">DNA information density</Link></b> record tracks two very different numbers that shouldn&rsquo;t be conflated: a theoretical raw ceiling near <b>455 exabytes per gram</b>, and what&rsquo;s actually been demonstrated with a real, working, error-corrected encoding scheme.</p>
 

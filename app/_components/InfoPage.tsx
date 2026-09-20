@@ -1,8 +1,9 @@
+import { SponsorCallout } from "../../src/components/sponsor-callout";
 import type { ReactNode } from "react";
 import { PublicHeader } from "../../src/components/public-header";
 import { SiteFooter } from "../../src/components/site-footer";
 
-export default function InfoPage({ kicker, title, intro, children }: { kicker: string; title: string; intro: string; children: ReactNode }) {
+export default function InfoPage({ kicker, title, intro, children, sponsorRecord }: { kicker: string; title: string; intro: string; children: ReactNode; sponsorRecord?: string }) {
   return (
     <div className="info-page">
       <PublicHeader />
@@ -15,6 +16,7 @@ export default function InfoPage({ kicker, title, intro, children }: { kicker: s
           <h1>{title}</h1>
           <p className="info-intro">{intro}</p>
           <div className="info-body">{children}</div>
+          {sponsorRecord ? <SponsorCallout record={sponsorRecord} context="research" compact /> : null}
         </article>
       </main>
       <SiteFooter />

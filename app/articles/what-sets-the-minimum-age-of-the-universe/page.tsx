@@ -12,7 +12,7 @@ export const metadata: Metadata = {
   twitter: { card: "summary_large_image", title: `${post.title} — Limits Registry`, description: post.dek },
 };
 
-export default function Page() { return <InfoPage kicker="Articles · Cosmology" title={post.title} intro={post.dek}>
+export default function Page() { return <InfoPage kicker="Articles · Cosmology" title={post.title} intro={post.dek} sponsorRecord="LR-003520">
 
 <p>The standard estimate for the age of the universe &mdash; about 13.8 billion years &mdash; comes from fitting a cosmological model to measurements of the cosmic microwave background. That&rsquo;s a model-dependent number: change the assumptions in the model, and the estimate shifts. The <b><Link href="/limits/LR-003520">cosmic-age lower bound from oldest dated stars</Link></b> is a completely different, model-independent kind of argument: whatever the universe&rsquo;s true age turns out to be, it cannot be younger than the oldest object found inside it.</p>
 

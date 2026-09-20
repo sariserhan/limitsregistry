@@ -12,7 +12,7 @@ export const metadata: Metadata = {
   twitter: { card: "summary_large_image", title: `${post.title} — Limits Registry`, description: post.dek },
 };
 
-export default function Page() { return <InfoPage kicker="Articles · Mathematics" title={post.title} intro={post.dek}>
+export default function Page() { return <InfoPage kicker="Articles · Mathematics" title={post.title} intro={post.dek} sponsorRecord="LR-000072">
 
 <p>Take every point in the infinite flat plane. Color each point so that no two points exactly one unit apart share the same color. How few colors do you need?</p>
 

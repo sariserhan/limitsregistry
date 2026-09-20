@@ -12,7 +12,7 @@ export const metadata: Metadata = {
   twitter: { card: "summary_large_image", title: `${post.title} — Limits Registry`, description: post.dek },
 };
 
-export default function Page() { return <InfoPage kicker="Articles · Optimization" title={post.title} intro={post.dek}>
+export default function Page() { return <InfoPage kicker="Articles · Optimization" title={post.title} intro={post.dek} sponsorRecord="LR-002000">
 
 <p>A mixed-integer program (MIP) is an optimization problem where you&rsquo;re minimizing or maximizing something subject to constraints, and at least some of the variables have to be whole numbers &mdash; you can&rsquo;t assign 2.3 trucks to a delivery route or open 1.7 of a factory. That integer requirement is what makes MIPs hard: relaxing it away turns a problem into ordinary linear programming, solvable efficiently, but putting it back makes the problem NP-hard in general, with no known algorithm that solves every instance quickly.</p>
 

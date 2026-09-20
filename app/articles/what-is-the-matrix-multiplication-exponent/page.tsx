@@ -12,7 +12,7 @@ export const metadata: Metadata = {
   twitter: { card: "summary_large_image", title: `${post.title} — Limits Registry`, description: post.dek },
 };
 
-export default function Page() { return <InfoPage kicker="Articles · Algorithms" title={post.title} intro={post.dek}>
+export default function Page() { return <InfoPage kicker="Articles · Algorithms" title={post.title} intro={post.dek} sponsorRecord="LR-DRAFT-OMEGA">
 
 <p>Multiplying two n&times;n matrices the way it&rsquo;s taught in school takes roughly n<sup>3</sup> arithmetic operations. It turns out that&rsquo;s not the fastest possible method &mdash; and how much faster it can go is still an open question. The <b><Link href="/limits/LR-DRAFT-OMEGA">matrix multiplication exponent</Link></b>, written &omega;, is defined as the smallest number such that n&times;n matrices can be multiplied using O(n<sup>&omega;</sup>) operations. Trivially &omega; &ge; 2 &mdash; you at least have to read every entry of both matrices &mdash; but nobody knows whether that lower bound is actually achievable.</p>
 

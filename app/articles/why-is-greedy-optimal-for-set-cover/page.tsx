@@ -12,7 +12,7 @@ export const metadata: Metadata = {
   twitter: { card: "summary_large_image", title: `${post.title} — Limits Registry`, description: post.dek },
 };
 
-export default function Page() { return <InfoPage kicker="Articles · Algorithms" title={post.title} intro={post.dek}>
+export default function Page() { return <InfoPage kicker="Articles · Algorithms" title={post.title} intro={post.dek} sponsorRecord="LR-DRAFT-ALG-25">
 
 <p>Set cover asks for the fewest subsets, drawn from a given collection, whose union covers every element of a universe. It&rsquo;s NP-hard, and it generalizes cleanly recognizable problems like scheduling and facility placement. The obvious heuristic is <b>greedy</b>: at each step, pick whichever remaining subset covers the most elements not yet covered, and repeat until done. The <b><Link href="/limits/LR-DRAFT-ALG-25">set-cover greedy approximation</Link></b> record tracks exactly how good that simple idea provably is &mdash; and how it compares to the best any algorithm could do.</p>
 

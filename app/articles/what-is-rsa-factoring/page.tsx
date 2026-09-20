@@ -12,7 +12,7 @@ export const metadata: Metadata = {
   twitter: { card: "summary_large_image", title: `${post.title} — Limits Registry`, description: post.dek },
 };
 
-export default function Page() { return <InfoPage kicker="Articles · Cryptography" title={post.title} intro={post.dek}>
+export default function Page() { return <InfoPage kicker="Articles · Cryptography" title={post.title} intro={post.dek} sponsorRecord="LR-RSA-260">
 
 <p>RSA encryption &mdash; the algorithm behind a large share of internet security &mdash; relies on one asymmetry: multiplying two large prime numbers together is fast, but recovering those two primes from their product is, as far as anyone has proven, extremely slow. There&rsquo;s no proof that factoring is fundamentally hard in the mathematical sense (that&rsquo;s an open question in complexity theory), but decades of attempts have never found a fast general method &mdash; and that empirical track record is what the RSA Factoring Challenge was built to keep testing.</p>
 

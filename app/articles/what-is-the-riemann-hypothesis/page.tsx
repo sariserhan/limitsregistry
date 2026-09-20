@@ -12,7 +12,7 @@ export const metadata: Metadata = {
   twitter: { card: "summary_large_image", title: `${post.title} — Limits Registry`, description: post.dek },
 };
 
-export default function Page() { return <InfoPage kicker="Articles · Number theory" title={post.title} intro={post.dek}>
+export default function Page() { return <InfoPage kicker="Articles · Number theory" title={post.title} intro={post.dek} sponsorRecord="LR-RIEMANN">
 
 <p>The Riemann zeta function &zeta;(s) extends the familiar sum 1 + 1/2<sup>s</sup> + 1/3<sup>s</sup> + &hellip; to the entire complex plane. It has infinitely many &ldquo;trivial&rdquo; zeros at the negative even integers, and infinitely many &ldquo;non-trivial&rdquo; zeros elsewhere. Bernhard Riemann conjectured in 1859 that every one of those non-trivial zeros has real part exactly 1/2 &mdash; that they all sit on a single vertical line in the complex plane, the <b>critical line</b>. That is the <b><Link href="/limits/LR-RIEMANN">Riemann hypothesis</Link></b>.</p>
 

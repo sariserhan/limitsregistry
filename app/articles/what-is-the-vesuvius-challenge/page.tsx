@@ -12,7 +12,7 @@ export const metadata: Metadata = {
   twitter: { card: "summary_large_image", title: `${post.title} — Limits Registry`, description: post.dek },
 };
 
-export default function Page() { return <InfoPage kicker="Articles · Computer vision" title={post.title} intro={post.dek}>
+export default function Page() { return <InfoPage kicker="Articles · Computer vision" title={post.title} intro={post.dek} sponsorRecord="LR-VESUVIUS">
 
 <p>When Mount Vesuvius buried the Roman town of Herculaneum in 79 AD, it carbonized an entire library of papyrus scrolls into blocks of fragile black carbon. Unrolling one by hand crumbles it. For over two centuries, that left a real library of ancient text that nobody could read. The <b><Link href="/limits/LR-VESUVIUS">Vesuvius Challenge</Link></b>, founded by Nat Friedman and Daniel Gross, offers a $1,000,000 Grand Prize &mdash; part of a $2.14M total prize pool &mdash; to the first team that reads a complete scroll without ever physically opening it.</p>
 

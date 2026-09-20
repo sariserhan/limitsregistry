@@ -12,7 +12,7 @@ export const metadata: Metadata = {
   twitter: { card: "summary_large_image", title: `${post.title} — Limits Registry`, description: post.dek },
 };
 
-export default function Page() { return <InfoPage kicker="Articles · Information theory" title={post.title} intro={post.dek}>
+export default function Page() { return <InfoPage kicker="Articles · Information theory" title={post.title} intro={post.dek} sponsorRecord="LR-DRAFT-LANDAUER">
 
 <p>Computation feels abstract, but it happens in physical hardware, and physics has an opinion about it. In 1961, IBM physicist Rolf Landauer showed that any <i>logically irreversible</i> operation &mdash; one where you can&rsquo;t work backward from the output to recover the input, like overwriting a bit or erasing a memory cell &mdash; must dissipate a minimum amount of heat into the environment. The <b><Link href="/limits/LR-DRAFT-LANDAUER">Landauer bit-erasure limit</Link></b> puts a number on it: erasing one bit at temperature <i>T</i> dissipates at least <i>Q</i> = <i>k</i><sub>B</sub><i>T</i> ln(2) of energy, where <i>k</i><sub>B</sub> is Boltzmann&rsquo;s constant.</p>
 

@@ -12,7 +12,7 @@ export const metadata: Metadata = {
   twitter: { card: "summary_large_image", title: `${post.title} — Limits Registry`, description: post.dek },
 };
 
-export default function Page() { return <InfoPage kicker="Articles · Computational complexity" title={post.title} intro={post.dek}>
+export default function Page() { return <InfoPage kicker="Articles · Computational complexity" title={post.title} intro={post.dek} sponsorRecord="LR-P-VS-NP">
 
 <p>Some problems are hard to solve but easy to check. Given a proposed route through a hundred cities, verifying it&rsquo;s under some target length is quick; finding the shortest route from scratch might take far longer. <b><Link href="/limits/LR-P-VS-NP">P versus NP</Link></b> asks whether that gap is real &mdash; whether every problem whose solution can be verified quickly (in polynomial time, the class NP) can also be solved quickly from scratch (the class P). Stephen Cook and Leonid Levin formulated the question independently in 1971.</p>
 

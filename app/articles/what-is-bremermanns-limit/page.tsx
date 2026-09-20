@@ -12,7 +12,7 @@ export const metadata: Metadata = {
   twitter: { card: "summary_large_image", title: `${post.title} — Limits Registry`, description: post.dek },
 };
 
-export default function Page() { return <InfoPage kicker="Articles · Physics" title={post.title} intro={post.dek}>
+export default function Page() { return <InfoPage kicker="Articles · Physics" title={post.title} intro={post.dek} sponsorRecord="LR-003308">
 
 <p>In 1962, mathematician and biophysicist Hans Bremermann proposed a ceiling on how fast any physical system could process information, based on combining relativity (mass-energy equivalence) with the quantum time-energy uncertainty relation. The <b><Link href="/limits/LR-003308">Bremermann information-processing bound</Link></b> states that a system with energy <i>E</i> cannot process information faster than <i>R</i> &le; 2<i>E</i>/(&pi;&#295; ln 2) bits per second. For one kilogram of mass converted entirely to computing energy, that works out to roughly 1.36 &times; 10<sup>50</sup> bits per second &mdash; a number since cited in arguments about the ultimate limits of brute-force computation and cryptographic key strength.</p>
 

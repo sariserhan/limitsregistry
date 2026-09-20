@@ -12,7 +12,7 @@ export const metadata: Metadata = {
   twitter: { card: "summary_large_image", title: `${post.title} — Limits Registry`, description: post.dek },
 };
 
-export default function Page() { return <InfoPage kicker="Articles · Information theory" title={post.title} intro={post.dek}>
+export default function Page() { return <InfoPage kicker="Articles · Information theory" title={post.title} intro={post.dek} sponsorRecord="LR-DRAFT-SHANNON">
 
 <p>Every lossless compression algorithm &mdash; zip, gzip, the codec behind a PNG &mdash; is bounded by a limit that was proven mathematically in 1948, decades before any of them existed. No amount of cleverness in the algorithm can beat it, because the limit isn&rsquo;t about the algorithm. It&rsquo;s about the information itself.</p>
 
