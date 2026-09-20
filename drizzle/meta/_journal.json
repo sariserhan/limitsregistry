@@ -204,6 +204,13 @@
       "when": 1789931122001,
       "tag": "0028_visitorping_record_history",
       "breakpoints": true
+    },
+    {
+      "idx": 29,
+      "version": "7",
+      "when": 1789933720618,
+      "tag": "0029_visitorping_all_visit_history",
+      "breakpoints": true
     }
   ]
 }

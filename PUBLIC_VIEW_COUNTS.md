@@ -60,8 +60,10 @@ these local checks as a production rollout.
 
 ## VisitorPing historical export and record backfill
 
-The supplied Pages API guide provides page-view rollups from 2026-08-28,
-excluding bots by default. `scripts/export-visitorping-history.ts` reads
+The current Pages API returns `views`, including humans, crawlers and AI agents.
+The `traffic` parameter and `uniqueVisitors` are removed. Tracker history starts
+2026-08-28; edge crawler history begins 2026-09-20. Earlier history is tracker-only.
+The human-only exports below document the original import, now corrected by 0029. `scripts/export-visitorping-history.ts` reads
 `VISITORPING_API_SECRET` from `.env.local` (or the process environment) and discovers
 the matching domain and site ID through authenticated `GET /api/v1/sites`.
 Optional `--site-id` or `VISITORPING_SITE_ID` must match that discovery. It follows every opaque
@@ -70,12 +72,13 @@ refuses duplicate paths or malformed data. It writes a private local export only
 it does not update production counts. Existing output files are not overwritten.
 
 Example: `npx tsx scripts/export-visitorping-history.ts`.
+Use `--from 2026-09-20 --to 2026-09-20` to audit the daily rankings.
 The default cutoff is 2026-09-19 inclusive, before live counting began on September
 20. The Pages API has only whole-day boundaries: it cannot isolate September 20
 views before our live counter began. Therefore a simple pre-cutoff backfill would
 avoid double-counting but leave that partial-day gap; do not call it a complete
-all-time total. Historical bot filtering also differs from the current browser
-counter's semantics and must be disclosed before combining figures.
+all-time total. Historical all-visit totals include crawlers; the ongoing browser counter only
+observes clients that execute JavaScript. It does not count all edge crawler visits.
 
 An explicit later `--to` is allowed for read-only audits; the summary flags overlap
 with live counters. It is not an import command.
@@ -99,7 +102,7 @@ Migration `0028_visitorping_record_history` adds 88 human page views through
 September 19 across 52 matching published records. One nonmatching historical
 path is excluded. Zero-view paths are omitted. Existing live totals are incremented
 atomically, with no new UI or separate historical counter. Category and bounty
-counts are unchanged. The whole-day gap and differing bot filtering noted above
+counts are unchanged. The whole-day gap noted above
 still apply; this is a recorded total, not a complete unique-visitor count.
 
 The transaction and Drizzle journal prevent a repeat migration from importing twice.
@@ -114,3 +117,35 @@ Migration SHA-256: `5c31f9eaf4aa4c67a064c7091fd0c6c9c518a5bfae98899e5cb55c7d4948
 Live browser verification showed a single “4 page views” counter on LR-003318,
 including the verification visit. Temporary migration deployment
 `dpl_Aeta8EKBKzfrFfaEwdEAsyPiTWyH` and its local credentials were removed.
+
+### Revised VisitorPing contract and correction — 2026-09-20
+
+The export client now requires `views` and sends no `traffic` parameter. It rejects
+legacy `pageviews` rows, preserves opaque pagination, and accepts an explicit
+`--from` for daily audits. Six focused tests, typecheck and lint passed.
+
+Fresh daily results for September 20 exactly matched the provider benchmarks:
+`/sponsor` 342, `/sponsor/bounties` 171, `/submit` 157, `/login` 148, `/` 63.
+There were 1,402 daily paths and 2,990 views. The full-range export contained 2,238
+paths and 9,483 views across three requests; the old 1,302-path benchmark no longer
+applies. The pre-September-20 export contained 6,493 views across 1,263 paths.
+
+Migration `0029_visitorping_all_visit_history` adds only the difference between the
+new pre-cutoff totals and migration 0028, preserving live increments. Production
+received 4,086 additional views across 1,118 matching published records. Every
+counter was checked against its previous value plus the correction, and rerunning
+the guarded migration changed nothing. Categories and bounties were unchanged.
+LR-003318 changed from 4 to 7 before the verification visit. A rolled-back local test
+proved 10 live views + 1 old historical view + 3 correction = 14, with private
+records excluded and category counts preserved.
+
+The historical cutoff remains September 19. This is a one-time historical correction,
+not continuous VisitorPing synchronization; live increments still require JavaScript.
+The September 20 partial-day gap remains, and edge crawler history before September
+20 is unavailable from VisitorPing. There is still only one visible total per record.
+
+Migration SHA-256: `8ab12105337f26954cf695226d8c2d8484094d89a88a074ed491b2f49f99df83`.
+
+Live browser verification displayed a single “8 page views” total on LR-003318,
+including the verification visit. Temporary runner `dpl_BvpEZ2ooXdfeJw5gChfcWKukP5zk`
+and its local authentication files were removed.

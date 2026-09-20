@@ -4,10 +4,10 @@ import { discoverVisitorPingSite, fetchVisitorPingHistory } from "../src/analyti
 
 async function main() {
   const args = process.argv.slice(2);
-  const allowed = new Set(["--site-id", "--to", "--output"]);
+  const allowed = new Set(["--site-id", "--from", "--to", "--output"]);
   const options = new Map<string, string>();
   for (let i = 0; i < args.length; i += 2) {
-    if (!allowed.has(args[i]) || !args[i + 1] || options.has(args[i])) throw new Error("Usage: tsx scripts/export-visitorping-history.ts [--site-id ID] [--to YYYY-MM-DD] [--output FILE]");
+    if (!allowed.has(args[i]) || !args[i + 1] || options.has(args[i])) throw new Error("Usage: tsx scripts/export-visitorping-history.ts [--site-id ID] [--from YYYY-MM-DD] [--to YYYY-MM-DD] [--output FILE]");
     options.set(args[i], args[i + 1]);
   }
   const local = parse(await readFile(".env.local"));
@@ -19,11 +19,11 @@ async function main() {
   const siteId = discovered.id;
   const to = options.get("--to") || "2026-09-19";
   // Later dates are useful for read-only audits, but cannot be added to live totals.
-  const history = await fetchVisitorPingHistory({ siteId, apiKey, to });
+  const history = await fetchVisitorPingHistory({ siteId, apiKey, from: options.get("--from"), to });
   const output = options.get("--output") || "/private/tmp/limitsregistry-visitorping-history.json";
   await writeFile(output, JSON.stringify(history, null, 2), { mode: 0o600, flag: "wx" });
   const limitRows = history.rows.filter(row => /^\/limits\/[^/]+$/.test(row.path));
   const categoryRows = history.rows.filter(row => /^\/categories\/[^/]+$/.test(row.path));
-  console.log(JSON.stringify({ output, site: history.site, to, traffic: history.traffic, requests: history.generatedAt.length, pages: history.rows.length, pageviews: history.rows.reduce((sum, row) => sum + row.pageviews, 0), homepage: history.rows.find(row => row.path === "/") || null, limitPages: limitRows.length, categoryPages: categoryRows.length, example: history.rows.find(row => row.path === "/limits/LR-003318") || null, overlapsLiveCounters: to >= "2026-09-20", imported: false }, null, 2));
+  console.log(JSON.stringify({ output, site: history.site, from: history.from, to, requests: history.generatedAt.length, pages: history.rows.length, views: history.rows.reduce((sum, row) => sum + row.views, 0), topPages: history.rows.slice(0, 5), homepage: history.rows.find(row => row.path === "/") || null, limitPages: limitRows.length, categoryPages: categoryRows.length, example: history.rows.find(row => row.path === "/limits/LR-003318") || null, overlapsLiveCounters: to >= "2026-09-20", imported: false }, null, 2));
 }
 main().catch(error => { console.error(error instanceof Error ? error.message : "VisitorPing export failed."); process.exitCode = 1; });
