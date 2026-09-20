@@ -101,6 +101,55 @@ export const blogPosts: BlogPost[] = [
     publishedAt: "2026-08-29",
     tags: ["Records", "Methodology"],
   },
+  {
+    slug: "what-is-the-p-vs-np-problem",
+    title: "What Is the P versus NP Problem?",
+    dek: "The $1,000,000 question of whether every easily checked answer is also easy to find — open since 1971.",
+    publishedAt: "2026-09-19",
+    tags: ["Mathematics", "Computing"],
+  },
+  {
+    slug: "what-is-the-riemann-hypothesis",
+    title: "What Is the Riemann Hypothesis?",
+    dek: "A 165-year-old claim about where the zeros of one function sit — verified for trillions of cases, proven for none.",
+    publishedAt: "2026-09-19",
+    tags: ["Mathematics", "Number theory"],
+  },
+  {
+    slug: "what-is-the-navier-stokes-problem",
+    title: "What Is the Navier–Stokes Existence and Smoothness Problem?",
+    dek: "The equations that fly every airplane and forecast every storm — and the unproven question of whether their solutions can blow up.",
+    publishedAt: "2026-09-19",
+    tags: ["Physics", "Open problems"],
+  },
+  {
+    slug: "what-is-landauers-principle",
+    title: "What Is Landauer's Principle?",
+    dek: "Erasing a single bit of information has a minimum energy cost — a thermodynamic floor confirmed in the lab in 2012.",
+    publishedAt: "2026-09-19",
+    tags: ["Physics", "Information theory"],
+  },
+  {
+    slug: "what-is-the-matrix-multiplication-exponent",
+    title: "What Is the Matrix Multiplication Exponent?",
+    dek: "The best proven algorithm for multiplying two matrices keeps getting slightly faster — currently ω < 2.371339, with 2 as the unreached floor.",
+    publishedAt: "2026-09-19",
+    tags: ["Computing", "Algorithms"],
+  },
+  {
+    slug: "how-good-can-a-tsp-approximation-get",
+    title: "How Good Can a TSP Approximation Get?",
+    dek: "Christofides' 3/2-approximation for the traveling salesman problem stood as the best known bound for 44 years — until it finally moved in 2020.",
+    publishedAt: "2026-09-19",
+    tags: ["Computing", "Optimization"],
+  },
+  {
+    slug: "what-is-the-vesuvius-challenge",
+    title: "What Is the Vesuvius Challenge?",
+    dek: "A $1,000,000 prize to read a 2,000-year-old scroll nobody can physically open — using CT scans and machine learning instead.",
+    publishedAt: "2026-09-19",
+    tags: ["Computing", "Machine learning"],
+  },
 ];
 
 export function getBlogPost(slug: string) {
