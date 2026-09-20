@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("server-only", () => ({}));
+vi.mock("./activity", () => ({ observeApi: (_request: Request, _endpoint: string, handler: (context: object) => Promise<Response>) => handler({}) }));
 const mocks = vi.hoisted(() => ({
   resolveApiKey: vi.fn(), recordSnapshotDownload: vi.fn(), currentSnapshot: vi.fn(), openSnapshot: vi.fn(),
   snapshotStorageConfigured: vi.fn(), checkRateLimit: vi.fn(), hasDistributedRateLimit: vi.fn(), paused: false,
@@ -88,7 +89,7 @@ describe("paid snapshot delivery", () => {
   });
   it("rejects unsupported formats and HEAD without usage", async () => {
     expect((await GET(request({}, "csv"))).status).toBe(400);
-    expect((await HEAD()).status).toBe(405);
+    expect((await HEAD(new Request("http://localhost/api/v1/snapshot", { method: "HEAD" }))).status).toBe(405);
     expect(mocks.recordSnapshotDownload).not.toHaveBeenCalled();
   });
 });

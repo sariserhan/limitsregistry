@@ -1,3 +1,4 @@
+import { observeApi } from "../../../../src/api/activity";
 import { NextResponse } from "next/server";
 import { listPublicLimitPage } from "../../../../src/db/repository.public-limits";
 import { API_V1_PAUSED, pausedApiResponse } from "../../../../src/api/v1-paused";
@@ -6,7 +7,7 @@ export const runtime = "nodejs";
 
 // Read-only public API — same published data the site itself renders (listPublishedLimits is
 // already OPEN/PROVEN/DISPUTED/RETIRED only), just as JSON for programmatic use. See /developers.
-export async function GET(request: Request) {
+async function getResponse(request: Request) {
   if (API_V1_PAUSED) return pausedApiResponse();
   const params = new URL(request.url).searchParams;
   const category = params.get("category");
@@ -29,4 +30,8 @@ export async function GET(request: Request) {
   }));
 
   return NextResponse.json({ data, page: pageData.page, pageSize, total: pageData.total }, { headers: { "cache-control": "public, s-maxage=60, stale-while-revalidate=300" } });
+}
+
+export async function GET(request: Request) {
+  return observeApi(request, "limits", () => getResponse(request));
 }

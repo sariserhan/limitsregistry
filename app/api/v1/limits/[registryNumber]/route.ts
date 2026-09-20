@@ -1,3 +1,4 @@
+import { observeApi } from "../../../../../src/api/activity";
 import { getLimitResearchData, getPublishedLimit } from "../../../../../src/db/repository";
 import { API_V1_PAUSED, pausedApiResponse } from "../../../../../src/api/v1-paused";
 
@@ -11,7 +12,7 @@ function jsonResponse(body: unknown, status = 200) {
   return new Response(text, { status, headers: { "content-type": "application/json", "cache-control": "public, s-maxage=60, stale-while-revalidate=300" } });
 }
 
-export async function GET(_request: Request, { params }: { params: Promise<{ registryNumber: string }> }) {
+async function getRecord(_request: Request, { params }: { params: Promise<{ registryNumber: string }> }) {
   if (API_V1_PAUSED) return pausedApiResponse();
   const { registryNumber } = await params;
   const limit = await getPublishedLimit(registryNumber);
@@ -34,4 +35,8 @@ export async function GET(_request: Request, { params }: { params: Promise<{ reg
     evidence: research.evidence,
     url: `https://www.limitsregistry.com/limits/${limit.registryNumber}`,
   });
+}
+
+export async function GET(request: Request, context: { params: Promise<{ registryNumber: string }> }) {
+  return observeApi(request, "record", () => getRecord(request, context));
 }

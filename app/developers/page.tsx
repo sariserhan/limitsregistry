@@ -89,6 +89,9 @@ export default function Page() {
 <p>Beyond the JSON API: an embeddable SVG status badge at <code>/api/badge/&#123;registryNumber&#125;</code>, a BibTeX citation per record (see the record page), and RSS feeds for the <Link href="/breakthroughs">breakthroughs</Link> and <a href="/watchlists">watchlist</a> feeds.</p>
 
 <h2 id="limits">Public API rate limits and caching</h2>
-<p>No API key and no hard rate limit today &mdash; please cache client-side rather than polling in a tight loop. Public endpoints configure a 60-second shared-cache lifetime and up to 300 seconds of stale-while-revalidate; responses may lag recent edits. This is a best-effort read-only mirror of the public site, not a guaranteed-uptime service; these public record endpoints require no authentication and do not allow writes.</p>
+<p>No API key and no hard rate limit today &mdash; please cache client-side rather than polling in a tight loop. Record endpoints configure a 60-second shared-cache lifetime and up to 300 seconds of stale-while-revalidate; categories use 300 and 3,600 seconds respectively; responses may lag recent edits. This is a best-effort read-only mirror of the public site, not a guaranteed-uptime service; these public record endpoints require no authentication and do not allow writes.</p>
+
+<h2>Operational monitoring</h2>
+<p>We aggregate requests reaching our API servers by endpoint, status, hour, and resolved pilot key. Short-lived, daily rotating client identifiers help detect repeated failures. Monitoring excludes CDN cache hits and does not change download accounting. See our <Link href="/privacy">privacy policy</Link>.</p>
 
 </InfoPage>; }

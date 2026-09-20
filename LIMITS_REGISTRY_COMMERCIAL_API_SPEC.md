@@ -205,3 +205,54 @@ copies cannot be withdrawn by this service.
   fields in the local inbox and displayed confirmation; the test entry was removed.
   Desktop and 390px mobile layouts were checked, with no horizontal page overflow
   or Next.js runtime/compilation errors. This does not verify administrator email replies.
+
+## API activity and abuse signals
+
+- `/admin/api-activity` is ADMIN-only and reports current UTC hour plus the previous
+  23 hours: endpoint, HTTP status, GET/HEAD, resolved customer key, and hourly totals.
+  It includes 304s and rejected requests; these are separate from billable/download
+  accounting. Public CDN cache hits and edge-blocked traffic do not run handlers and
+  are **not included**. Consult Vercel traffic/firewall reporting for edge activity.
+- All four v1 GET handlers and explicit snapshot HEAD schedule best-effort recording
+  with Next.js `after`. Response bodies, status, cache headers, authentication and
+  rate limits remain unchanged. Recording failures produce a generic server log;
+  they do not fail API requests. No sampling is applied to handler executions.
+- Upstash holds hourly counters for 48 hours, five-minute detection windows for
+  15 minutes, and the most recent 100 signals for at most 24 hours. Cooldown state
+  is capped at 1,000 active subjects. No PostgreSQL migration is required.
+- Client addresses are HMAC-hashed with a UTC-day component. Set a 32+ character
+  `API_ACTIVITY_SECRET`, or use the existing `CRON_SECRET` fallback. Without a long
+  secret, client detection is disabled and the dashboard shows a warning; endpoint
+  and resolved-key activity still works. Raw IPs, tokens, queries, arbitrary paths,
+  and user agents are never stored in this telemetry. Unknown proxy addresses are
+  not grouped into a fabricated client identity.
+- Signals require at least 60 seconds of activity within a fixed five-minute window:
+  30 invalid credentials or 60 throttled responses per client/resolved key; 60
+  successful snapshot GETs per key; or 20 server errors per endpoint. A traffic spike
+  requires 500+ requests and 5x the preceding window, whose baseline must have 100+
+  requests. These are starting thresholds for review, not proof of abuse. No new
+  blocking policy or public API rate limit is introduced.
+- Each kind/endpoint/subject has a one-hour signal cooldown. The protected cron
+  `/api/cron/api-activity` runs every five minutes and emails a summary at most once
+  per hour after successful provider acceptance. An expiring owner-token lock
+  prevents concurrent sends; failed sends remain eligible for retry. The dashboard
+  shows the latest request, cron check, provider acceptance, and generic send errors.
+- `API_ALERT_EMAIL` overrides the existing signup-notification owner address.
+  `RESEND_API_KEY`, Upstash credentials and `CRON_SECRET` are required for operational
+  alerts. No real alert email is sent as part of automated verification. Email copies
+  have separate retention from Redis counters. Provider acceptance does not prove
+  inbox delivery. If a process dies after provider acceptance but before recording
+  it, a later run may repeat that summary.
+- Deploy the application/cron to activate collection; historical requests cannot be
+  recovered by this feature. This local implementation has not been deployed or
+  verified against live email delivery. The authenticated dashboard still requires
+  a real admin browser session for live visual acceptance.
+
+Verification includes telemetry privacy and failure isolation, cron/admin guards,
+email locking/cooldowns/retry behavior, and rendering the dashboard with fixture data.
+The actual Lua script can also be exercised without network or email using
+`scripts/verification/api-activity-lua.py` in a disposable Python environment with
+`fakeredis[lua]`. It checks sustained thresholds, cross-window cooldowns, bounded
+storage, expiry, traffic spikes and server errors. Run DB integration suites
+sequentially (`vitest run --no-file-parallelism`) when they share one disposable DB;
+otherwise sponsorship fixtures can change a registry-wide snapshot during hash tests.

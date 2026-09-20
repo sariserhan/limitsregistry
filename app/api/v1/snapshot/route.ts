@@ -1,3 +1,4 @@
+import { observeApi } from "../../../../src/api/activity";
 import { API_V1_PAUSED, pausedApiResponse } from "../../../../src/api/v1-paused";
 import { resolveApiKey, recordSnapshotDownload } from "../../../../src/api/api-key";
 import { currentSnapshot, openSnapshot, snapshotPath, snapshotStorageConfigured } from "../../../../src/api/snapshots";
@@ -9,7 +10,7 @@ export const runtime = "nodejs";
 export const maxDuration = 60;
 const privateHeaders = { "cache-control": "private, no-store", vary: "Authorization" };
 
-export async function GET(request: Request) {
+async function getSnapshot(request: Request, context: { keyId?: string }) {
   const headers = new Headers(privateHeaders);
   const error = (status: number, code: string, message: string) => Response.json({ error: code, message, documentation: "/developers" }, { status, headers });
   if (API_V1_PAUSED) return pausedApiResponse();
@@ -29,6 +30,7 @@ export async function GET(request: Request) {
       headers.set("www-authenticate", 'Bearer realm="registry-snapshots"');
       return error(401, "invalid_api_key", "The API key is malformed, unknown, or revoked.");
     }
+    context.keyId = key.id;
     const rate = await checkRateLimit(`snapshot-key:${key.id}`, PILOT_PER_MINUTE);
     headers.set("x-ratelimit-limit", String(PILOT_PER_MINUTE));
     headers.set("x-ratelimit-remaining", String(rate.remaining));
@@ -59,6 +61,10 @@ export async function GET(request: Request) {
 }
 
 // Next's implicit HEAD would call GET and count a download without delivering the file.
-export async function HEAD() {
-  return new Response(null, { status: 405, headers: { ...privateHeaders, allow: "GET" } });
+export async function HEAD(request: Request) {
+  return observeApi(request, "snapshot", async () => new Response(null, { status: 405, headers: { ...privateHeaders, allow: "GET" } }));
+}
+
+export async function GET(request: Request) {
+  return observeApi(request, "snapshot", (context) => getSnapshot(request, context));
 }
