@@ -621,7 +621,7 @@ export const WORLD_RECORDS_BATCH5: FrontierRecord[] = [
     value: "578",
     claimType: "CONSTRUCTION", epistemicStatus: "SOURCE_CONFIRMED", limitStatus: "OPEN",
     methodSummary: "Corporate registration and historical business records maintained in Japan.",
-    source: { title: "Guinness World Records — Oldest company", url: "https://www.guinnessworldrecords.com/world-records/oldest-company", date: "578-01-01", location: "Osaka, Japan" },
+    source: { title: "Guinness World Records — Oldest company", url: "https://www.guinnessworldrecords.com/world-records/oldest-company", date: "0578-01-01", location: "Osaka, Japan" },
   },
   {
     registryNumber: "LR-FIRST-CREDIT-CARD", slug: "first-credit-card", title: "First credit card",
