@@ -146,6 +146,20 @@ export const HUMAN_ANIMAL_RECORDS: HumanAnimalRecord[] = [
     methodSummary: "Measured and weighed at a whaling station per standard mid-20th-century whaling industry practice; the best-documented maximum mass for the species. Modern non-lethal measurement methods (photogrammetry, drone survey) have not exceeded this figure.",
     source: { title: "Largest animal — Guinness World Records", url: "https://www.guinnessworldrecords.com/world-records/115537-largest-animal", date: "1947-03-20", location: "Southern Ocean (whaling record)" },
   },
+  {
+    registryNumber: "LR-50M-FREESTYLE-MEN",
+    slug: "50m-freestyle-men",
+    title: "Men's 50 meters freestyle (swimming)",
+    subcategory: "Swimming",
+    direction: "MINIMIZE",
+    metricName: "50 meters freestyle time (men, long course, record-eligible)",
+    unit: "s",
+    formalStatement: "The fastest time recorded for a man to swim 50 meters freestyle in a long-course (50 m) pool, under World Aquatics record-eligible conditions.",
+    summary: "Australia's Cameron McEvoy swam 20.88 seconds at the China Swimming Open in Shenzhen on March 20, 2026, breaking César Cielo's 20.91-second record — a mark set in a now-banned polyurethane 'supersuit' in 2009 and widely assumed unbreakable in ordinary swimwear. World Aquatics ratified it as the new world record.",
+    value: "20.88",
+    methodSummary: "Electronically timed 50 m freestyle race at the China Swimming Open, ratified by World Aquatics as the official world record.",
+    source: { title: "McEvoy breaks iconic 50m freestyle World Record — World Aquatics", url: "https://www.worldaquatics.com/news/4474806/swimming-world-record-cameron-mcevoy-breaks-iconic-50m-freestyle-world-record-cesar-cielo", date: "2026-03-20", location: "China Swimming Open, Shenzhen, China" },
+  },
 ];
 
 // Fills in the existing LR-DRAFT-BIO-18 stub (title already reserved as "Cheetah sprint speed")
