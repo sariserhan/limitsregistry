@@ -15,6 +15,6 @@ export async function manageSponsorship(form:FormData) {
     }
     await changeSponsorship(String(form.get("id")??""),raw,session.user.id);
   }catch(error){return {error:error instanceof SponsorshipError?error.message:"Could not save the change. Please retry."};}
-  revalidatePath("/admin/sponsorships");revalidatePath("/limits/[id]","page");
+  revalidatePath("/admin/sponsorships");revalidatePath("/limits/[id]","page");revalidatePath("/categories/[slug]","page");
   return {success:true};
 }

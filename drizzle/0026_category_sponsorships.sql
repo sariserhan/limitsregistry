@@ -1,0 +1,3 @@
+ALTER TABLE "research_bounties" ADD COLUMN "category" text;--> statement-breakpoint
+CREATE INDEX "bounties_category_idx" ON "research_bounties" USING btree ("category");--> statement-breakpoint
+ALTER TABLE "research_bounties" ADD CONSTRAINT "bounties_scope_valid" CHECK ("research_bounties"."category" is null or ("research_bounties"."limit_id" is null and length(trim("research_bounties"."category")) between 1 and 200));

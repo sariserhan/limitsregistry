@@ -1,6 +1,7 @@
 import "server-only";
 import { and, desc, eq, gt, inArray, lt, lte, sql } from "drizzle-orm";
 import { z } from "zod";
+import { bountyCoversLimit } from "./bounty-scope";
 import { db } from "./client";
 import { auditLogs, bountySponsorships as terms, limits, researchBounties as bounties } from "./schema";
 import { hasActiveSponsorship, invoiceSchema, PUBLIC_LIMIT_STATUSES, sponsorshipRequestSchema, SponsorshipError, validateWindow } from "../domain/bounty-sponsorship";
@@ -10,14 +11,16 @@ export async function requestSponsorship(raw: unknown) {
   const parsed = sponsorshipRequestSchema.safeParse(raw);
   if (!parsed.success) throw new SponsorshipError("Check all fields: valid HTTPS links, contact email, positive amounts below 100 million, and the acknowledgement are required.");
   const { sponsorUrl, contactEmail, expiresAt: expiry, ...rest } = parsed.data;
-  const { limitId, title, sponsor, description, sourceUrl, amount, currency } = rest;
-  const input = { limitId, title, sponsor, description, sourceUrl, amount, currency };
+  const { title, sponsor, description, sourceUrl, amount, currency } = rest;
+  const limitId = rest.scope === "LIMIT" ? rest.limitId! : null;
+  const category = rest.scope === "CATEGORY" ? rest.category! : null;
+  const input = { limitId, category, title, sponsor, description, sourceUrl, amount, currency };
   const expiresAt = expiry ? new Date(`${expiry}T23:59:59.999Z`) : null;
   const error = validateBountyInput({...input,expiresAt});
   if (error) throw new SponsorshipError(error);
   return db.transaction(async tx => {
-    const [limit] = await tx.select({ id:limits.id }).from(limits).where(and(eq(limits.id,input.limitId),inArray(limits.status,[...PUBLIC_LIMIT_STATUSES])));
-    if (!limit) throw new SponsorshipError("Choose a published Limit.");
+    const [limit] = await tx.select({ id:limits.id }).from(limits).where(and(category ? eq(limits.category,category) : eq(limits.id,limitId!),inArray(limits.status,[...PUBLIC_LIMIT_STATUSES]))).limit(1);
+    if (!limit) throw new SponsorshipError("Choose a category containing published Limits, or a published Limit.");
     const [bounty] = await tx.insert(bounties).values({...input,expiresAt}).returning({id:bounties.id});
     const [term] = await tx.insert(terms).values({bountyId:bounty.id,sponsorUrl,contactEmail}).returning({id:terms.id});
     await tx.insert(auditLogs).values({action:"SPONSORSHIP_REQUESTED",entityType:"BOUNTY_SPONSORSHIP",entityId:term.id,after:{status:"REQUESTED",bountyId:bounty.id}});
@@ -26,7 +29,7 @@ export async function requestSponsorship(raw: unknown) {
 }
 
 export async function listSponsorships() {
-  return db.select({term:terms,bounty:{id:bounties.id,title:bounties.title,sponsor:bounties.sponsor,status:bounties.status,expiresAt:bounties.expiresAt},limit:{registryNumber:limits.registryNumber,title:limits.title,status:limits.status}})
+  return db.select({term:terms,bounty:{id:bounties.id,title:bounties.title,category:bounties.category,sponsor:bounties.sponsor,status:bounties.status,expiresAt:bounties.expiresAt},limit:{registryNumber:limits.registryNumber,title:limits.title,status:limits.status}})
     .from(terms).innerJoin(bounties,eq(bounties.id,terms.bountyId)).leftJoin(limits,eq(limits.id,bounties.limitId)).orderBy(desc(terms.createdAt));
 }
 
@@ -47,7 +50,7 @@ export async function changeSponsorship(id:string,raw:unknown,actorUserId:string
     const [current] = await tx.select().from(terms).where(eq(terms.id,id));
     if (!current) throw new SponsorshipError("Sponsorship not found.");
     const [bounty] = await tx.select().from(bounties).where(eq(bounties.id,current.bountyId)).for("update");
-    const [limit] = bounty.limitId ? await tx.select().from(limits).where(eq(limits.id,bounty.limitId)) : [];
+    const [limit] = await tx.select({status:limits.status}).from(limits).where(and(bounty.category ? eq(limits.category,bounty.category) : eq(limits.id,bounty.limitId!),inArray(limits.status,[...PUBLIC_LIMIT_STATUSES]))).limit(1);
     const now = new Date();
     const assertPublishable = () => {
       if (!limit || !(PUBLIC_LIMIT_STATUSES as readonly string[]).includes(limit.status) || !isPublicBounty(bounty.status,bounty.expiresAt,now)) throw new SponsorshipError("Independent editorial verification and an unexpired bounty on a published Limit are required first.");
@@ -100,9 +103,21 @@ export async function lapseSponsorships(now=new Date()) {
 
 // Deliberately uncached: cancellation, editorial withdrawal, and expiry apply on the next render.
 export async function listActiveSponsorPlacements(limitId:string,now=new Date()) {
-  const rows = await db.select({id:terms.id,bountyId:bounties.id,title:bounties.title,sponsor:bounties.sponsor,sponsorUrl:terms.sponsorUrl,status:terms.status,startsAt:terms.startsAt,endsAt:terms.endsAt,bountyStatus:bounties.status,bountyExpiresAt:bounties.expiresAt,limitStatus:limits.status})
-    .from(terms).innerJoin(bounties,eq(bounties.id,terms.bountyId)).innerJoin(limits,eq(limits.id,bounties.limitId))
+  const rows = await db.select({id:terms.id,bountyId:bounties.id,title:bounties.title,category:bounties.category,amount:bounties.amount,currency:bounties.currency,sourceUrl:bounties.sourceUrl,sponsor:bounties.sponsor,sponsorUrl:terms.sponsorUrl,status:terms.status,startsAt:terms.startsAt,endsAt:terms.endsAt,bountyStatus:bounties.status,bountyExpiresAt:bounties.expiresAt,limitStatus:limits.status})
+    .from(terms).innerJoin(bounties,eq(bounties.id,terms.bountyId)).innerJoin(limits,bountyCoversLimit)
     .where(and(eq(limits.id,limitId),eq(terms.status,"PAID"),lte(terms.startsAt,now),gt(terms.endsAt,now))).orderBy(terms.startsAt);
   return rows.filter(row=>hasActiveSponsorship(row,row.bountyStatus,row.bountyExpiresAt,row.limitStatus,now))
-    .map(({id,bountyId,title,sponsor,sponsorUrl,endsAt})=>({id,bountyId,title,sponsor,sponsorUrl,endsAt}));
+    .map(({id,bountyId,title,category,amount,currency,sourceUrl,sponsor,sponsorUrl,endsAt})=>({id,bountyId,title,category,amount,currency,sourceUrl,sponsor,sponsorUrl,endsAt}));
+}
+
+export async function listSponsorableCategories() {
+  return db.select({category:limits.category,count:sql<number>`count(*)::int`}).from(limits)
+    .where(inArray(limits.status,[...PUBLIC_LIMIT_STATUSES])).groupBy(limits.category).orderBy(limits.category);
+}
+
+export async function listActiveCategorySponsorPlacements(category:string,now=new Date()) {
+  // One representative published Limit lets us reuse the full live visibility predicate.
+  const [limit]=await db.select({id:limits.id}).from(limits).where(and(eq(limits.category,category),inArray(limits.status,[...PUBLIC_LIMIT_STATUSES]))).limit(1);
+  if(!limit)return [];
+  return (await listActiveSponsorPlacements(limit.id,now)).filter(term=>term.category===category);
 }

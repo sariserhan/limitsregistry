@@ -9,9 +9,11 @@ export const httpsUrl = z.string().trim().max(2000).refine(value => {
 const amount = z.string().trim().regex(/^\d{1,8}(?:\.\d{1,2})?$/).refine(value => Number(value) > 0, "Amount must be positive and below 100 million.");
 export const invoiceSchema = z.object({ feeAmount: amount, feeCurrency: z.string().trim().regex(/^[A-Z]{3}$/), invoiceReference: z.string().trim().min(1).max(200) });
 export const sponsorshipRequestSchema = z.object({
-  limitId:z.uuid(), title:z.string().trim().min(3).max(200), sponsor:z.string().trim().min(2).max(160),
+  scope:z.enum(["LIMIT","CATEGORY"]).default("LIMIT"), limitId:z.union([z.uuid(),z.literal("")]).optional(), category:z.string().trim().max(200).optional(), title:z.string().trim().min(3).max(200), sponsor:z.string().trim().min(2).max(160),
   description:z.string().trim().min(20).max(5000), sourceUrl:httpsUrl, amount, currency:z.string().regex(/^[A-Z]{3}$/),
   sponsorUrl:httpsUrl, contactEmail:z.email().max(254), expiresAt:z.union([z.literal(""),z.iso.date()]), acknowledgement:z.literal("on"),
+}).superRefine((value,ctx)=>{
+  if(value.scope === "LIMIT" ? !value.limitId || !!value.category : !value.category || !!value.limitId) ctx.addIssue({code:"custom",message:"Choose exactly one published Limit or category."});
 });
 export class SponsorshipError extends Error {}
 export function hasActiveSponsorship(term: {status:string; startsAt:Date|null; endsAt:Date|null}, bountyStatus:string, bountyExpiresAt:Date|null, limitStatus:string, now=new Date()) {

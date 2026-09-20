@@ -30,4 +30,12 @@ describe("sponsor placement", () => {
     expect(sponsorshipRequestSchema.safeParse({...input,sponsorUrl:"https://user:pass@example.org"}).success).toBe(false);
     expect(sponsorshipRequestSchema.safeParse({...input,contactEmail:"bad"}).success).toBe(false);
   });
+  it("requires one target and rejects ambiguous category-plus-Limit requests",()=>{
+    const input={scope:"CATEGORY",category:"Mathematics",title:"Shared research prize",sponsor:"Institute",description:"A shared award across the entire category.",sourceUrl:"https://example.org/terms",amount:"1000",currency:"USD",sponsorUrl:"https://example.org",contactEmail:"hello@example.org",expiresAt:"",acknowledgement:"on"};
+    expect(sponsorshipRequestSchema.safeParse(input).success).toBe(true);
+    expect(sponsorshipRequestSchema.safeParse({...input,limitId:"55555555-5555-4555-8555-555555555555"}).success).toBe(false);
+    expect(sponsorshipRequestSchema.safeParse({...input,category:""}).success).toBe(false);
+    expect(sponsorshipRequestSchema.safeParse({...input,scope:"LIMIT"}).success).toBe(false);
+  });
+
 });

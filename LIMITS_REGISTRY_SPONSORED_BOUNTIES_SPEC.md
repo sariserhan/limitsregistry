@@ -12,7 +12,10 @@ The agreed first release below supersedes conflicting details in the original pr
 - When a paid term ends, the extra panel disappears. Ordinary attribution and the independently verified bounty archive remain; bounty expiry still controls active listings. There is no perpetual paid placement.
 - Daily `/api/cron/bounty-sponsorships` at 07:00 UTC performs idempotent bookkeeping under `CRON_SECRET`. Display expiry does not depend on the cron running. No additional provider, store, or payment dependency is required.
 - Verification: typecheck, lint, production build, full test suite, and focused PostgreSQL lifecycle tests passed. Browser checks covered published-Limit search, mobile enquiry submission and persistence, paid-link attributes, and expiry with the status still PAID. Anonymous admin access redirects to login; admin action authorization and UTC parsing were tested programmatically. An authenticated admin browser click-through was not performed.
-- Deploy migration 0025 before shipping the new routes. This build has been tested against an isolated local PostgreSQL database; this amendment is not a claim of production migration or deployment.
+- Category expansion: `/sponsor` supports one Limit or an entire category. A category request creates one category-scoped bounty and one commercial term; the award amount is a shared category pool, not an amount multiplied by the number of records. One editorial decision, invoice, payment, renewal, cancellation, and refund apply to the whole category.
+- Category coverage is live: all current and newly published records in the selected category are included while the paid term is active; drafts, unrelated records, and records moved out are excluded. Paid panels appear on the category page and covered Limit pages. The public archive lists each shared category bounty once. Financial/contact fields remain private.
+- Migration 0026 adds nullable category scope to research bounties, with an index and a constraint prohibiting simultaneous category and single-Limit targeting. Existing single-Limit records are unchanged.
+- Deploy migrations 0025 and 0026 in order before shipping the new routes. This build has been tested against an isolated local PostgreSQL database; this amendment is not a claim of production migration or deployment.
 
 ---
 

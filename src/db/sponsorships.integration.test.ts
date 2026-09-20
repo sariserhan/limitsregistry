@@ -62,4 +62,47 @@ describe.skipIf(!client)("sponsorship PostgreSQL workflow",()=>{
       await database!.delete(schema.limits).where(eq(schema.limits.id,limitId));await database!.delete(schema.user).where(eq(schema.user.id,actor));
     }
   });
+  it("sponsors a whole category under one invoice with live published membership",async()=>{
+    const {requestSponsorship,changeSponsorship,listActiveSponsorPlacements,listActiveCategorySponsorPlacements}=await import("./repository.sponsorships");
+    const {moderateBounty,listPublicBounties,listPublicBountyArchive}=await import("./repository.research");
+    const ids=Array.from({length:4},()=>randomUUID()),actor=randomUUID(),category=`Category-${randomUUID()}`;
+    let termId="",bountyId="";
+    await database!.insert(schema.user).values({id:actor,name:"Category test editor",email:`${actor}@example.test`,role:"ADMIN"});
+    await database!.insert(schema.limits).values(ids.map((id,index)=>({id,registryNumber:`LR-CATEGORY-${id}`,slug:id,title:"Category test record",summary:"Test",category:index===3?`${category}-outside`:category,direction:"MINIMIZE" as const,metricName:"test",status:index===2?"DRAFT" as const:"OPEN" as const})));
+    const input={scope:"CATEGORY",category,title:"Shared category prize",sponsor:"Category foundation",description:"One shared award pool across this entire category.",sourceUrl:"https://example.test/terms",amount:"50000",currency:"USD",sponsorUrl:"https://example.test",contactEmail:"category-private@example.test",expiresAt:"",acknowledgement:"on"};
+    try {
+      await expect(requestSponsorship({...input,category:"nonexistent category"})).rejects.toThrow(/published/);
+      const term=await requestSponsorship(input);termId=term.id;
+      const [stored]=await database!.select().from(schema.bountySponsorships).where(eq(schema.bountySponsorships.id,termId));bountyId=stored.bountyId;
+      const [bounty]=await database!.select().from(schema.researchBounties).where(eq(schema.researchBounties.id,bountyId));
+      expect(bounty.limitId).toBeNull();expect(bounty.category).toBe(category);expect(bounty.status).toBe("UNVERIFIED");
+      await expect(database!.update(schema.researchBounties).set({limitId:ids[0]}).where(eq(schema.researchBounties.id,bountyId))).rejects.toThrow();
+      const invoice={action:"invoice",feeAmount:"750",feeCurrency:"USD",invoiceReference:"ONE-CATEGORY-INVOICE"};
+      await expect(changeSponsorship(termId,invoice,actor)).rejects.toThrow(/editorial/);
+      await moderateBounty({id:bountyId,decision:"VERIFIED",note:"Verified category-wide award terms and shared pool.",actorUserId:actor});
+      await changeSponsorship(termId,invoice,actor);
+      const end=new Date(Date.now()+86400000);
+      await changeSponsorship(termId,{action:"pay",startsAt:new Date(Date.now()-60000),endsAt:end},actor);
+      expect(await listActiveSponsorPlacements(ids[0])).toHaveLength(1);expect(await listActiveSponsorPlacements(ids[1])).toHaveLength(1);
+      expect(await listActiveSponsorPlacements(ids[2])).toHaveLength(0);expect(await listActiveSponsorPlacements(ids[3])).toHaveLength(0);
+      expect(await listActiveCategorySponsorPlacements(category)).toHaveLength(1);
+      expect((await listPublicBountyArchive()).filter(row=>row.bounty.id===bountyId)).toHaveLength(1);
+      expect((await listPublicBounties(ids[0])).map(row=>row.bounty.id)).toContain(bountyId);
+      await database!.update(schema.limits).set({status:"OPEN"}).where(eq(schema.limits.id,ids[2]));
+      expect(await listActiveSponsorPlacements(ids[2])).toHaveLength(1);
+      await database!.update(schema.limits).set({category:`${category}-outside`}).where(eq(schema.limits.id,ids[1]));
+      expect(await listActiveSponsorPlacements(ids[1])).toHaveLength(0);
+      expect(await listActiveCategorySponsorPlacements(category,end)).toHaveLength(0);
+      await moderateBounty({id:bountyId,decision:"WITHDRAWN",note:"Category award terms have been withdrawn.",actorUserId:actor});
+      expect(await listActiveSponsorPlacements(ids[0])).toHaveLength(0);expect(await listActiveCategorySponsorPlacements(category)).toHaveLength(0);
+      await changeSponsorship(termId,{action:"cancel",note:"Cancelled the whole category sponsorship."},actor);
+      expect((await database!.select().from(schema.bountySponsorships).where(eq(schema.bountySponsorships.bountyId,bountyId)))).toHaveLength(1);
+    }finally{
+      await database!.delete(schema.auditLogs).where(inArray(schema.auditLogs.entityId,[termId,bountyId]));
+      if(termId)await database!.delete(schema.bountySponsorships).where(eq(schema.bountySponsorships.id,termId));
+      if(bountyId)await database!.delete(schema.researchBounties).where(eq(schema.researchBounties.id,bountyId));
+      await database!.delete(schema.limits).where(inArray(schema.limits.id,ids));await database!.delete(schema.user).where(eq(schema.user.id,actor));
+    }
+  });
+
 });
