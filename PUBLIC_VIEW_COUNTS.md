@@ -29,8 +29,7 @@ Migration: `drizzle/0027_public_view_counts.sql` creates `public_view_counts` an
 `public_view_receipts`. Applied and verified in the disposable local PostgreSQL DB.
 **Production migration 0027 is applied and the application is deployed.** See the production verification below. The daily `/api/cron/view-receipts` job uses `CRON_SECRET` and removes
 receipts older than 48 hours (normally within 72 hours of creation); totals are retained.
-If the cron is disabled, receipts remain until cleanup runs. No preexisting history
-is backfilled.
+If the cron is disabled, receipts remain until cleanup runs. The historical record backfill is documented below.
 
 Checks: concurrent increment and receipt idempotency, independent target totals,
 private-target rejection, cleanup preserving totals, request validation, same-origin
@@ -59,7 +58,7 @@ these local checks as a production rollout.
   Runner endpoint returns 404, and all recorded aliases still point to their
   original application deployments.
 
-## VisitorPing historical export (not imported)
+## VisitorPing historical export and record backfill
 
 The supplied Pages API guide provides page-view rollups from 2026-08-28,
 excluding bots by default. `scripts/export-visitorping-history.ts` reads
@@ -91,5 +90,27 @@ LR-003318 had 1 view before that cutoff. Recent rollups may still change.
 
 Private local exports: `/private/tmp/limitsregistry-visitorping-audit-sep20.json`
 and `/private/tmp/limitsregistry-visitorping-cutoff-sep19.json`. These are temporary
-verification artifacts, not a durable backup. No historical rows have been imported
-into public counters. Per-bounty card history cannot be derived from page totals.
+verification artifacts, not a durable backup. Migration 0028 imports the matching published record totals as described below. Per-bounty card history cannot be derived from page totals.
+
+
+### Production record backfill — 2026-09-20
+
+Migration `0028_visitorping_record_history` adds 88 human page views through
+September 19 across 52 matching published records. One nonmatching historical
+path is excluded. Zero-view paths are omitted. Existing live totals are incremented
+atomically, with no new UI or separate historical counter. Category and bounty
+counts are unchanged. The whole-day gap and differing bot filtering noted above
+still apply; this is a recorded total, not a complete unique-visitor count.
+
+The transaction and Drizzle journal prevent a repeat migration from importing twice.
+Do not run this data SQL directly outside the migration runner. Production verification
+checked every count against the export and the previous value; repeating the guarded
+migration returned no applied migrations and left counts unchanged. LR-003318 changed
+from 2 to 3 before the browser verification visit. A rolled-back local fixture verified
+existing totals, exclusion of private records, and preservation of category counts.
+
+Migration SHA-256: `5c31f9eaf4aa4c67a064c7091fd0c6c9c518a5bfae98899e5cb55c7d49489c39`.
+
+Live browser verification showed a single “4 page views” counter on LR-003318,
+including the verification visit. Temporary migration deployment
+`dpl_Aeta8EKBKzfrFfaEwdEAsyPiTWyH` and its local credentials were removed.
