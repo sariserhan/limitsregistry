@@ -150,6 +150,48 @@ export const blogPosts: BlogPost[] = [
     publishedAt: "2026-09-19",
     tags: ["Computing", "Machine learning"],
   },
+  {
+    slug: "what-is-bremermanns-limit",
+    title: "What Is Bremermann's Limit?",
+    dek: "A 1962 estimate of the fastest any physical system can compute — later superseded by a more rigorous quantum bound with almost the same number.",
+    publishedAt: "2026-09-20",
+    tags: ["Physics", "Computing"],
+  },
+  {
+    slug: "why-cant-edit-distance-be-computed-faster",
+    title: "Why Can't Edit Distance Be Computed Faster?",
+    dek: "A 44-year-old quadratic-time algorithm, and a 2015 proof that beating it would break a foundational assumption of complexity theory.",
+    publishedAt: "2026-09-20",
+    tags: ["Computing", "Algorithms"],
+  },
+  {
+    slug: "why-is-greedy-optimal-for-set-cover",
+    title: "Why Is the Greedy Algorithm Optimal for Set Cover?",
+    dek: "A simple, decades-old heuristic turned out to be provably as good as any polynomial-time algorithm can get.",
+    publishedAt: "2026-09-20",
+    tags: ["Computing", "Algorithms"],
+  },
+  {
+    slug: "can-vertex-cover-be-approximated-better-than-2x",
+    title: "Can Vertex Cover Be Approximated Better Than 2×?",
+    dek: "A one-line algorithm has stood unbeaten for decades — and beating it would resolve one of complexity theory's biggest open conjectures.",
+    publishedAt: "2026-09-20",
+    tags: ["Computing", "Algorithms"],
+  },
+  {
+    slug: "how-much-data-can-dna-actually-store",
+    title: "How Much Data Can DNA Actually Store?",
+    dek: "A theoretical ceiling near 455 exabytes per gram, and a real demonstrated record of 215 petabytes per gram using fountain codes.",
+    publishedAt: "2026-09-20",
+    tags: ["Biology", "Data storage"],
+  },
+  {
+    slug: "what-sets-the-minimum-age-of-the-universe",
+    title: "What Sets the Minimum Age of the Universe?",
+    dek: "The universe must be at least as old as its oldest surviving stars — a lower bound independent of any cosmological model.",
+    publishedAt: "2026-09-20",
+    tags: ["Physics", "Astrophysics"],
+  },
 ];
 
 export function getBlogPost(slug: string) {
