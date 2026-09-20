@@ -15,7 +15,18 @@ The agreed first release below supersedes conflicting details in the original pr
 - Category expansion: `/sponsor` supports one Limit or an entire category. A category request creates one category-scoped bounty and one commercial term; the award amount is a shared category pool, not an amount multiplied by the number of records. One editorial decision, invoice, payment, renewal, cancellation, and refund apply to the whole category.
 - Category coverage is live: all current and newly published records in the selected category are included while the paid term is active; drafts, unrelated records, and records moved out are excluded. Paid panels appear on the category page and covered Limit pages. The public archive lists each shared category bounty once. Financial/contact fields remain private.
 - Migration 0026 adds nullable category scope to research bounties, with an index and a constraint prohibiting simultaneous category and single-Limit targeting. Existing single-Limit records are unchanged.
-- Deploy migrations 0025 and 0026 in order before shipping the new routes. This build has been tested against an isolated local PostgreSQL database; this amendment is not a claim of production migration or deployment.
+- Migrations 0025 and 0026 are applied in production (see verification below). The sponsorship application routes still require deployment; the current canonical deployment remains unchanged.
+
+
+## Production migration verification — 2026-09-20
+
+- Confirmed the Limits Registry production database in Neon project `lucky-math-24474654`. The latest existing journal entry was 0024 with its exact committed SHA-256; both pending sponsorship schema changes were absent.
+- Applied 0025 and 0026 in one transaction with their journal entries. Preserved the older sparse migration history instead of replaying already-existing schema changes.
+- `0025_bounty_sponsorships`: SHA-256 `5e109a531c18e20c248190fe4560cac26666886d5a9cbc45e037e5c3b2812966`.
+- `0026_category_sponsorships`: SHA-256 `e4dab682154b599fdb433b5590655bc80bb8489b6c5f86c2f4a90984edc41e11`.
+- Verified every column, check constraint, foreign key, and index on the two affected tables against the committed 0026 snapshot. Existing bounty counts remain 18 total and 17 verified. A repeated guarded migration returned no pending changes.
+- The temporary authenticated migration deployment was deleted; its endpoint returns 404. The default Vercel alias was restored after the CLI assigned it to the runner despite `--skip-domain`. The canonical domain stayed on `dpl_BoucaDpw7EvtudbXMFCA6nkqM1zv`; live homepage and public API checks returned 200.
+- Database migrations are complete. Deployment of the sponsorship UI, server actions, and daily expiry cron remains a separate pending release step.
 
 ---
 
