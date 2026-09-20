@@ -1,5 +1,20 @@
 import { z } from "zod";
 
+const isRegistryDomain = (domain: string) => ["limitsregistry.com", "www.limitsregistry.com"].includes(domain.toLowerCase());
+
+export async function discoverVisitorPingSite(apiKey: string, fetcher: typeof fetch = fetch) {
+  if (!apiKey) throw new Error("VisitorPing API credential is required.");
+  const response = await fetcher("https://visitorping.com/api/v1/sites", {
+    headers: { Authorization: `Bearer ${apiKey}` }, cache: "no-store", signal: AbortSignal.timeout(30_000),
+  });
+  if (!response.ok) throw new Error(`VisitorPing site discovery returned HTTP ${response.status}.`);
+  const result = z.object({ data: z.array(z.object({ id: z.string().min(1), siteKey: z.string().min(1), domain: z.string() })) }).safeParse(await response.json());
+  if (!result.success) throw new Error("Unexpected VisitorPing site discovery response.");
+  const sites = result.data.data.filter(site => isRegistryDomain(site.domain));
+  if (sites.length !== 1) throw new Error("Expected exactly one Limits Registry site accessible to this key.");
+  return sites[0];
+}
+
 const responseSchema = z.object({
   apiVersion: z.literal("1"),
   site: z.object({ id: z.string(), domain: z.string(), name: z.string().optional() }),
@@ -25,14 +40,14 @@ export async function fetchVisitorPingHistory({ siteId, apiKey, to, fetcher = fe
     if (cursor) url.searchParams.set("cursor", cursor);
     const response = await fetcher(url, { headers: { Authorization: `Bearer ${apiKey}` }, cache: "no-store", signal: AbortSignal.timeout(30_000) });
     if (!response.ok) {
-      if (response.status === 404) throw new Error("VisitorPing site_not_found: supply the internal site ID matching this key.");
+      if (response.status === 404) throw new Error("VisitorPing site_not_found: discover the site matching this key with GET /api/v1/sites.");
       if (response.status === 429) throw new Error(`VisitorPing rate limit reached. Retry after ${response.headers.get("retry-after") || "the provider's cooldown"}; no import was performed.`);
       throw new Error(`VisitorPing returned HTTP ${response.status}; no import was performed.`);
     }
     const result = responseSchema.safeParse(await response.json());
     if (!result.success) throw new Error("Unexpected VisitorPing response shape; no import was performed.");
     const body = result.data;
-    if (!["limitsregistry.com", "www.limitsregistry.com"].includes(body.site.domain.toLowerCase())) throw new Error("VisitorPing key is not scoped to Limits Registry.");
+    if (!isRegistryDomain(body.site.domain)) throw new Error("VisitorPing key is not scoped to Limits Registry.");
     if (body.range.from !== "1970-01-01" || body.range.to !== to) throw new Error("VisitorPing returned an unexpected date range.");
     if (site && body.site.id !== site.id) throw new Error("VisitorPing changed site between pages.");
     site = body.site; generatedAt.push(body.generatedAt);

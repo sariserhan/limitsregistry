@@ -63,13 +63,14 @@ these local checks as a production rollout.
 
 The supplied Pages API guide provides page-view rollups from 2026-08-28,
 excluding bots by default. `scripts/export-visitorping-history.ts` reads
-`VISITORPING_API_SECRET` from `.env.local` (or the process environment) and requires
-an internal site ID via `--site-id` or `VISITORPING_SITE_ID`. It follows every opaque
+`VISITORPING_API_SECRET` from `.env.local` (or the process environment) and discovers
+the matching domain and site ID through authenticated `GET /api/v1/sites`.
+Optional `--site-id` or `VISITORPING_SITE_ID` must match that discovery. It follows every opaque
 cursor, checks the returned site/domain and date range, preserves exact paths, and
 refuses duplicate paths or malformed data. It writes a private local export only;
 it does not update production counts. Existing output files are not overwritten.
 
-Example: `npx tsx scripts/export-visitorping-history.ts --site-id INTERNAL_ID`.
+Example: `npx tsx scripts/export-visitorping-history.ts`.
 The default cutoff is 2026-09-19 inclusive, before live counting began on September
 20. The Pages API has only whole-day boundaries: it cannot isolate September 20
 views before our live counter began. Therefore a simple pre-cutoff backfill would
@@ -77,7 +78,18 @@ avoid double-counting but leave that partial-day gap; do not call it a complete
 all-time total. Historical bot filtering also differs from the current browser
 counter's semantics and must be disclosed before combining figures.
 
-The current tracker public ID `vp_PBTR9YAZ` returned `404 site_not_found` with the
-configured credential. The matching internal site ID is still needed. No historical
-rows have been fetched or imported. Per-bounty card history cannot be derived from
-these page totals.
+An explicit later `--to` is allowed for read-only audits; the summary flags overlap
+with live counters. It is not an import command.
+
+Authenticated verification on 2026-09-20 succeeded using the public tracker ID;
+site discovery confirmed Limits Registry. The full export through September 20
+matched the supplied benchmarks: 1,302 paths, 1,583 human page views, and `/` with
+341 views across 19 active days. Pagination completed in two requests. There were
+1,153 Limit paths and 20 category paths. `/limits/LR-003318` had 5 views over 2 days.
+The separate export through September 19 contained 1,263 paths and 1,081 views;
+LR-003318 had 1 view before that cutoff. Recent rollups may still change.
+
+Private local exports: `/private/tmp/limitsregistry-visitorping-audit-sep20.json`
+and `/private/tmp/limitsregistry-visitorping-cutoff-sep19.json`. These are temporary
+verification artifacts, not a durable backup. No historical rows have been imported
+into public counters. Per-bounty card history cannot be derived from page totals.
