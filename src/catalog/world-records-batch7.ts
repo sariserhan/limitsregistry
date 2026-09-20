@@ -884,4 +884,28 @@ export const WORLD_RECORDS_BATCH7: FrontierRecord[] = [
     methodSummary: "Documented surgical case published in peer-reviewed surgical literature.",
     source: { title: "University of Minnesota — History of Transplantation", url: "https://med.umn.edu/", date: "1966-12-17", location: "University of Minnesota, Minneapolis, USA" },
   },
+
+  // --- Food & Culture, final additions ---
+  {
+    registryNumber: "LR-LARGEST-HAMBURGER", slug: "largest-hamburger-ever-made", title: "Largest hamburger ever made",
+    category: "Food & Culture", subcategory: "Food Records", direction: "MAXIMIZE",
+    metricName: "Weight of the largest hamburger ever made", unit: "kg",
+    formalStatement: "The greatest weight of any single hamburger made, per Guinness World Records certification.",
+    summary: "Josef Zellner and friends cooked a triple-patty hamburger weighing 1,164 kg (2,566 lb) — as heavy as a walrus — in Pilsting, Germany, in 2017, certified by Guinness World Records as the largest hamburger ever made.",
+    value: "1164",
+    claimType: "CONSTRUCTION", epistemicStatus: "SOURCE_CONFIRMED", limitStatus: "OPEN",
+    methodSummary: "Physical weight measurement, certified by an on-site Guinness World Records adjudicator.",
+    source: { title: "Guinness World Records — Largest hamburger", url: "https://www.guinnessworldrecords.com/world-records/largest-hamburger", date: "2017-08-01", location: "Pilsting, Germany" },
+  },
+  {
+    registryNumber: "LR-MOST-EXPENSIVE-WINE-AUCTION", slug: "most-expensive-wine-sold-at-auction", title: "Most expensive bottle of wine sold at auction",
+    category: "Food & Culture", subcategory: "Collectibles", direction: "MAXIMIZE",
+    metricName: "Hammer price of the most expensive single bottle of wine ever sold at auction", unit: "USD",
+    formalStatement: "The highest price ever paid for a single bottle of wine sold at a public auction.",
+    summary: "A bottle of 1945 Domaine de la Romanée-Conti — one of only about 600 ever produced, from the last vintage before the vineyard's original vines were replanted following a phylloxera outbreak — sold for $812,500 at Acker's La Paulée auction in March 2026, the highest price ever paid for a bottle of wine at auction, surpassing the previous record ($558,000, set by the same vintage in 2018).",
+    value: "812500",
+    claimType: "CONSTRUCTION", epistemicStatus: "SOURCE_CONFIRMED", limitStatus: "OPEN",
+    methodSummary: "Official auction results reported by Acker Merrall & Condit, the auction house.",
+    source: { title: "Forbes — Bottle Of 1945 French Wine Sold For $812,500", url: "https://www.forbes.com/sites/maryroeloffs/2026/03/30/bottle-of-1945-french-wine-sold-for-812500-shattering-wine-auction-record/", date: "2026-03-30", location: "Acker's La Paulée auction, New York, USA" },
+  },
 ];
