@@ -26,7 +26,7 @@ export function snapshotPath(snapshot: typeof apiSnapshots.$inferSelect, format:
   return format === "json" ? snapshot.jsonPath : snapshot.ndjsonPath;
 }
 
-export async function publishSnapshot(actorUserId: string) {
+export async function publishSnapshot(actorUserId: string | null) {
   if (!snapshotStorageConfigured()) throw new Error("Private snapshot storage is not configured.");
   const directory = await mkdtemp(join(tmpdir(), "limits-snapshot-"));
   const uploaded: string[] = [];
