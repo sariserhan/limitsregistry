@@ -27,8 +27,7 @@ explains counting semantics and when tracking began.
 
 Migration: `drizzle/0027_public_view_counts.sql` creates `public_view_counts` and
 `public_view_receipts`. Applied and verified in the disposable local PostgreSQL DB.
-**Production migration and app deployment are pending.** Deploy the migration before
-the application. The daily `/api/cron/view-receipts` job uses `CRON_SECRET` and removes
+**Production migration 0027 is applied and the application is deployed.** See the production verification below. The daily `/api/cron/view-receipts` job uses `CRON_SECRET` and removes
 receipts older than 48 hours (normally within 72 hours of creation); totals are retained.
 If the cron is disabled, receipts remain until cleanup runs. No preexisting history
 is backfilled.
@@ -40,3 +39,22 @@ handling, rate limits, failure responses and cron authentication. Run DB tests w
 Browser verification covers refresh increments on Limit/category pages and visible
 bounty cards; offscreen bounty counters do not eagerly increment. Do not interpret
 these local checks as a production rollout.
+
+
+## Production migration — 2026-09-20
+
+- Verified the Limits Registry database host and existing 0026 journal hash before
+  applying 0027 in a transaction. Both view tables were absent before the migration.
+- Migration SHA-256:
+  `a84e9938a0f4712fc632a60502bffe97a3ce8adf8e937f8fc2d4f2f4296b0840`;
+  Drizzle timestamp `1789889993489`. Earlier journal entries were preserved.
+- Verified all six columns and their types/nullability, validated constraints, and
+  all three indexes. Bounty counts stayed unchanged (18 total, 17 verified).
+  Repeating the guarded migration returned an empty applied list.
+- Temporary authenticated runner `dpl_HoW1ADBzzmsvaL2H8mU66jMGcDsA` was deleted,
+  along with its local authorization files. The canonical app remains on
+  `dpl_GWjTLfPPGKiZfL9ESPmJf9DsjL4F`.
+- Live browser verification on `/limits/LR-003318` displayed “1 page view”, then
+  “2 page views” after a refresh. The unavailable-counter error is resolved.
+  Runner endpoint returns 404, and all recorded aliases still point to their
+  original application deployments.
