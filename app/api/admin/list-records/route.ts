@@ -86,6 +86,17 @@ export async function GET(request: Request) {
     `);
     return NextResponse.json({ status: oneSidedStatus, count: rows.length, records: rows });
   }
+  const categoryCounts = searchParams.get("categoryCounts");
+  if (categoryCounts) {
+    const rows = await db.execute(sql`
+      select category, count(*)::int as "count"
+      from limits
+      where status in ('OPEN', 'PROVEN', 'DISPUTED', 'RETIRED')
+      group by category
+      order by count(*) asc
+    `);
+    return NextResponse.json({ categories: rows });
+  }
   const status = searchParams.get("status") ?? "OPEN";
   const limit = Math.min(Number(searchParams.get("limit") ?? "50"), 200);
   const rows = await db.execute(sql`
