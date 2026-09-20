@@ -173,3 +173,36 @@ export const apiSnapshots = pgTable("api_snapshots", {
   check("api_snapshots_hashes_valid", sql`${t.jsonHash} ~ '^[0-9a-f]{64}$' and ${t.ndjsonHash} ~ '^[0-9a-f]{64}$'`),
   check("api_snapshots_paths_valid", sql`${t.jsonPath} like 'registry-snapshots/%' and ${t.ndjsonPath} like 'registry-snapshots/%'`),
 ]);
+
+// A row is one commercial term. Renewals create rows; ordinary bounty attribution stays free.
+export const bountySponsorships = pgTable("bounty_sponsorships", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  bountyId: uuid("bounty_id").references(() => researchBounties.id).notNull(),
+  status: text("status").default("REQUESTED").notNull(),
+  sponsorUrl: text("sponsor_url").notNull(),
+  contactEmail: text("contact_email").notNull(),
+  feeAmount: text("fee_amount"), feeCurrency: text("fee_currency"), invoiceReference: text("invoice_reference"),
+  startsAt: timestamp("starts_at", { withTimezone:true }), endsAt: timestamp("ends_at", { withTimezone:true }),
+  paidAt: timestamp("paid_at", { withTimezone:true }),
+  resolutionNote: text("resolution_note"), refundReference: text("refund_reference"),
+  ...audit,
+}, t => [
+  index("bounty_sponsorship_expiry_idx").on(t.status,t.endsAt),
+  index("bounty_sponsorship_bounty_idx").on(t.bountyId),
+  uniqueIndex("bounty_sponsorship_pending_unique").on(t.bountyId).where(sql`${t.status} in ('REQUESTED','INVOICED')`),
+  check("sponsorship_status_valid",sql`${t.status} in ('REQUESTED','INVOICED','PAID','LAPSED','CANCELLED','REFUNDED')`),
+  check("sponsorship_fee_paired",sql`(${t.feeAmount} is null) = (${t.feeCurrency} is null) and (${t.feeAmount} is null) = (${t.invoiceReference} is null)`),
+  check("sponsorship_fee_valid",sql`${t.feeAmount} is null or (case when ${t.feeAmount} ~ '^[0-9]{1,8}([.][0-9]{1,2})?$' then ${t.feeAmount}::numeric > 0 else false end)`),
+  check("sponsorship_currency_valid",sql`${t.feeCurrency} is null or ${t.feeCurrency} ~ '^[A-Z]{3}$'`),
+  check("sponsorship_invoice_valid",sql`${t.invoiceReference} is null or length(trim(${t.invoiceReference})) between 1 and 200`),
+  check("sponsorship_invoice_required",sql`${t.status} not in ('INVOICED','PAID','LAPSED','REFUNDED') or ${t.invoiceReference} is not null`),
+  check("sponsorship_window_paired",sql`(${t.startsAt} is null) = (${t.endsAt} is null) and (${t.startsAt} is null) = (${t.paidAt} is null)`),
+  check("sponsorship_window_ordered",sql`${t.endsAt} is null or ${t.endsAt} > ${t.startsAt}`),
+  check("sponsorship_payment_required",sql`${t.status} not in ('PAID','LAPSED','REFUNDED') or ${t.paidAt} is not null`),
+  check("sponsorship_payment_invoice",sql`${t.paidAt} is null or ${t.invoiceReference} is not null`),
+  check("sponsorship_unpaid_window",sql`${t.status} not in ('REQUESTED','INVOICED') or ${t.paidAt} is null`),
+  check("sponsorship_resolution_required",sql`${t.status} not in ('CANCELLED','REFUNDED') or length(trim(coalesce(${t.resolutionNote},''))) between 10 and 2000`),
+  check("sponsorship_refund_required",sql`${t.status} <> 'REFUNDED' or length(trim(coalesce(${t.refundReference},''))) between 1 and 200`),
+  check("sponsorship_url_valid",sql`${t.sponsorUrl} ~ '^https://[^/?#[:space:]@]+([/?#][^[:space:]]*)?$' and length(${t.sponsorUrl}) <= 2000`),
+  check("sponsorship_email_valid",sql`${t.contactEmail} ~ '^[^[:space:]@]+@[^[:space:]@]+[.][^[:space:]@]+$' and length(${t.contactEmail}) <= 254`),
+]);

@@ -22,6 +22,7 @@ jobs:
           --health-retries 10
     env:
       DATABASE_URL: postgres://limits:limits@localhost:5432/limits_registry
+      SPONSORSHIP_TEST_DATABASE_URL: postgres://limits:limits@localhost:5432/limits_registry
       SEARCH_TEST_DATABASE_URL: postgres://limits:limits@localhost:5432/limits_registry
     steps:
       - uses: actions/checkout@v4

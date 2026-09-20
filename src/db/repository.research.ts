@@ -1,6 +1,5 @@
 import "server-only";
-import { unstable_cache } from "next/cache";
-import { and, desc, eq, gt, inArray, isNotNull, isNull, or, sql } from "drizzle-orm";
+import { and, desc, eq, inArray, isNotNull, or, sql } from "drizzle-orm";
 import { db } from "./client";
 import { auditLogs, breakthroughEvents, claims, dependencyRelations, limits, researchBounties, specificationVersions, verificationArtifacts, verifierExecutions, watchlistEvents } from "./schema";
 import { createHash } from "node:crypto";
@@ -125,19 +124,21 @@ export async function listBountiesByUser(userId: string) {
 }
 export async function createBounty(input: { limitId: string; title: string; sponsor: string; description: string; sourceUrl: string; amount?: string | null; currency?: string | null; expiresAt?: Date | null; submittedByUserId: string }) { const error = validateBountyInput(input); if (error) throw new Error(error); const [limit] = await db.select({ id: limits.id }).from(limits).where(eq(limits.id, input.limitId)); if (!limit) throw new Error("Linked Limit not found."); const [row] = await db.insert(researchBounties).values({ ...input, title: input.title.trim(), sponsor: input.sponsor.trim(), description: input.description.trim(), sourceUrl: input.sourceUrl.trim(), amount: input.amount?.trim() || null, currency: input.currency?.trim().toUpperCase() || null, expiresAt: input.expiresAt ?? null }).returning(); return row; }
 export async function moderateBounty(input: { id: string; decision: Exclude<BountyStatus, "UNVERIFIED">; note: string; actorUserId: string }) { if (input.note.trim().length < 10) throw new Error("A moderation note of at least 10 characters is required."); return db.transaction(async (tx) => { const [current] = await tx.select().from(researchBounties).where(eq(researchBounties.id, input.id)); if (!current) throw new Error("Bounty not found."); if (input.decision === "VERIFIED") { if (!current.limitId) throw new Error("A verified bounty must link to a Limit."); const [limit] = await tx.select({ status: limits.status }).from(limits).where(eq(limits.id, current.limitId)); if (!limit || !["OPEN", "PROVEN", "DISPUTED", "RETIRED"].includes(limit.status)) throw new Error("A verified bounty must link to a published Limit."); if (current.expiresAt && current.expiresAt <= new Date()) throw new Error("An expired bounty cannot be verified."); } const now = new Date(); const [updated] = await tx.update(researchBounties).set({ status: input.decision, moderationNote: input.note.trim(), verifiedByUserId: input.actorUserId, verifiedAt: input.decision === "VERIFIED" ? now : null, updatedAt: now }).where(eq(researchBounties.id, input.id)).returning(); await tx.insert(auditLogs).values({ actorUserId: input.actorUserId, action: "BOUNTY_" + input.decision, entityType: "RESEARCH_BOUNTY", entityId: input.id, before: current, after: updated, reason: input.note.trim() }); return updated; }); }
+const publicBountyFields = {
+  id:researchBounties.id, limitId:researchBounties.limitId, title:researchBounties.title,
+  sponsor:researchBounties.sponsor, description:researchBounties.description, sourceUrl:researchBounties.sourceUrl,
+  status:researchBounties.status, amount:researchBounties.amount, currency:researchBounties.currency,
+  expiresAt:researchBounties.expiresAt, verifiedAt:researchBounties.verifiedAt,
+};
 export async function listPublicBounties(limitId?: string) {
-  const read = unstable_cache(async () => {
-    const conditions = [eq(researchBounties.status, "VERIFIED"), or(isNull(researchBounties.expiresAt), gt(researchBounties.expiresAt, new Date()))!];
-    if (limitId) conditions.push(eq(researchBounties.limitId, limitId));
-    const rows = await db.select({ bounty: researchBounties, limit: { id: limits.id, registryNumber: limits.registryNumber, title: limits.title } }).from(researchBounties).innerJoin(limits, eq(limits.id, researchBounties.limitId)).where(and(...conditions, inArray(limits.status, ["OPEN", "PROVEN", "DISPUTED", "RETIRED"]))).orderBy(desc(researchBounties.verifiedAt));
-    return rows.filter(({ bounty }) => isPublicBounty(bounty.status, bounty.expiresAt));
-  }, ["public-bounties", limitId ?? "all"], { revalidate: 60, tags: ["public-bounties"] });
-  const rows = await read();
-  // expiresAt/verifiedAt round-trip through unstable_cache's JSON cache as strings despite their Date type.
-  return rows.map((row) => ({ ...row, bounty: { ...row.bounty, expiresAt: row.bounty.expiresAt ? new Date(row.bounty.expiresAt) : null, verifiedAt: row.bounty.verifiedAt ? new Date(row.bounty.verifiedAt) : null } }));
+  const conditions = [eq(researchBounties.status,"VERIFIED"),inArray(limits.status,["OPEN","PROVEN","DISPUTED","RETIRED"])];
+  if(limitId)conditions.push(eq(researchBounties.limitId,limitId));
+  const rows=await db.select({bounty:publicBountyFields,limit:{id:limits.id,registryNumber:limits.registryNumber,title:limits.title}})
+    .from(researchBounties).innerJoin(limits,eq(limits.id,researchBounties.limitId)).where(and(...conditions)).orderBy(desc(researchBounties.verifiedAt));
+  return rows.filter(({bounty})=>isPublicBounty(bounty.status,bounty.expiresAt));
 }
 export async function listPublicBountyArchive() {
-  const rows = await db.select({ bounty: researchBounties, limit: { id: limits.id, registryNumber: limits.registryNumber, title: limits.title } })
+  const rows = await db.select({ bounty: publicBountyFields, limit: { id: limits.id, registryNumber: limits.registryNumber, title: limits.title } })
     .from(researchBounties).innerJoin(limits, eq(limits.id, researchBounties.limitId))
     .where(and(eq(researchBounties.status, "VERIFIED"), inArray(limits.status, ["OPEN", "PROVEN", "DISPUTED", "RETIRED"])))
     .orderBy(desc(researchBounties.createdAt));

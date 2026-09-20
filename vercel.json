@@ -12,6 +12,10 @@
     {
       "path": "/api/cron/source-ingestion",
       "schedule": "*/5 * * * *"
+    },
+    {
+      "path": "/api/cron/bounty-sponsorships",
+      "schedule": "0 7 * * *"
     }
   ],
   "redirects": [

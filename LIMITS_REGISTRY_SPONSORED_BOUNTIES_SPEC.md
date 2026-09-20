@@ -1,3 +1,21 @@
+## Implementation amendments (2026-09-20)
+
+The agreed first release below supersedes conflicting details in the original proposal retained after this section.
+
+- Ordinary verified bounty listings remain free. Manually quoted fees buy a labelled, nonexclusive sponsor panel on the linked Limit for an agreed period, defaulting to 90 days. They do not buy editorial acceptance, search ranking, research outcomes, or guaranteed award payment.
+- Commercial terms live in `bounty_sponsorships`, separate from `research_bounties`. No term means unsponsored. Existing rows are untouched by migration `0025_bounty_sponsorships.sql`. Renewals create new rows, preserving each invoice, fee, payment timestamp, and placement window.
+- States: `REQUESTED → INVOICED → PAID → LAPSED`. Requested/invoiced/paid/lapsed terms can be cancelled; paid/lapsed/cancelled paid terms can record an externally completed full refund. Cancelled/refunded terms do not display. Cancellation does not move money. Partial refunds and automatic checkout are outside this release.
+- Invoicing and payment require independent editorial verification and an active bounty linked to a published Limit. Payment never changes editorial status. A renewal starts as a fresh request; paid/lapsed periods cannot overlap for the same bounty (cancelled/refunded placement can be replaced). All financial transitions are serialized and atomically audited without private financial values in shared audit events.
+- `/sponsor` accepts an anonymous, rate-limited enquiry (10/minute/IP), searches published Limits, and requires official award terms, sponsor website, contact email, and acknowledgement. It atomically creates an unverified bounty and a requested term. No email is sent automatically; administrators use the enquiry queue to contact the sponsor and invoice externally.
+- `/admin/sponsorships` requires ADMIN for reads and each action. It records invoices, received payments with UTC windows, cancellation, full-refund references, and renewal requests. Existing editorial review remains in `/console/research/bounties`.
+- Placement requires `PAID`, `startsAt <= now < endsAt`, VERIFIED and unexpired bounty, and a currently published Limit. The sponsor component renders per request instead of using the Limit page's one-hour cache. It selects only public placement fields. Sponsor links use `rel="sponsored noopener noreferrer"` and credential-free HTTPS URLs.
+- When a paid term ends, the extra panel disappears. Ordinary attribution and the independently verified bounty archive remain; bounty expiry still controls active listings. There is no perpetual paid placement.
+- Daily `/api/cron/bounty-sponsorships` at 07:00 UTC performs idempotent bookkeeping under `CRON_SECRET`. Display expiry does not depend on the cron running. No additional provider, store, or payment dependency is required.
+- Verification: typecheck, lint, production build, full test suite, and focused PostgreSQL lifecycle tests passed. Browser checks covered published-Limit search, mobile enquiry submission and persistence, paid-link attributes, and expiry with the status still PAID. Anonymous admin access redirects to login; admin action authorization and UTC parsing were tested programmatically. An authenticated admin browser click-through was not performed.
+- Deploy migration 0025 before shipping the new routes. This build has been tested against an isolated local PostgreSQL database; this amendment is not a claim of production migration or deployment.
+
+---
+
 # Sponsored Bounties — Implementation Spec
 
 > **For the implementing agent.** Read this and the `researchBounties` table in
