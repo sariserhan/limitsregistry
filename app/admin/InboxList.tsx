@@ -1,8 +1,9 @@
 import { listInboxMessages, type InboxChannel } from "../../src/db/repository.inbox";
 import { replyToMessage } from "./inbox-actions";
 
-export async function InboxList({ channel, returnPath }: { channel: InboxChannel; returnPath: string }) {
-  const messages = await listInboxMessages(channel);
+export async function InboxList({ channel, returnPath, subjectPrefix }: { channel: InboxChannel; returnPath: string; subjectPrefix?: string }) {
+  const allMessages = await listInboxMessages(channel);
+  const messages = subjectPrefix ? allMessages.filter(message => message.subject?.startsWith(subjectPrefix)) : allMessages;
   const open = messages.filter((m) => m.status === "OPEN");
   const resolved = messages.filter((m) => m.status === "RESOLVED");
 

@@ -74,3 +74,9 @@ export async function getPublicLimitOptionByRegistryNumber(registryNumber: strin
 }
 
 
+
+// Lightweight complete catalogue for sponsorship pickers; never include drafts.
+export async function listAllPublicLimitOptions() {
+  return db.select({ id: limits.id, registryNumber: limits.registryNumber, title: limits.title, category: limits.category })
+    .from(limits).where(inArray(limits.status, PUBLIC_LIMIT_STATUSES)).orderBy(asc(limits.registryNumber));
+}

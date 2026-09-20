@@ -290,3 +290,27 @@ loses placement.
    itself the paid product? This spec assumes both are listed and only
    attribution differs, which keeps the registry useful and the fee honest.
 4. Is one sponsor per limit exclusive, or can several appear?
+
+
+## Separate regular and bounty sponsorship enquiries
+
+- `/sponsor` now accepts regular placement enquiries (registry-wide, category, or
+  a published record) without a bounty amount, award terms, or claimant obligations.
+  It saves private enquiries for manual discussion of availability, placement,
+  duration, and pricing; it does not create a bounty or automatically publish a panel.
+- `/sponsor/bounties` retains the bounty sponsorship workflow, including award terms,
+  independent verification and manual invoicing. Existing bounty cards and links
+  go directly here. Both pages offer clear section navigation and preserve record
+  or category context when switching sections.
+- Administrators have distinct Regular sponsorship enquiries and Bounty sponsors
+  sections. Regular enquiries use the existing private contact inbox and reply flow,
+  with no new schema or migration. Bounty payment/placement controls are unchanged.
+- Both forms use a lightweight complete list of published Limits, searched in-place
+  by registry number, title, or category. There is no 50/100-record picker cap. Drafts
+  remain excluded. Filtering preserves the selected record and other entered fields.
+- Verification: typecheck, lint, nine focused action tests, and browser checks with
+  105 published records plus one excluded draft. Record 105 was selectable and
+  preselected; filtering retained the selection and entered bounty title. A regular
+  enquiry was submitted through the browser and verified in the local inbox without
+  award fields. All disposable records and the enquiry were removed after testing.
+- Deployment is still required before these changes appear publicly.
