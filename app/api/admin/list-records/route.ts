@@ -66,6 +66,26 @@ export async function GET(request: Request) {
     `);
     return NextResponse.json({ status: twoSidedStatus, count: rows.length, records: rows });
   }
+  const oneSided = searchParams.get("oneSided");
+  if (oneSided) {
+    const oneSidedStatus = searchParams.get("status") ?? "OPEN";
+    const oneSidedLimit = Math.min(Number(searchParams.get("limit") ?? "200"), 300);
+    const rows = await db.execute(sql`
+      select l.registry_number as "registryNumber", l.title, l.category, l.summary,
+        array_agg(distinct c.claim_type) as "claimTypes",
+        max(c.value_exact) filter (where c.claim_type = 'LOWER_BOUND') as "lowerValue",
+        max(c.value_exact) filter (where c.claim_type = 'UPPER_BOUND') as "upperValue"
+      from limits l
+      join limit_spec_versions sv on sv.limit_id = l.id
+      join claims c on c.specification_version_id = sv.id and c.status = 'ACCEPTED'
+      where l.status = ${oneSidedStatus} and c.claim_type in ('LOWER_BOUND', 'UPPER_BOUND')
+      group by l.id, l.registry_number, l.title, l.category, l.summary
+      having count(distinct c.claim_type) filter (where c.claim_type in ('LOWER_BOUND', 'UPPER_BOUND')) = 1
+      order by l.registry_number
+      limit ${oneSidedLimit}
+    `);
+    return NextResponse.json({ status: oneSidedStatus, count: rows.length, records: rows });
+  }
   const status = searchParams.get("status") ?? "OPEN";
   const limit = Math.min(Number(searchParams.get("limit") ?? "50"), 200);
   const rows = await db.execute(sql`
