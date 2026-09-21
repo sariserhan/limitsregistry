@@ -2,6 +2,8 @@ import type { NextFetchEvent } from "next/server";
 import { NextRequest, NextResponse } from "next/server";
 import { getSessionCookie } from "better-auth/cookies";
 import { createAiTrafficMiddleware } from "@visitorping/vercel";
+import { allowRequest } from "./src/ops/rate-limit";
+import { clientIp } from "./src/ops/client-ip";
 
 /**
  * AI crawler watching, reported to VisitorPing.
@@ -43,6 +45,31 @@ export default async function proxy(request: NextRequest, event?: NextFetchEvent
       if (refused) return refused;
     } catch (error) {
       console.error("[visitorping] AI Traffic middleware failed", error);
+    }
+  }
+
+  // Credential-stuffing/bot swarms specifically hit two paths: the actual sign-in attempt
+  // (POSTed to better-auth's catch-all at /api/auth/sign-in/*, not the /login page itself, which
+  // only renders the form) and /submit (an auth-gated page whose form also POSTs back to the same
+  // path via a Server Action). Scoped to exactly these two so every other route — including every
+  // other /api/auth/* path like sign-up or session checks — stays untouched. IP-keyed via Upstash
+  // (see src/ops/rate-limit.ts) rather than a DB read, matching this proxy's "optimistic, DB-free"
+  // rule below; wrapped in try/catch so a slow/down rate-limit service fails open, same as the
+  // AI-traffic watcher above, rather than blocking real logins and submissions.
+  if (request.nextUrl.pathname.startsWith("/api/auth/sign-in")) {
+    try {
+      const allowed = await allowRequest(`proxy-login:${clientIp(request)}`, 10, 5 * 60_000);
+      if (!allowed) return NextResponse.json({ error: "Too many sign-in attempts. Try again in a few minutes." }, { status: 429 });
+    } catch (error) {
+      console.error("[proxy] Login rate limit check failed", error);
+    }
+  }
+  if (request.nextUrl.pathname === "/submit") {
+    try {
+      const allowed = await allowRequest(`proxy-submit:${clientIp(request)}`, 30, 5 * 60_000);
+      if (!allowed) return new NextResponse("Too many requests. Try again in a few minutes.", { status: 429 });
+    } catch (error) {
+      console.error("[proxy] Submit rate limit check failed", error);
     }
   }
 
