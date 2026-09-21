@@ -89,16 +89,6 @@ export const WORLD_RECORDS_BATCH8_MATH_AI_ENERGY: FrontierRecord[] = [
     source: { title: "Tao, 'The Erdős discrepancy problem', Discrete Analysis", url: "https://arxiv.org/abs/1509.05363", date: "2015-09-17", location: "UCLA, USA" },
   },
   {
-    registryNumber: "LR-BOOLEAN-PYTHAGOREAN-TRIPLES", slug: "boolean-pythagorean-triples-proof", title: "Boolean Pythagorean Triples Problem — largest SAT-solver proof",
-    category: "Mathematics", subcategory: "Computational Combinatorics", direction: "MAXIMIZE",
-    metricName: "Size of a single computer-generated formal mathematical proof", unit: "terabytes",
-    formalStatement: "The natural numbers from 1 to 7,824 can be two-colored (e.g. red/blue) so that no Pythagorean triple (a, b, c with a^2+b^2=c^2) is monochromatic, but every two-coloring of 1 to 7,825 must contain a monochromatic Pythagorean triple.",
-    summary: "Marijn Heule, Oliver Kullmann, and Victor Marek solved the decades-old Boolean Pythagorean Triples problem in 2016 using a SAT solver running on the University of Texas's Stampede supercomputer, generating a roughly 200-terabyte proof certificate (compressed to about 68 gigabytes) — at the time the largest formal mathematical proof ever produced. The result was independently verified by a separate, more compact proof-checking program.",
-    value: "200", claimType: "CONSTRUCTION", epistemicStatus: "SOURCE_CONFIRMED", limitStatus: "PROVEN",
-    methodSummary: "Encoded the coloring problem as a Boolean satisfiability instance and used cube-and-conquer SAT-solving techniques distributed across roughly 800 CPU cores to exhaustively rule out a valid coloring beyond 7,825.",
-    source: { title: "Heule, Kullmann & Marek, 'Solving and Verifying the Boolean Pythagorean Triples Problem via Cube-and-Conquer'", url: "https://arxiv.org/abs/1605.00723", date: "2016-05-03", location: "University of Texas at Austin, USA / Swansea University, UK" },
-  },
-  {
     registryNumber: "LR-SPHERE-PACKING-DIMENSION-8", slug: "sphere-packing-dimension-8", title: "Optimal sphere packing in 8 dimensions (E8 lattice)",
     category: "Mathematics", subcategory: "Discrete Geometry", direction: "MAXIMIZE",
     metricName: "Proof of optimality of a specific lattice sphere packing", unit: "boolean (proven/unproven)",

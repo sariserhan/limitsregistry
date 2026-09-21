@@ -586,17 +586,6 @@ export const WORLD_RECORDS_BATCH8_PHYSICS_CHEM: FrontierRecord[] = [
     source: { title: "Korea Institute of Fusion Energy — KSTAR sets new record for plasma operation", url: "https://www.kfe.re.kr/eng/", date: "2021-11-24", location: "Korea Institute of Fusion Energy, Daejeon, South Korea" },
   },
   {
-    registryNumber: "LR-HIGHEST-ENERGY-GAIN-INERTIAL-CONFINEMENT-FUSION", slug: "first-fusion-ignition-with-net-energy-gain", title: "First laboratory fusion reaction to achieve net energy gain (ignition)",
-    category: "Physics", subcategory: "Plasma Physics", direction: "MAXIMIZE",
-    metricName: "Historical first: a controlled fusion experiment producing more energy out than the laser energy delivered to the target", unit: "event",
-    formalStatement: "The first laboratory demonstration of fusion 'ignition' — a controlled nuclear fusion reaction that produced more energy from fusion than the energy of the laser light delivered directly to the fuel capsule.",
-    summary: "On December 5, 2022, scientists at Lawrence Livermore National Laboratory's National Ignition Facility achieved fusion ignition for the first time, with a laser-driven inertial confinement fusion shot producing about 3.15 megajoules of fusion energy output from 2.05 megajoules of laser energy input — a historic scientific milestone, though this measures gain relative to laser energy delivered, not the much larger total electrical energy consumed to power the lasers.",
-    value: "2022-12-05",
-    claimType: "CONSTRUCTION", epistemicStatus: "SOURCE_CONFIRMED", limitStatus: "OPEN",
-    methodSummary: "192 laser beams at the National Ignition Facility compressed a millimeter-scale deuterium-tritium fuel capsule via inertial confinement, with fusion energy output measured via calibrated neutron and X-ray diagnostics.",
-    source: { title: "Lawrence Livermore National Laboratory — National Ignition Facility achieves fusion ignition", url: "https://www.llnl.gov/news/national-ignition-facility-achieves-fusion-ignition", date: "2022-12-13", location: "Lawrence Livermore National Laboratory, California, USA" },
-  },
-  {
     registryNumber: "LR-LONGEST-DISTANCE-QUANTUM-KEY-DISTRIBUTION", slug: "longest-distance-satellite-quantum-key-distribution", title: "Longest-distance quantum key distribution via satellite",
     category: "Physics", subcategory: "Quantum Communication", direction: "MAXIMIZE",
     metricName: "Ground-station separation distance over which entanglement-based quantum key distribution has been demonstrated via satellite relay", unit: "km",
