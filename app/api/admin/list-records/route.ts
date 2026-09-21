@@ -26,6 +26,18 @@ export async function GET(request: Request) {
     const rows = await db.execute(sql`select id, name, email, role from "user" where email = ${email} limit 1`);
     return NextResponse.json({ user: rows[0] ?? null });
   }
+  const recentSignups = searchParams.get("recentSignups");
+  if (recentSignups) {
+    const signupLimit = Math.min(Number(searchParams.get("limit") ?? "100"), 300);
+    const rows = await db.execute(sql`
+      select id, name, email, email_verified as "emailVerified", role, created_at as "createdAt"
+      from "user"
+      where email not like '%@deleted.limitsregistry.internal'
+      order by created_at desc
+      limit ${signupLimit}
+    `);
+    return NextResponse.json({ count: rows.length, signups: rows });
+  }
   const registryNumber = searchParams.get("registryNumber");
   if (registryNumber) {
     const [limitRow] = await db.execute(sql`select id, registry_number as "registryNumber", title, category, subcategory, status, direction, metric_name as "metricName", unit, summary from limits where registry_number = ${registryNumber} limit 1`);
