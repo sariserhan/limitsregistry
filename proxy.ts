@@ -4,6 +4,7 @@ import { getSessionCookie } from "better-auth/cookies";
 import { createAiTrafficMiddleware } from "@visitorping/vercel";
 import { allowRequest } from "./src/ops/rate-limit";
 import { clientIp } from "./src/ops/client-ip";
+import { canonicalRedirect } from "./src/ops/canonical-host";
 
 /**
  * AI crawler watching, reported to VisitorPing.
@@ -32,6 +33,11 @@ const watchAiTraffic =
 // request-id stamping (formerly middleware.ts) lives here too since that
 // file is otherwise silently unused.
 export default async function proxy(request: NextRequest, event?: NextFetchEvent) {
+  // Before anything else, including AI crawler watching: a crawl of the
+  // duplicate host is sent to the real one rather than counted twice.
+  const canonical = canonicalRedirect(request);
+  if (canonical) return canonical;
+
   // First, and before the /api/ branch returns early, so a crawler hitting an
   // API path is still counted and /robots.txt and /license.xml are answered
   // before anything else considers them.
