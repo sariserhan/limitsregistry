@@ -1,5 +1,5 @@
 import type { MetadataRoute } from "next";
-import { listPublicCategories, listPublishedLimits } from "../src/db/repository";
+import { listPublicCategories, listPublishedLimitSitemapEntries } from "../src/db/repository";
 import { categorySlug } from "../src/domain/category";
 import { blogPosts } from "../src/domain/blog-posts";
 import { LIMIT_COLLECTIONS } from "../src/db/repository.collections";
@@ -38,7 +38,7 @@ const STATIC_PAGES: Array<[string, number, MetadataRoute.Sitemap[number]["change
 // batch, astrophysics, information theory, etc.) was undiscoverable through the sitemap. Now
 // driven directly from what's actually published.
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const [limits, categories, breakthroughs] = await Promise.all([listPublishedLimits(), listPublicCategories(), listRecentBreakthroughEvents(1000)]);
+  const [limits, categories, breakthroughs] = await Promise.all([listPublishedLimitSitemapEntries(), listPublicCategories(), listRecentBreakthroughEvents(1000)]);
   const now = new Date();
 
   return [
