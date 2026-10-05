@@ -1,3 +1,4 @@
+import { pageMetadata } from "../../src/domain/seo";
 import type { Metadata } from "next";
 import { PublicHeader } from "../../src/components/public-header";
 import { SiteFooter } from "../../src/components/site-footer";
@@ -5,7 +6,7 @@ import { DependencyGraph } from "../../src/components/dependency-graph";
 import { listAcceptedDependencies } from "../../src/db/repository.research";
 import "./dependencies.css";
 export const revalidate = 60;
-export const metadata: Metadata = { title: "Dependency Graph — Limits Registry", description: "Reviewed reductions and dependencies between published Limits." };
+export const metadata: Metadata = pageMetadata({ path: "/dependencies", title: "Dependency Graph — Limits Registry", description: "Reviewed reductions and dependencies between published Limits." });
 export default async function DependenciesPage() {
   const edges = await listAcceptedDependencies();
   const nodes = [...new Map(edges.flatMap((edge) => [[edge.source.id, edge.source], [edge.target.id, edge.target]])).values()];

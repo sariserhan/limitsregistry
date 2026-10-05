@@ -1,3 +1,4 @@
+import { pageMetadata } from "../../src/domain/seo";
 import Link from "next/link";
 import type { Metadata } from "next";
 import { PublicHeader } from "../../src/components/public-header";
@@ -6,7 +7,7 @@ import { LIMIT_COLLECTIONS, countCollectionLimits } from "../../src/db/repositor
 import "./collections.css";
 
 export const revalidate = 300;
-export const metadata: Metadata = { title: "Scientific Limit Collections — Limits Registry", description: "Explore curated, data-driven collections of published scientific limits." };
+export const metadata: Metadata = pageMetadata({ path: "/collections", title: "Scientific Limit Collections — Limits Registry", description: "Explore curated, data-driven collections of published scientific limits." });
 
 export default async function CollectionsPage() {
   const counts = await Promise.all(LIMIT_COLLECTIONS.map(countCollectionLimits));

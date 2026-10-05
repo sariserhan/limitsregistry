@@ -1,7 +1,8 @@
+import { pageMetadata } from "../../src/domain/seo";
 import type { Metadata } from "next";
 import InfoPage from "../_components/InfoPage";
 
-export const metadata: Metadata = { title: "A small, deliberate data footprint. — Limits Registry", description: "Limits Registry is designed to publish research records, not to build an advertising profile of its visitors." };
+export const metadata: Metadata = pageMetadata({ path: "/privacy", title: "A small, deliberate data footprint. — Limits Registry", description: "Limits Registry is designed to publish research records, not to build an advertising profile of its visitors." });
 
 export default function Page() { return <InfoPage kicker="Privacy" title="A small, deliberate data footprint." intro="Limits Registry is designed to publish research records, not to build an advertising profile of its visitors."><h2>What we collect</h2><p>The public site does not require an account. Server logs may contain ordinary technical data such as IP address, user agent, request path, and request ID for security and reliability.</p>
 <h2>How we use it</h2><p>We use operational data to protect the service, diagnose failures, and understand aggregate usage. We do not sell personal information or use advertising trackers.</p>

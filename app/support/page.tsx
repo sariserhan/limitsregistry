@@ -1,8 +1,9 @@
+import { pageMetadata } from "../../src/domain/seo";
 import type { Metadata } from "next";
 import InfoPage from "../_components/InfoPage";
 import { ContactForm } from "../contact/ContactForm";
 
-export const metadata: Metadata = { title: "Found an error or need help? — Limits Registry", description: "Tell us what you found, include the Registry ID or URL, and provide enough context for an editor to reproduce the issue." };
+export const metadata: Metadata = pageMetadata({ path: "/support", title: "Found an error or need help? — Limits Registry", description: "Tell us what you found, include the Registry ID or URL, and provide enough context for an editor to reproduce the issue." });
 
 export default async function Page({ searchParams }: { searchParams: Promise<{ sent?: string }> }) {
   const { sent } = await searchParams;

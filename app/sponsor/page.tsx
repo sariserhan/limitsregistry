@@ -1,3 +1,5 @@
+import type { Metadata } from "next";
+import { pageMetadata } from "../../src/domain/seo";
 import Link from "next/link";
 import { PublicHeader } from "../../src/components/public-header";
 import { SiteFooter } from "../../src/components/site-footer";
@@ -7,7 +9,7 @@ import { RegularEnquiryForm } from "./RegularEnquiryForm";
 import { SponsorshipNav } from "./SponsorshipNav";
 import "../submit/submit.css";
 export const dynamic = "force-dynamic";
-export const metadata = { title: "Regular sponsorship — Limits Registry" };
+export const metadata: Metadata = pageMetadata({ path: "/sponsor", title: "Regular sponsorship — Limits Registry" });
 export default async function SponsorPage({ searchParams }: { searchParams: Promise<{ category?: string; record?: string; q?: string }> }) {
   const params = await searchParams;
   const [options, categories] = await Promise.all([listAllPublicLimitOptions(), listSponsorableCategories()]);

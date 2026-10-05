@@ -9,8 +9,13 @@ import { deriveFrontierPresentation } from "../src/domain/frontier-presentation"
 import { buildSiteJsonLd, buildFaqJsonLd, jsonLdScript } from "../src/domain/structured-data";
 import { blogPosts } from "../src/domain/blog-posts";
 import { HOMEPAGE_FAQ } from "../src/domain/faq";
+import { pageMetadata } from "../src/domain/seo";
+import type { Metadata } from "next";
 
 export const revalidate = 60;
+// Self-referencing canonical: ?page=, ?q=, ?category= and ?status= browse states all point back
+// to the one homepage URL rather than competing with it as separate pages.
+export const metadata: Metadata = pageMetadata({ path: "/", title: "Limits Registry — The verified boundaries of what is possible", description: "A curated public record of the verified boundaries of what is possible." });
 const displayValue = (value: Parameters<typeof formatExact>[0]): ExactValue | null => value ? { kind: "text", value: formatExact(value) } : null;
 type HomeProps = { searchParams: Promise<{ page?: string; q?: string; category?: string; status?: string }> };
 

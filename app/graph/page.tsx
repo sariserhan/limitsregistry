@@ -1,3 +1,4 @@
+import { pageMetadata } from "../../src/domain/seo";
 import Link from "next/link";
 import type { Metadata } from "next";
 import { PublicHeader } from "../../src/components/public-header";
@@ -9,7 +10,7 @@ import { listPublicGraphRelationships } from "../../src/db/repository.graph";
 import "../dependencies/dependencies.css";
 
 export const revalidate = 60;
-export const metadata: Metadata = { title: "Scientific Knowledge Graph — Limits Registry", description: "Explore connections between Limits, claims, papers, researchers, and breakthroughs." };
+export const metadata: Metadata = pageMetadata({ path: "/graph", title: "Scientific Knowledge Graph — Limits Registry", description: "Explore connections between Limits, claims, papers, researchers, and breakthroughs." });
 
 export default async function GraphPage() {
   const [edges, breakthroughs, relationships] = await Promise.all([listAcceptedDependencies(), listRecentBreakthroughEvents(12), listPublicGraphRelationships(50)]);

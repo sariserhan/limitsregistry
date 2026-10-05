@@ -1,7 +1,8 @@
+import { pageMetadata } from "../../src/domain/seo";
 import type { Metadata } from "next";
 import InfoPage from "../_components/InfoPage";
 
-export const metadata: Metadata = { title: "Use the Registry as a research reference. — Limits Registry", description: "These terms describe the expectations for using Limits Registry and its public records." };
+export const metadata: Metadata = pageMetadata({ path: "/terms", title: "Use the Registry as a research reference. — Limits Registry", description: "These terms describe the expectations for using Limits Registry and its public records." });
 
 export default function Page() { return <InfoPage kicker="Terms of use" title="Use the Registry as a research reference." intro="These terms describe the expectations for using Limits Registry and its public records."><h2>Acceptable use</h2><p>Do not misuse the service, attempt unauthorized access, overload the APIs, or submit material that infringes another person’s rights.</p>
 <h2>Research use</h2><p>You may link to and cite public records. Check the specification, evidence, and status before relying on a Claim. Records can change as research develops.</p>

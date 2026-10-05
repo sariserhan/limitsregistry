@@ -1,3 +1,5 @@
+import type { Metadata } from "next";
+import { pageMetadata } from "../../../src/domain/seo";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { PublicHeader } from "../../../src/components/public-header";
@@ -6,6 +8,12 @@ import { getClaimsForPerson, getInstitutionsForPerson, getPerson } from "../../.
 import { getSession } from "../../../src/auth/session";
 
 type PageProps = { params: Promise<{ id: string }> };
+
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const person = await getPerson((await params).id).catch(() => null);
+  if (!person) return { title: "Researcher not found — Limits Registry" };
+  return pageMetadata({ path: `/researchers/${person.id}`, title: `${person.displayName} — Limits Registry`, description: `Published Limits Registry records and Claims credited to ${person.displayName}.` });
+}
 
 export default async function ResearcherPage({ params }: PageProps) {
   const { id } = await params;

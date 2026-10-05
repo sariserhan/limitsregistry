@@ -1,3 +1,4 @@
+import { pageMetadata } from "../../src/domain/seo";
 import { SponsorCallout } from "../../src/components/sponsor-callout";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -9,7 +10,7 @@ import { listPublicLimitPage } from "../../src/db/repository.public-limits";
 import "./open-limits.css";
 
 export const revalidate = 60;
-export const metadata: Metadata = { title: "Open Limits — Limits Registry", description: "Published Limits whose accepted Claims still leave a genuine unknown gap." };
+export const metadata: Metadata = pageMetadata({ path: "/open-limits", title: "Open Limits — Limits Registry", description: "Published Limits whose accepted Claims still leave a genuine unknown gap." });
 
 type Props = { searchParams: Promise<{ page?: string; q?: string; field?: string; sort?: string }> };
 

@@ -1,8 +1,9 @@
+import { pageMetadata } from "../../src/domain/seo";
 import type { Metadata } from "next";
 import InfoPage from "../_components/InfoPage";
 import { StatusGuide } from "../../src/components/status-guide";
 
-export const metadata: Metadata = { title: "A public record of the boundaries of what is possible. — Limits Registry", description: "Limits Registry turns scattered bounds, constructions, proofs, and open gaps into durable records that researchers can inspect and cite." };
+export const metadata: Metadata = pageMetadata({ path: "/about", title: "A public record of the boundaries of what is possible. — Limits Registry", description: "Limits Registry turns scattered bounds, constructions, proofs, and open gaps into durable records that researchers can inspect and cite." });
 
 export default function Page() { return <InfoPage kicker="About" title="A public record of the boundaries of what is possible." intro="Limits Registry turns scattered bounds, constructions, proofs, and open gaps into durable records that researchers can inspect and cite."><h2>What we are building</h2><p>The Registry records what is known, what is achievable, what is ruled out, and where the gap remains open. Every published quantitative statement should be scoped to a specification and connected to evidence.</p>
 <StatusGuide />

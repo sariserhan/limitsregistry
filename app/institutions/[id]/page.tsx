@@ -1,3 +1,5 @@
+import type { Metadata } from "next";
+import { pageMetadata } from "../../../src/domain/seo";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { PublicHeader } from "../../../src/components/public-header";
@@ -5,6 +7,12 @@ import { SiteFooter } from "../../../src/components/site-footer";
 import { getInstitution, getPeopleForInstitution } from "../../../src/db/repository.entities";
 
 type PageProps = { params: Promise<{ id: string }> };
+
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const institution = await getInstitution((await params).id).catch(() => null);
+  if (!institution) return { title: "Institution not found — Limits Registry" };
+  return pageMetadata({ path: `/institutions/${institution.id}`, title: `${institution.name} — Limits Registry`, description: `Researchers affiliated with ${institution.name} who are credited on published Limits Registry records.` });
+}
 
 export default async function InstitutionPage({ params }: PageProps) {
   const { id } = await params;

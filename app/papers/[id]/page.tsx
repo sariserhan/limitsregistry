@@ -1,3 +1,5 @@
+import type { Metadata } from "next";
+import { pageMetadata } from "../../../src/domain/seo";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { PublicHeader } from "../../../src/components/public-header";
@@ -5,6 +7,13 @@ import { SiteFooter } from "../../../src/components/site-footer";
 import { getClaimsForPaper, getPaper } from "../../../src/db/repository.entities";
 
 type PageProps = { params: Promise<{ id: string }> };
+
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const paper = await getPaper((await params).id).catch(() => null);
+  if (!paper) return { title: "Paper not found — Limits Registry" };
+  const description = paper.abstract ? (paper.abstract.length > 200 ? `${paper.abstract.slice(0, 197).trimEnd()}…` : paper.abstract) : `Limits established by "${paper.title}" in Limits Registry.`;
+  return pageMetadata({ path: `/papers/${paper.id}`, title: `${paper.title} — Limits Registry`, description, type: "article" });
+}
 
 export default async function PaperPage({ params }: PageProps) {
   const { id } = await params;

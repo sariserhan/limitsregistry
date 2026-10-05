@@ -1,8 +1,9 @@
+import { pageMetadata } from "../../src/domain/seo";
 import type { Metadata } from "next";
 import InfoPage from "../_components/InfoPage";
 import { StatusGuide } from "../../src/components/status-guide";
 
-export const metadata: Metadata = { title: "How a record earns its place. — Limits Registry", description: "How to propose a result, how Claims get accepted, what verification tiers mean, and how a Claim earns a signed certificate." };
+export const metadata: Metadata = pageMetadata({ path: "/methodology", title: "How a record earns its place. — Limits Registry", description: "How to propose a result, how Claims get accepted, what verification tiers mean, and how a Claim earns a signed certificate." });
 
 export default function Page() { return <InfoPage kicker="Methodology" title="How a record earns its place." intro="How to propose a result, how Claims get accepted, what verification tiers mean, and how a Claim earns a signed certificate.">
 

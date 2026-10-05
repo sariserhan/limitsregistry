@@ -1,3 +1,4 @@
+import { pageMetadata } from "../../src/domain/seo";
 import Link from "next/link";
 import type { Metadata } from "next";
 import { PublicHeader } from "../../src/components/public-header";
@@ -6,7 +7,7 @@ import { listRecentTimelineEvents } from "../../src/db/repository";
 import "../breakthroughs/breakthroughs.css";
 
 export const revalidate = 60;
-export const metadata: Metadata = { title: "Recently updated — Limits Registry", description: "Every timeline event across the Registry — new publications, specification changes, and breakthroughs — not just bound improvements." };
+export const metadata: Metadata = pageMetadata({ path: "/recent", title: "Recently updated — Limits Registry", description: "Every timeline event across the Registry — new publications, specification changes, and breakthroughs — not just bound improvements." });
 
 function label(eventType: string) {
   return eventType.replaceAll("_", " ").toLowerCase().replace(/^./, (c) => c.toUpperCase());

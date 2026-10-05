@@ -11,8 +11,8 @@ import { AdminModeBanner } from "../src/components/admin-mode-banner";
 import { AcquisitionTracker } from "../src/components/acquisition-tracker";
 import { getSession } from "../src/auth/session";
 import { hasRole, type Role } from "../src/auth/permissions";
+import { SITE_URL } from "../src/domain/seo";
 
-const SITE_URL = "https://www.limitsregistry.com";
 const SITE_TITLE = "Limits Registry — The verified boundaries of what is possible";
 const SITE_DESCRIPTION = "A curated public record of the verified boundaries of what is possible.";
 
@@ -24,7 +24,9 @@ export const metadata: Metadata = {
   verification: process.env.GOOGLE_SITE_VERIFICATION ? { google: process.env.GOOGLE_SITE_VERIFICATION } : undefined,
   title: SITE_TITLE,
   description: SITE_DESCRIPTION,
-  openGraph: { type: "website", siteName: "Limits Registry", title: SITE_TITLE, description: SITE_DESCRIPTION, url: SITE_URL },
+  // No og:url here: a page without its own openGraph would otherwise declare itself to be the
+  // homepage. Public pages set canonical + og:url together through pageMetadata (src/domain/seo).
+  openGraph: { type: "website", siteName: "Limits Registry", title: SITE_TITLE, description: SITE_DESCRIPTION },
   twitter: { card: "summary_large_image", title: SITE_TITLE, description: SITE_DESCRIPTION },
 };
 

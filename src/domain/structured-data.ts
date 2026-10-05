@@ -1,4 +1,4 @@
-const SITE_URL = "https://www.limitsregistry.com";
+import { SITE_URL } from "./seo";
 
 /**
  * schema.org Dataset markup for a canonical record — a Limit is closest in shape to a dataset

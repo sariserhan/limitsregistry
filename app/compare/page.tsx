@@ -1,10 +1,11 @@
+import { pageMetadata } from "../../src/domain/seo";
 import Link from "next/link";
 import type { Metadata } from "next";
 import { PublicHeader } from "../../src/components/public-header";
 import { SiteFooter } from "../../src/components/site-footer";
 import { getPublicLimitOptionByRegistryNumber, listPublicLimitOptions } from "../../src/db/repository.public-limits";
 import "./compare.css";
-export const metadata: Metadata = { title: "Compare Limits — Limits Registry", description: "Compare two Limits Registry records side by side — question, direction, publication state, and source trail.", alternates: { canonical: "/compare" } };
+export const metadata: Metadata = pageMetadata({ path: "/compare", title: "Compare Limits — Limits Registry", description: "Compare two Limits Registry records side by side — question, direction, publication state, and source trail." });
 type Props = { searchParams: Promise<{ a?: string; b?: string }> };
 export default async function ComparePage({ searchParams }: Props) {
   const params = await searchParams;

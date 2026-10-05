@@ -3,13 +3,14 @@ import type { Metadata } from "next";
 import { PublicHeader } from "../../src/components/public-header";
 import { SiteFooter } from "../../src/components/site-footer";
 import { blogPosts } from "../../src/domain/blog-posts";
+import { pageMetadata } from "../../src/domain/seo";
 import "./blog.css";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
+  path: "/articles",
   title: "Articles — Limits Registry",
   description: "Explainers on the open problems, proven bounds, and reference constants cataloged in Limits Registry.",
-  alternates: { canonical: "/articles" },
-};
+});
 
 export default function ArticlesIndexPage() {
   return <main className="blog-page">

@@ -1,3 +1,4 @@
+import { pageMetadata } from "../../src/domain/seo";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { PublicHeader } from "../../src/components/public-header";
@@ -5,7 +6,7 @@ import { SiteFooter } from "../../src/components/site-footer";
 import { listResearchers } from "../../src/db/repository.researchers";
 
 export const revalidate = 60;
-export const metadata: Metadata = { title: "Researchers — Limits Registry", description: "People credited on published Registry records — discoverers, proof authors, and record setters.", alternates: { canonical: "/researchers" } };
+export const metadata: Metadata = pageMetadata({ path: "/researchers", title: "Researchers — Limits Registry", description: "People credited on published Registry records — discoverers, proof authors, and record setters." });
 
 export default async function ResearchersPage() {
   const researchers = await listResearchers();

@@ -1,3 +1,4 @@
+import { pageMetadata } from "../../src/domain/seo";
 import Link from "next/link";
 import type { Metadata } from "next";
 import { PublicHeader } from "../../src/components/public-header";
@@ -6,7 +7,7 @@ import { listRecentBreakthroughEvents } from "../../src/db/repository.breakthrou
 import "./breakthroughs.css";
 
 export const revalidate = 60;
-export const metadata: Metadata = { title: "Breakthroughs — Limits Registry", description: "Recently accepted stronger bounds, constructions, and frontier closures across the Registry." };
+export const metadata: Metadata = pageMetadata({ path: "/breakthroughs", title: "Breakthroughs — Limits Registry", description: "Recently accepted stronger bounds, constructions, and frontier closures across the Registry." });
 
 const LABEL: Record<string, string> = { STRONGER_BOUND: "Stronger bound accepted", FRONTIER_CLOSED: "Frontier closed" };
 

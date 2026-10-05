@@ -1,3 +1,5 @@
+import type { Metadata } from "next";
+import { pageMetadata } from "../../../src/domain/seo";
 import { SponsorshipNav } from "../SponsorshipNav";
 import Link from "next/link";
 import { PublicHeader } from "../../../src/components/public-header";
@@ -7,7 +9,7 @@ import { listSponsorableCategories } from "../../../src/db/repository.sponsorshi
 import { EnquiryForm } from "../EnquiryForm";
 import "../../submit/submit.css";
 export const dynamic="force-dynamic";
-export const metadata={title:"Sponsor a research bounty — Limits Registry"};
+export const metadata: Metadata = pageMetadata({ path: "/sponsor/bounties", title: "Sponsor a research bounty — Limits Registry" });
 export default async function SponsorPage({searchParams}:{searchParams:Promise<{q?:string;category?:string;record?:string}>}) {
   const params=await searchParams;const q=typeof params.q==="string"?params.q.slice(0,200):"";
   const record=typeof params.record==="string"?params.record.trim().slice(0,120):"";
