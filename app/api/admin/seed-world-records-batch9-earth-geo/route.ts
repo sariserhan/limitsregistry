@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { timingSafeEqual } from "node:crypto";
 import { eq, or } from "drizzle-orm";
+import { revalidatePublishedRecords } from "../../../../src/ops/revalidate-published-records";
 import { db } from "../../../../src/db/client";
 import { limits, specificationVersions, claims, evidence, claimEvidence, papers, claimPapers, timelineEvents, auditLogs, reviews, user } from "../../../../src/db/schema";
 import { WORLD_RECORDS_BATCH9_EARTH_GEO } from "../../../../src/catalog/world-records-batch9-earth-geo";
@@ -78,5 +79,6 @@ export async function POST(request: Request) {
     }
   }
 
+  if (inserted > 0) revalidatePublishedRecords();
   return NextResponse.json({ inserted, skipped, errors, total: WORLD_RECORDS_BATCH9_EARTH_GEO.length });
 }
