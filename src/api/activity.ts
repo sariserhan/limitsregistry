@@ -1,4 +1,5 @@
 import "server-only";
+import { observeResources } from "../analytics/visitorping-resources";
 import { createHmac } from "node:crypto";
 import { after } from "next/server";
 import { Redis } from "@upstash/redis";
@@ -94,7 +95,7 @@ export async function observeApi(request: Request, endpoint: ApiEndpoint, handle
   const at = Date.now();
   let status = 500;
   try {
-    const response = await handler(context);
+    const response = await observeResources(() => handler(context));
     status = response.status;
     return response;
   } finally {

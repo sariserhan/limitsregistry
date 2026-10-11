@@ -35,3 +35,32 @@ npm run typecheck
 npm run lint
 npm run build
 ```
+
+### VisitorPing origin resource samples
+
+Production-only reporting uses `VISITORPING_RESOURCE_REPORTING_ENABLED=true` and
+`VISITORPING_RESOURCE_MERCHANT_TOKEN` (server secret; never NEXT_PUBLIC). The scoped
+credential expires after 90 days. Renew deliberately through the VisitorPing owner
+account before expiry; revoke it there to stop ingestion. The connection utility
+lives in VisitorPing as `scripts/connect-limitsregistry-resources.mjs` (dry run by
+default). This uses the existing Upstash quota service, not a new subscription.
+
+Public v1 API handlers and `/api/search` emit at most one sample per warm process
+per minute, subject to a shared 900-attempt rolling-day budget. Only successful
+origin responses are included. CDN cache hits, skipped requests, HTML rendering,
+MCP streams and failed delivery are not covered. No extrapolation or AI attribution
+is performed. These are partial origin measurements, not the provider invoice.
+
+`apiCalls` counts sampled API invocations. `databaseReads`/`databaseWrites` count
+attempted SELECT/INSERT/UPDATE/DELETE statements via an isolated async request
+context, not rows or CU-hours. Ambiguous SQL causes the DB counters to be omitted.
+`bandwidthBytes` measures generated uncompressed JSON body bytes, capped at 256 KiB
+and one second; larger/streaming bodies remain unknown. CPU and other unmeasured
+resources remain absent. SQL text, parameters, response contents, URLs, request
+headers, and user identifiers are never transmitted in resource reports.
+
+Reporting runs after delivery, times out after five seconds, rejects redirects,
+and fails without changing API responses. Failed requests are not retried or replayed
+as new measurements. Coverage may be incomplete on reporting failures; the receiving
+service also enforces its existing 1,000-attempt daily site quota. Resource sampling
+must not be used as a count of users, customers, or total traffic.
