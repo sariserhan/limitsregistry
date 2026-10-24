@@ -38,6 +38,13 @@ export default async function proxy(request: NextRequest, event?: NextFetchEvent
   const canonical = canonicalRedirect(request);
   if (canonical) return canonical;
 
+  // These notices are static and public even if VisitorPing/configuration is
+  // unavailable. Never let the optional analytics adapter override the
+  // release-controlled origin license or fetch the database to discover it.
+  if (["/license.xml", "/robots.txt", "/crawl-policy"].includes(request.nextUrl.pathname)) {
+    return NextResponse.next();
+  }
+
   // First, and before the /api/ branch returns early, so a crawler hitting an
   // API path is still counted and /robots.txt and /license.xml are answered
   // before anything else considers them.
