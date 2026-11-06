@@ -8,6 +8,8 @@ const nextConfig: NextConfig = {
   // own canonical for those records. Metadata reads go through the same cached repository calls as
   // the page, so blocking on them costs little.
   htmlLimitedBots: /.*/,
+  // Native canvas bindings and pdfjs' worker can't be bundled; load them from node_modules.
+  serverExternalPackages: ["pdf-parse", "pdfjs-dist", "@napi-rs/canvas"],
 };
 
 export default nextConfig;

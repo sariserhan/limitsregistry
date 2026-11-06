@@ -1,6 +1,5 @@
 import "server-only";
 import { lookup } from "node:dns/promises";
-import { PDFParse } from "pdf-parse";
 import { isPrivateIp, validatePdfSourceUrl } from "./source-security";
 
 export const MAX_PDF_BYTES = 15 * 1024 * 1024;
@@ -40,8 +39,19 @@ export async function downloadAllowedPdf(rawUrl: string, fetcher: typeof fetch =
   throw new Error("PDF redirect limit exceeded.");
 }
 
+// pdfjs needs browser globals such as DOMMatrix the moment it loads, and Node has none. Importing it
+// at the top of this file took the whole ingestion route down with a 500 on every run, before any
+// job was even claimed. The worker entry installs those globals, so it has to load first.
+async function loadPdfParser() {
+  const { CanvasFactory, getData } = await import("pdf-parse/worker");
+  const { PDFParse } = await import("pdf-parse");
+  PDFParse.setWorker(getData());
+  return { PDFParse, CanvasFactory };
+}
+
 export async function extractPdfText(source: Uint8Array): Promise<{ text: string; pages: number }> {
-  const parser = new PDFParse({ data: source });
+  const { PDFParse, CanvasFactory } = await loadPdfParser();
+  const parser = new PDFParse({ data: source, CanvasFactory });
   try {
     const result = await parser.getText();
     if (result.total > MAX_PDF_PAGES) throw new Error(`PDF exceeds the ${MAX_PDF_PAGES}-page extraction limit.`);
