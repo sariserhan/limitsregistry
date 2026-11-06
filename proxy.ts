@@ -86,6 +86,13 @@ export default async function proxy(request: NextRequest, event?: NextFetchEvent
     }
   }
 
+  // Every page asks this client-side (useSession), and nearly all of them are anonymous. Without a
+  // session cookie the answer is always null, so give it here rather than waking a function for
+  // each one. Better Auth's own handler returns the same null body for this case.
+  if (request.nextUrl.pathname === "/api/auth/get-session" && !getSessionCookie(request)) {
+    return NextResponse.json(null, { headers: { "cache-control": "no-store" } });
+  }
+
   if (request.nextUrl.pathname.startsWith("/api/")) {
     const response = NextResponse.next();
     response.headers.set("x-request-id", request.headers.get("x-request-id") ?? crypto.randomUUID());

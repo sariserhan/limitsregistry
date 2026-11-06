@@ -10,8 +10,22 @@ const DEFAULTS = { id: SETTINGS_ID, maintenanceEnabled: false, maintenanceMessag
 export const getSiteSettings = unstable_cache(
   async () => { const rows = await db.select().from(siteSettings).where(eq(siteSettings.id, SETTINGS_ID)).limit(1); return rows[0] ?? DEFAULTS; },
   ["site-settings"],
-  { revalidate: 30, tags: ["site-settings"] },
+  { revalidate: 3600, tags: ["site-settings"] },
 );
+
+/**
+ * For the root layout, which wraps every route including build-time prerenders and error pages.
+ * Banner and maintenance settings are not worth failing a page over: if they can't be read, the
+ * page renders without them.
+ */
+export async function getSiteSettingsSafe() {
+  try {
+    return await getSiteSettings();
+  } catch (error) {
+    console.error("[settings] Falling back to defaults", error);
+    return DEFAULTS;
+  }
+}
 
 export type SiteSettingsInput = { maintenanceEnabled: boolean; maintenanceMessage: string | null; announcementEnabled: boolean; announcementMessage: string | null; announcementLevel: "INFO" | "WARNING" | "CRITICAL" };
 

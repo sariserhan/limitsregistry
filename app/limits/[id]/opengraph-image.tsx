@@ -7,6 +7,11 @@ export const alt = "Limits Registry record";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
+// Rendered on first request and then cached. Without these two, every fetch of a record's preview
+// image renders it from scratch: 5,000+ invocations a day, nearly all from crawlers.
+export const revalidate = 86400;
+export function generateStaticParams() { return []; }
+
 const INK = "#121820";
 const MUTED = "#687585";
 const PAPER = "#f7f5f0";

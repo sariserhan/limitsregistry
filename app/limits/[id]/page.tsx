@@ -26,6 +26,9 @@ import { buildFrontierHistory } from "../../../src/domain/frontier-history";
 import { FrontierHistoryChart } from "../../../src/components/frontier-history-chart";
 
 export const revalidate = 3600;
+// An empty list is what opts this route into on-demand caching: each record renders on its first
+// visit and is then served from the cache. Without it, revalidate alone does nothing here.
+export function generateStaticParams() { return []; }
 
 type PageProps = { params: Promise<{ id: string }> };
 

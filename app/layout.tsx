@@ -1,16 +1,13 @@
 import Script from "next/script";
 
 import type { Metadata } from "next";
-import { headers } from "next/headers";
 import "./globals.css";
 import "./canonical.css";
-import { getSiteSettings } from "../src/db/repository.settings";
+import { getSiteSettingsSafe } from "../src/db/repository.settings";
 import { AnnouncementBanner } from "../src/components/announcement-banner";
-import { MaintenanceScreen } from "../src/components/maintenance-screen";
+import { MaintenanceGate } from "../src/components/maintenance-gate";
 import { AdminModeBanner } from "../src/components/admin-mode-banner";
 import { AcquisitionTracker } from "../src/components/acquisition-tracker";
-import { getSession } from "../src/auth/session";
-import { hasRole, type Role } from "../src/auth/permissions";
 import { SITE_URL } from "../src/domain/seo";
 
 const SITE_TITLE = "Limits Registry — The verified boundaries of what is possible";
@@ -30,22 +27,25 @@ export const metadata: Metadata = {
   twitter: { card: "summary_large_image", title: SITE_TITLE, description: SITE_DESCRIPTION },
 };
 
-// Always allowed through, even during maintenance — otherwise an admin could lock themselves
-// out with no way back in (can't sign in, can't reach /admin to turn it back off).
-const MAINTENANCE_BYPASS_PREFIXES = ["/admin", "/login"];
+// Nothing in this layout may read the request (headers(), cookies(), the session). It wraps every
+// route, so a single request-time read here makes the whole site uncacheable: every page view,
+// prefetch and crawler hit becomes a function invocation plus database reads. That is what let one
+// scraper turn into a 29x invocation spike on 2026-11-06. The per-visitor parts (admin banner,
+// maintenance bypass by path) are client components instead.
+//
+// The ceiling for pages that declare nothing themselves, which used to be implicitly dynamic.
+// Publishing and settings changes invalidate by tag, so this only bounds untagged reads.
+export const revalidate = 3600;
 
 export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-  const [requestHeaders, settings, session] = await Promise.all([headers(), getSiteSettings(), getSession()]);
-  const pathname = requestHeaders.get("x-pathname") ?? "";
-  const bypassMaintenance = MAINTENANCE_BYPASS_PREFIXES.some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`));
-  const showMaintenance = settings.maintenanceEnabled && !bypassMaintenance;
-  const isAdmin = hasRole(session?.user.role as Role, "ADMIN");
+  const settings = await getSiteSettingsSafe();
 
   return <html lang="en" data-scroll-behavior="smooth"><body suppressHydrationWarning>
-    {isAdmin && <AdminModeBanner />}
+    <AdminModeBanner />
     <AcquisitionTracker />
-    {!showMaintenance && settings.announcementEnabled && <AnnouncementBanner message={settings.announcementMessage} level={settings.announcementLevel} />}
-    {showMaintenance ? <MaintenanceScreen message={settings.maintenanceMessage} /> : children}
+    <MaintenanceGate enabled={settings.maintenanceEnabled} message={settings.maintenanceMessage} announcement={settings.announcementEnabled ? <AnnouncementBanner message={settings.announcementMessage} level={settings.announcementLevel} /> : null}>
+      {children}
+    </MaintenanceGate>
     <Script
       src="https://cdn.visitorping.com/site/vp_PBTR9YAZ.js"
       strategy="afterInteractive"
