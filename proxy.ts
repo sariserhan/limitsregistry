@@ -29,6 +29,17 @@ const watchAiTraffic =
       })
     : null;
 
+/**
+ * Pages whose first step is requireRole(). Exact paths, not prefixes, where the public neighbour
+ * must stay open: /watchlists/unsubscribe works from an email link without signing in.
+ */
+export function requiresSignIn(pathname: string) {
+  if (pathname.startsWith("/console") || pathname.startsWith("/admin")) return true;
+  if (pathname === "/account" || pathname.startsWith("/account/")) return true;
+  if (["/submit", "/bounties/propose", "/profile", "/reviewer-profile", "/watchlists"].includes(pathname)) return true;
+  return /^\/researchers\/[^/]+\/claim$/.test(pathname);
+}
+
 // This fork of Next.js renamed the middleware.js convention to proxy.js —
 // request-id stamping (formerly middleware.ts) lives here too since that
 // file is otherwise silently unused.
@@ -99,17 +110,14 @@ export default async function proxy(request: NextRequest, event?: NextFetchEvent
     return response;
   }
 
-  // Optimistic cookie-only check, scoped to the same two path prefixes as before broadening the
-  // matcher below — everything else (public pages) must NOT be gated behind a login redirect.
-  // Each protected page also calls requireRole() server-side (src/auth/session.ts) for the real,
-  // database-backed check.
-  if (request.nextUrl.pathname.startsWith("/console") || request.nextUrl.pathname.startsWith("/admin")) {
-    const sessionCookie = getSessionCookie(request);
-    if (!sessionCookie) {
-      const loginUrl = new URL("/login", request.url);
-      loginUrl.searchParams.set("next", request.nextUrl.pathname);
-      return NextResponse.redirect(loginUrl);
-    }
+  // Optimistic cookie-only check for pages that require sign-in. Doing it here means an anonymous
+  // visitor (in practice, mostly crawlers) is redirected without rendering the page. Everything else
+  // (public pages) must NOT be gated behind a login redirect. Each protected page also calls
+  // requireRole() server-side (src/auth/session.ts) for the real, database-backed check.
+  if (requiresSignIn(request.nextUrl.pathname) && !getSessionCookie(request)) {
+    const loginUrl = new URL("/login", request.url);
+    loginUrl.searchParams.set("next", request.nextUrl.pathname + request.nextUrl.search);
+    return NextResponse.redirect(loginUrl);
   }
 
   // Server Components can't read the current pathname directly — forward it as a request header

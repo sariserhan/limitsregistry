@@ -1,7 +1,13 @@
 "use client";
 
 import { useActionState } from "react";
+import { useSearchParams } from "next/navigation";
 import { submitInboxMessage } from "./actions";
+
+/** Reads ?sent=1 (set by the submit action's redirect) itself, so its pages can stay cached. */
+export function ContactFormFromQuery({ channel }: { channel: "CONTACT" | "SUPPORT" }) {
+  return <ContactForm channel={channel} sent={useSearchParams().get("sent") === "1"} />;
+}
 
 export function ContactForm({ channel, sent }: { channel: "CONTACT" | "SUPPORT"; sent?: boolean }) {
   const [state, formAction, pending] = useActionState(submitInboxMessage, undefined);
